@@ -1,0 +1,1301 @@
+/* ============================================
+   科技基金趋势分析 - 样式表
+   专业金融仪表板暗色主题
+   ============================================ */
+
+/* ============ CSS 变量 ============ */
+:root {
+  /* 背景色系 */
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #0f1420;
+  --bg-card: #131825;
+  --bg-card-hover: #182030;
+  --bg-elevated: #1a2235;
+
+  /* 边框 */
+  --border-color: #1e2535;
+  --border-hover: #2a3550;
+
+  /* 文字 */
+  --text-primary: #e0e3eb;
+  --text-secondary: #8b8fa3;
+  --text-muted: #5a5e72;
+
+  /* 功能色 */
+  --color-up: #00d68f;
+  --color-up-bg: rgba(0, 214, 143, 0.1);
+  --color-down: #ff5252;
+  --color-down-bg: rgba(255, 82, 82, 0.1);
+  --color-neutral: #8b8fa3;
+  --color-accent: #448aff;
+  --color-gold: #ffc839;
+  --color-purple: #a855f7;
+
+  /* 字体 */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* 阴影 */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(0, 214, 143, 0.08);
+
+  /* 过渡 */
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============ 重置 & 基础 ============ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+canvas {
+  max-width: 100%;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ============ 容器 ============ */
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ============ 导航栏 ============ */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(10, 14, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 1000;
+  transition: var(--transition);
+}
+
+.nav-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.logo-accent {
+  color: var(--color-up);
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.nav-link.active {
+  color: var(--color-up);
+  background: var(--color-up-bg);
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: var(--transition);
+}
+
+/* ============ Hero / 市场概览 ============ */
+.hero {
+  padding: 120px 0 48px;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 214, 143, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -100px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(68, 138, 255, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  text-align: center;
+  margin-bottom: 48px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-up);
+  border-radius: 50%;
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-up) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ============ 全球指数网格 ============ */
+.indices-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.index-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: var(--transition);
+}
+
+.index-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.index-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.index-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.index-change {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.text-up { color: var(--color-up); }
+.text-down { color: var(--color-down); }
+.bg-up { background: var(--color-up-bg); color: var(--color-up); }
+.bg-down { background: var(--color-down-bg); color: var(--color-down); }
+
+/* ============ 市场情绪条 ============ */
+.sentiment-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.sentiment-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-right: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.sentiment-item:last-child {
+  border-right: none;
+}
+
+.sentiment-item:hover {
+  background: var(--bg-card-hover);
+  border-radius: var(--radius-sm);
+}
+
+.sentiment-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sentiment-value {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sentiment-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-weight: 600;
+}
+
+/* ============ 通用 Section ============ */
+.section {
+  padding: 64px 0;
+}
+
+.section-alt {
+  background: var(--bg-secondary);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+/* ============ 基金卡片网格 ============ */
+.fund-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.fund-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.fund-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-up);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.fund-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.fund-card:hover::before {
+  opacity: 1;
+}
+
+.fund-card.down::before {
+  background: var(--color-down);
+}
+
+.fund-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.fund-card-info h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.fund-card-code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.fund-type-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-weight: 600;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.fund-card-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fund-nav {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.fund-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.fund-change.up {
+  background: var(--color-up-bg);
+  color: var(--color-up);
+}
+
+.fund-change.down {
+  background: var(--color-down-bg);
+  color: var(--color-down);
+}
+
+.fund-sparkline {
+  width: 100%;
+  height: 60px;
+  margin: 8px 0 12px;
+}
+
+.fund-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.fund-period {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.fund-period strong {
+  font-family: var(--font-mono);
+}
+
+.fund-period .up { color: var(--color-up); }
+.fund-period .down { color: var(--color-down); }
+
+.fund-manager {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ============ 图表区域 ============ */
+.chart-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.fund-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fund-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.fund-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.fund-chip.active {
+  background: var(--color-up-bg);
+  border-color: var(--color-up);
+  color: var(--color-up);
+}
+
+.fund-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timeframe-btns {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.tf-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.tf-btn:hover {
+  color: var(--text-primary);
+}
+
+.tf-btn.active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.chart-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.chart-toggle-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.chart-toggle-btn.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.chart-wrapper {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+
+.chart-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.chart-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chart-info-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chart-info-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.chart-canvas-wrap {
+  height: 420px;
+  position: relative;
+}
+
+/* ============ 图表子区域标签 ============ */
+.chart-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.chart-section-label svg {
+  flex-shrink: 0;
+}
+
+/* ============ 每日涨跌柱状图 ============ */
+.chart-bar-section {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+.chart-bar-section.hidden {
+  display: none;
+}
+
+.chart-bar-wrap {
+  height: 180px;
+  position: relative;
+}
+
+/* ============ 每日明细数据表 ============ */
+.daily-table-section {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+.daily-table-section.hidden {
+  display: none;
+}
+
+.daily-table-wrap {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.daily-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.daily-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-elevated);
+}
+
+.daily-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.daily-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.daily-table tr:hover td {
+  background: var(--bg-card-hover);
+}
+
+.daily-table .col-date {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.daily-table .col-nav {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.daily-table .col-change {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.daily-table .col-change.up {
+  color: var(--color-up);
+}
+
+.daily-table .col-change.down {
+  color: var(--color-down);
+}
+
+.daily-table .col-bar {
+  width: 120px;
+}
+
+.daily-table .change-bar {
+  display: flex;
+  align-items: center;
+  height: 18px;
+  position: relative;
+}
+
+.daily-table .change-bar-fill {
+  min-width: 2px;
+  height: 14px;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.daily-table .change-bar-fill.up {
+  background: var(--color-up);
+  margin-left: 50%;
+}
+
+.daily-table .change-bar-fill.down {
+  background: var(--color-down);
+  margin-right: 50%;
+}
+
+.daily-table .change-bar-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--text-muted);
+}
+
+.daily-table .row-highlight td {
+  background: var(--bg-card-hover);
+}
+
+.daily-table .col-news-icon {
+  width: 24px;
+  text-align: center;
+}
+
+.daily-table .news-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.daily-table .news-dot.positive { background: var(--color-up); }
+.daily-table .news-dot.negative { background: var(--color-down); }
+
+/* ============ 新闻筛选 ============ */
+.news-filters {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.filter-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--color-up-bg);
+  border-color: var(--color-up);
+  color: var(--color-up);
+}
+
+/* ============ 新闻时间线 ============ */
+.news-timeline {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.news-timeline::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color);
+}
+
+.news-card {
+  position: relative;
+  margin-bottom: 24px;
+  padding-left: 56px;
+}
+
+.news-card::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 24px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 3px solid var(--color-neutral);
+  z-index: 1;
+}
+
+.news-card.sentiment-positive::before {
+  border-color: var(--color-up);
+}
+
+.news-card.sentiment-negative::before {
+  border-color: var(--color-down);
+}
+
+.news-card-inner {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: var(--transition);
+}
+
+.news-card-inner:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.news-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.news-date {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.news-category {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.news-category.货币政策 { background: rgba(68, 138, 255, 0.15); color: var(--color-accent); }
+.news-category.科技产业 { background: rgba(168, 85, 247, 0.15); color: var(--color-purple); }
+.news-category.经济数据 { background: rgba(255, 200, 57, 0.15); color: var(--color-gold); }
+.news-category.地缘政治 { background: rgba(255, 82, 82, 0.15); color: var(--color-down); }
+.news-category.监管政策 { background: rgba(255, 138, 101, 0.15); color: #ff8a65; }
+.news-category.市场情绪 { background: rgba(0, 214, 143, 0.15); color: var(--color-up); }
+
+.news-sentiment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-left: auto;
+}
+
+.news-sentiment-badge.positive {
+  background: var(--color-up-bg);
+  color: var(--color-up);
+}
+
+.news-sentiment-badge.negative {
+  background: var(--color-down-bg);
+  color: var(--color-down);
+}
+
+.news-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.news-impact {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.news-impact strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.news-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.news-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.news-tag {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.news-affected {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.affected-fund {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.impact-level-bar {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.impact-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-color);
+}
+
+.impact-dot.active {
+  background: var(--color-gold);
+}
+
+/* ============ 页脚 ============ */
+.footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 48px 0 32px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 48px;
+  margin-bottom: 32px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.footer-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.footer-col h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  transition: var(--transition);
+}
+
+.footer-col a:hover {
+  color: var(--color-up);
+}
+
+.footer-disclaimer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 24px;
+}
+
+.footer-disclaimer p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.copyright {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ============ 返回顶部 ============ */
+.back-to-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+  z-index: 999;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.back-to-top:hover {
+  background: var(--color-up-bg);
+  border-color: var(--color-up);
+  color: var(--color-up);
+  transform: translateY(-4px);
+}
+
+/* ============ 动画 ============ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 1024px) {
+  .indices-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fund-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  .hero {
+    padding: 100px 0 32px;
+  }
+
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+
+  .indices-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sentiment-bar {
+    flex-wrap: wrap;
+  }
+
+  .sentiment-item {
+    flex: 1 1 33%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .fund-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .chart-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chart-actions {
+    justify-content: space-between;
+  }
+
+  .chart-canvas-wrap {
+    height: 320px;
+  }
+
+  .news-card {
+    padding-left: 40px;
+  }
+
+  .news-timeline::before {
+    left: 14px;
+  }
+
+  .news-card::before {
+    left: 7px;
+  }
+
+  .footer-links {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .back-to-top {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .indices-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+
+  .fund-card {
+    padding: 18px;
+  }
+
+  .fund-nav {
+    font-size: 24px;
+  }
+
+  .news-title {
+    font-size: 16px;
+  }
+}

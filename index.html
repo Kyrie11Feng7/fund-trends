@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
+  <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ============ 导航栏 ============ -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M4 20L10 12L14 16L20 6L24 10" stroke="#00d68f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="24" cy="10" r="2.5" fill="#00d68f"/>
+        </svg>
+        <span>科技基金<span class="logo-accent">趋势</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#hero" class="nav-link active">市场概览</a>
+        <a href="#funds" class="nav-link">基金总览</a>
+        <a href="#chart" class="nav-link">趋势分析</a>
+        <a href="#news" class="nav-link">每日解读</a>
+      </div>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ Hero / 市场概览 ============ -->
+  <section id="hero" class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          <span>实时数据更新中</span>
+        </div>
+        <h1 class="hero-title">全球科技基金<span class="gradient-text">趋势分析</span></h1>
+        <p class="hero-subtitle">
+          追踪纳斯达克、新兴市场等核心科技基金每日涨跌，<br>
+          结合世界局势与全球新闻，深度解读每一次波动背后的逻辑。
+        </p>
+      </div>
+
+      <!-- 全球指数概览 -->
+      <div class="indices-grid" id="indicesGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+
+      <!-- 市场情绪指标 -->
+      <div class="sentiment-bar" id="sentimentBar">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 基金总览 ============ -->
+  <section id="funds" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">基金总览</h2>
+        <p class="section-desc">6只核心科技基金，覆盖美股科技、新兴市场、A股科创等关键赛道</p>
+      </div>
+      <div class="fund-grid" id="fundGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 趋势分析图表 ============ -->
+  <section id="chart" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">趋势分析</h2>
+        <p class="section-desc">选择基金查看净值走势，支持多基金叠加对比</p>
+      </div>
+
+      <!-- 基金选择器 -->
+      <div class="chart-controls">
+        <div class="fund-selector" id="fundSelector">
+          <!-- 由 JS 动态渲染 -->
+        </div>
+        <div class="chart-actions">
+          <div class="timeframe-btns" id="timeframeBtns">
+            <button class="tf-btn active" data-range="7">近7日</button>
+            <button class="tf-btn" data-range="14">近14日</button>
+            <button class="tf-btn" data-range="30">全部</button>
+          </div>
+          <button class="chart-toggle-btn" id="compareToggle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 12L6 8L9 11L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            对比模式
+          </button>
+        </div>
+      </div>
+
+      <!-- 图表容器 -->
+      <div class="chart-wrapper">
+        <div class="chart-info" id="chartInfo">
+          <!-- 由 JS 动态渲染当前选中基金信息 -->
+        </div>
+        <!-- 净值趋势折线图 -->
+        <div class="chart-canvas-wrap">
+          <canvas id="mainChart"></canvas>
+        </div>
+        <!-- 每日涨跌幅柱状图 -->
+        <div class="chart-bar-section" id="barChartSection">
+          <div class="chart-section-label">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="8" width="4" height="7" rx="1" fill="#00d68f"/>
+              <rect x="7" y="3" width="4" height="12" rx="1" fill="#ff5252"/>
+              <rect x="13" y="6" width="2" height="9" rx="1" fill="#00d68f"/>
+            </svg>
+            <span>每日涨跌幅</span>
+          </div>
+          <div class="chart-bar-wrap">
+            <canvas id="barChart"></canvas>
+          </div>
+        </div>
+        <!-- 每日明细数据表 -->
+        <div class="daily-table-section" id="dailyTableSection">
+          <div class="chart-section-label">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="14" height="14" rx="2" stroke="#8b8fa3" stroke-width="1.5" fill="none"/>
+              <line x1="1" y2="5" x2="15" y2="5" stroke="#8b8fa3" stroke-width="1"/>
+              <line x1="6" y1="1" x2="6" y2="15" stroke="#8b8fa3" stroke-width="1"/>
+            </svg>
+            <span>每日明细</span>
+          </div>
+          <div class="daily-table-wrap" id="dailyTableWrap">
+            <!-- 由 JS 动态渲染 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 每日新闻解读 ============ -->
+  <section id="news" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">每日深度解读</h2>
+        <p class="section-desc">世界新闻 x 基金涨跌 — 每一次波动都有迹可循</p>
+      </div>
+
+      <!-- 筛选标签 -->
+      <div class="news-filters" id="newsFilters">
+        <button class="filter-btn active" data-category="all">全部</button>
+        <button class="filter-btn" data-category="货币政策">货币政策</button>
+        <button class="filter-btn" data-category="科技产业">科技产业</button>
+        <button class="filter-btn" data-category="经济数据">经济数据</button>
+        <button class="filter-btn" data-category="地缘政治">地缘政治</button>
+        <button class="filter-btn" data-category="监管政策">监管政策</button>
+        <button class="filter-btn" data-category="市场情绪">市场情绪</button>
+      </div>
+
+      <!-- 新闻时间线 -->
+      <div class="news-timeline" id="newsTimeline">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 页脚 ============ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+              <path d="M4 20L10 12L14 16L20 6L24 10" stroke="#00d68f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>科技基金趋势</span>
+          </div>
+          <p class="footer-desc">结合全球新闻视角的科技基金趋势分析平台</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>导航</h4>
+            <a href="#hero">市场概览</a>
+            <a href="#funds">基金总览</a>
+            <a href="#chart">趋势分析</a>
+            <a href="#news">每日解读</a>
+          </div>
+          <div class="footer-col">
+            <h4>覆盖基金</h4>
+            <a href="#funds">纳斯达克100 ETF</a>
+            <a href="#funds">建信新兴市场</a>
+            <a href="#funds">华夏科技创新</a>
+            <a href="#funds">广发全球精选</a>
+          </div>
+          <div class="footer-col">
+            <h4>数据说明</h4>
+            <a href="#news">新闻来源</a>
+            <a href="#chart">分析方法</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-disclaimer">
+        <p>
+          <strong>免责声明：</strong>本网站所展示的基金净值数据为基于真实市场走势特征的模拟数据，仅供演示和学习使用，不代表任何真实基金的实际情况。新闻事件分析基于公开信息整理，不构成任何投资建议。投资有风险，入市需谨慎。本网站不承担任何因使用本站内容而产生的投资损失责任。
+        </p>
+        <p class="copyright">© 2026 科技基金趋势分析 · Powered by WorkBuddy</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 返回顶部按钮 -->
+  <button class="back-to-top" id="backToTop" aria-label="返回顶部">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M10 16V4M4 10L10 4L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
