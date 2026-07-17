@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
   <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
-  <link rel="stylesheet" href="css/style.css?v=20260718e">
+  <link rel="stylesheet" href="css/style.css?v=20260718f">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -92,9 +92,13 @@
         </div>
         <div class="chart-actions">
           <div class="timeframe-btns" id="timeframeBtns">
-            <button class="tf-btn active" data-range="7">近7日</button>
-            <button class="tf-btn" data-range="14">近14日</button>
-            <button class="tf-btn" data-range="30">全部</button>
+            <button class="tf-btn" data-key="since">成立以来</button>
+            <button class="tf-btn" data-key="5y">近5年</button>
+            <button class="tf-btn" data-key="3y">近3年</button>
+            <button class="tf-btn active" data-key="1y">近1年</button>
+            <button class="tf-btn" data-key="6m">近半年</button>
+            <button class="tf-btn" data-key="3m">近3月</button>
+            <button class="tf-btn" data-key="1m">近1月</button>
           </div>
           <button class="chart-toggle-btn" id="compareToggle">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -114,6 +118,7 @@
         <div class="chart-canvas-wrap">
           <canvas id="mainChart"></canvas>
         </div>
+        <p class="chart-caption" id="chartCaption"></p>
         <!-- 每日涨跌幅柱状图 -->
         <div class="chart-bar-section" id="barChartSection">
           <div class="chart-section-label">
@@ -139,6 +144,21 @@
             <span>每日明细</span>
           </div>
           <div class="daily-table-wrap" id="dailyTableWrap">
+            <!-- 由 JS 动态渲染 -->
+          </div>
+        </div>
+
+        <!-- 区间表现汇总：7 个区间的区间收益与最大回撤 -->
+        <div class="window-summary-section" id="windowSummarySection">
+          <div class="chart-section-label">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="14" height="14" rx="2" stroke="#8b8fa3" stroke-width="1.5" fill="none"/>
+              <line x1="1" y2="5" x2="15" y2="5" stroke="#8b8fa3" stroke-width="1"/>
+              <line x1="6" y1="1" x2="6" y2="15" stroke="#8b8fa3" stroke-width="1"/>
+            </svg>
+            <span>区间表现汇总（真实净值计算）</span>
+          </div>
+          <div class="window-summary-wrap" id="windowSummary">
             <!-- 由 JS 动态渲染 -->
           </div>
         </div>
@@ -429,9 +449,9 @@
     </svg>
   </button>
 
-  <script src="js/realdata.js?v=20260718a"></script>
-  <script src="js/data.js?v=20260718b"></script>
+  <script src="js/realdata.js?v=20260718b"></script>
+  <script src="js/data.js?v=20260718c"></script>
   <script src="js/holdings.js?v=20260718c"></script>
-  <script src="js/app.js?v=20260718e"></script>
+  <script src="js/app.js?v=20260718f"></script>
 </body>
 </html>

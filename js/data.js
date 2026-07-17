@@ -1,7 +1,8 @@
 /**
  * 基金趋势分析网站 - 数据层
  * 包含：基金NAV数据、世界新闻事件分析、全球指数概览
- * 基金每日单位净值与涨跌幅来自天天基金(eastmoney)真实历史净值，抓取于2026-07-17。
+ * 基金每日单位净值与涨跌幅来自天天基金(eastmoney)真实历史净值(pingzhongdata接口)，抓取于2026-07-18，区间为各基金成立以来 ~ 2026-07-16。
+ * 趋势分析支持「成立以来 / 近5年 / 近3年 / 近1年 / 近半年 / 近3月 / 近1月」七个区间，区间收益与最大回撤由真实净值实时计算。
  * 下列 NEWS_EVENTS 为「真实宏观事件」，逐条标注来源/可核实出处，并按实际发生(发布)时间排序；
  * impact 仅做宏观传导机制说明与主题相关基金映射，不臆造单只基金当日虚构涨跌幅。
  */
@@ -319,15 +320,17 @@ const FUNDS = [
 FUNDS.forEach((fund) => {
   const data = fund.data;
   const latest = data[data.length - 1];
-  const first = data[0];
   fund.latestNav = latest.nav;
   fund.latestDate = latest.date;
   fund.latestChange = latest.change;
+  // 近30日收益（取最后最多30个交易日）
+  const n = Math.min(30, data.length);
+  const past = data[data.length - n];
   fund.periodReturn = parseFloat(
-    (((latest.nav - first.nav) / first.nav) * 100).toFixed(2)
+    (((latest.nav - past.nav) / past.nav) * 100).toFixed(2)
   );
-  fund.maxNav = Math.max(...data.map((d) => d.nav));
-  fund.minNav = Math.min(...data.map((d) => d.nav));
+  fund.maxNav = Math.max.apply(null, data.map((d) => d.nav));
+  fund.minNav = Math.min.apply(null, data.map((d) => d.nav));
   fund.avgChange = parseFloat(
     (data.reduce((s, d) => s + d.change, 0) / data.length).toFixed(2)
   );

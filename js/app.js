@@ -10,7 +10,7 @@
   // ============ 全局状态 ============
   const state = {
     selectedFundIndex: 0,
-    chartRange: 30,
+    windowKey: "1y", // 时间区间：since/5y/3y/1y/6m/3m/1m
     compareMode: false,
     comparedFunds: new Set([0]),
     newsCategory: "all",
@@ -18,6 +18,97 @@
     barChart: null,
     sparkCharts: [],
   };
+
+  // ============ 时间区间配置（成立以来 / 5年 / 3年 / 1年 / 半年 / 3月 / 1月）============
+  const TIME_WINDOWS = [
+    { key: "since", label: "成立以来", months: null },
+    { key: "5y", label: "近5年", months: 60 },
+    { key: "3y", label: "近3年", months: 36 },
+    { key: "1y", label: "近1年", months: 12 },
+    { key: "6m", label: "近半年", months: 6 },
+    { key: "3m", label: "近3月", months: 3 },
+    { key: "1m", label: "近1月", months: 1 },
+  ];
+
+  function parseDate(s) {
+    const p = String(s).split("-").map(Number);
+    return new Date(p[0], p[1] - 1, p[2]);
+  }
+  function addMonths(date, n) {
+    return new Date(date.getFullYear(), date.getMonth() + n, date.getDate());
+  }
+  function getWindowDef(key) {
+    return TIME_WINDOWS.find((x) => x.key === key) || TIME_WINDOWS[3];
+  }
+  function isLongWindow(key) {
+    const w = getWindowDef(key);
+    return w.months === null || w.months >= 6;
+  }
+  // 按所选区间切片完整净值序列（成立以来会尊重基金成立日）
+  function getWindowSlice(fund, key) {
+    const data = fund.data;
+    if (!data || data.length === 0) return [];
+    const last = data[data.length - 1];
+    const lastDate = parseDate(last.date);
+    const w = getWindowDef(key);
+    let startIdx = 0;
+    if (w.months !== null) {
+      const start = addMonths(lastDate, -w.months);
+      let i = 0;
+      while (i < data.length && parseDate(data[i].date) < start) i++;
+      startIdx = i;
+    }
+    if (key === "since" && fund.inception) {
+      const inc = parseDate(fund.inception);
+      let i = 0;
+      while (i < data.length && parseDate(data[i].date) < inc) i++;
+      startIdx = Math.max(startIdx, i);
+    }
+    return data.slice(startIdx);
+  }
+  // 区间指标：区间收益、最大回撤、年化波动、区间最高/最低（均基于复权净值 acc，已还原拆分/分红）
+  function computeMetrics(slice) {
+    if (!slice || slice.length === 0) return null;
+    const val = (d) => (d.acc != null ? d.acc : d.nav);
+    const first = slice[0];
+    const last = slice[slice.length - 1];
+    const cumReturn = ((val(last) - val(first)) / val(first)) * 100;
+    let peak = val(first);
+    let maxDD = 0;
+    for (const d of slice) {
+      const v = val(d);
+      if (v > peak) peak = v;
+      const dd = (peak - v) / peak * 100;
+      if (dd > maxDD) maxDD = dd;
+    }
+    const changes = slice.map((d) => d.change || 0);
+    const mean = changes.reduce((a, b) => a + b, 0) / changes.length;
+    const variance = changes.reduce((a, b) => a + (b - mean) * (b - mean), 0) / changes.length;
+    const vol = Math.sqrt(variance) * Math.sqrt(252);
+    const maxNav = Math.max.apply(null, slice.map((d) => val(d)));
+    const minNav = Math.min.apply(null, slice.map((d) => val(d)));
+    return {
+      cumReturn: cumReturn,
+      maxDD: maxDD,
+      vol: vol,
+      maxNav: maxNav,
+      minNav: minNav,
+      startDate: first.date,
+      endDate: last.date,
+      count: slice.length,
+    };
+  }
+  // 区间是否因基金成立不足而被截断（显示成立至今）
+  function isCappedWindow(fund, key) {
+    const w = getWindowDef(key);
+    if (key === "since" || w.months === null) return false;
+    const lastDate = parseDate(fund.latestDate || fund.data[fund.data.length - 1].date);
+    const start = addMonths(lastDate, -w.months);
+    return parseDate(fund.data[0].date) > start;
+  }
+  function tickLabel(d, key) {
+    return key === "1m" || key === "3m" ? d.dateCN : d.date;
+  }
 
   // ============ DOM Ready ============
   document.addEventListener("DOMContentLoaded", init);
@@ -31,6 +122,7 @@
     renderMainChart();
     renderBarChart();
     renderDailyTable();
+    renderWindowSummary();
     updateBarAndTableVisibility();
     renderNewsTimeline();
     initNav();
@@ -389,21 +481,21 @@
       ? Array.from(state.comparedFunds)
       : [state.selectedFundIndex];
 
-    // 获取日期标签（基于第一个基金）
+    // 获取日期标签（基于第一个基金，按所选区间切片）
     const firstFund = FUNDS[indices[0]];
-    const data = firstFund.data.slice(-state.chartRange);
-    const labels = data.map((d) => d.dateCN);
+    const data = getWindowSlice(firstFund, state.windowKey);
+    const labels = data.map((d) => tickLabel(d, state.windowKey));
 
     const datasets = indices.map((fundIdx, i) => {
       const fund = FUNDS[fundIdx];
-      const fundData = fund.data.slice(-state.chartRange);
+      const fundData = getWindowSlice(fund, state.windowKey);
       const color = colors[fundIdx % colors.length];
 
-      // 归一化净值（对比模式下以起点为100）
-      const baseNav = fundData[0].nav;
+      // 归一化净值（对比模式下以起点为100）；趋势线用复权净值 acc，真实反映收益与回撤
+      const baseNav = fundData[0].acc != null ? fundData[0].acc : fundData[0].nav;
       const navValues = state.compareMode
-        ? fundData.map((d) => ((d.nav / baseNav) * 100).toFixed(2))
-        : fundData.map((d) => d.nav);
+        ? fundData.map((d) => (((d.acc != null ? d.acc : d.nav) / baseNav) * 100).toFixed(2))
+        : fundData.map((d) => (d.acc != null ? d.acc : d.nav));
 
       // 创建渐变
       const canvas = document.getElementById("mainChart");
@@ -523,11 +615,19 @@
     state.mainChart.options.plugins.legend.display = state.compareMode;
     state.mainChart.update("none"); // 切换时禁用动画，瞬间完成
 
+    const cap = document.getElementById("chartCaption");
+    if (cap) {
+      cap.textContent = state.compareMode
+        ? "对比模式：各基金净值以区间起点 = 100 归一化，便于横向比较相对表现。"
+        : "趋势线为累计净值（复权），已还原份额拆分与分红，真实反映区间收益与最大回撤；下方「每日明细」展示单位净值。";
+    }
+
     updateChartInfo();
     updateBarChart();
     // 每日明细表 / 持仓 / 归因 DOM 较重，推迟到下一帧渲染，保证图表/柱形图切换即时可见
     requestAnimationFrame(() => {
       renderDailyTable();
+      renderWindowSummary();
       updateBarAndTableVisibility();
       renderHoldings();
       renderAttribution();
@@ -550,8 +650,10 @@
 
   function getBarChartData() {
     const fund = FUNDS[state.selectedFundIndex];
-    const data = fund.data.slice(-state.chartRange);
-    const labels = data.map((d) => d.dateCN);
+    let data = getWindowSlice(fund, state.windowKey);
+    // 柱状图最多保留最近 120 根，避免长区间卡顿（长区间时柱状图本身会隐藏）
+    if (data.length > 120) data = data.slice(-120);
+    const labels = data.map((d) => tickLabel(d, state.windowKey));
     const changes = data.map((d) => d.change);
 
     // 颜色：涨绿跌红
@@ -643,6 +745,8 @@
 
   function updateBarChart() {
     if (!state.barChart) return;
+    // 长区间不绘制每日涨跌柱状图（避免超长序列卡顿，且该类区间以净值走势为主）
+    if (isLongWindow(state.windowKey)) return;
     // 仅更新数据，禁用更新动画，保证切换基金时柱形图即时刷新
     const bd = getBarChartData();
     state.barChart.data.labels = bd.labels;
@@ -654,15 +758,23 @@
     const barSection = document.getElementById("barChartSection");
     const tableSection = document.getElementById("dailyTableSection");
     const analysisExtra = document.getElementById("analysisExtra");
+    const summarySection = document.getElementById("windowSummarySection");
 
     if (state.compareMode) {
       barSection?.classList.add("hidden");
       tableSection?.classList.add("hidden");
       analysisExtra?.classList.add("hidden");
+      summarySection?.classList.add("hidden");
     } else {
-      barSection?.classList.remove("hidden");
-      tableSection?.classList.remove("hidden");
       analysisExtra?.classList.remove("hidden");
+      summarySection?.classList.remove("hidden");
+      tableSection?.classList.remove("hidden");
+      // 长区间不显示每日涨跌柱状图（以净值走势为主）
+      if (isLongWindow(state.windowKey)) {
+        barSection?.classList.add("hidden");
+      } else {
+        barSection?.classList.remove("hidden");
+      }
     }
   }
 
@@ -760,7 +872,10 @@
     if (!wrap) return;
 
     const fund = FUNDS[state.selectedFundIndex];
-    const data = fund.data.slice(-state.chartRange);
+    const full = getWindowSlice(fund, state.windowKey);
+    // 明细表过长时仅展示最近 150 条，避免超长区间渲染卡顿
+    const truncated = full.length > 150;
+    const data = truncated ? full.slice(-150) : full;
 
     // 最大涨跌幅（用于柱状图缩放）
     const maxAbsChange = Math.max(...data.map((d) => Math.abs(d.change)), 0.01);
@@ -813,6 +928,7 @@
             .join("")}
         </tbody>
       </table>
+      ${truncated ? `<p class="table-note">区间过长，明细表仅展示最近 150 条；完整区间收益与最大回撤见上方「区间表现汇总」。</p>` : ""}
     `;
   }
 
@@ -839,6 +955,10 @@
       const fund = FUNDS[state.selectedFundIndex];
       const isUp = fund.latestChange >= 0;
       const periodClass = fund.periodReturn >= 0 ? "text-up" : "text-down";
+      const w = getWindowDef(state.windowKey);
+      const m = computeMetrics(getWindowSlice(fund, state.windowKey)) || {};
+      const capped = isCappedWindow(fund, state.windowKey);
+      const retClass = (m.cumReturn || 0) >= 0 ? "text-up" : "text-down";
 
       infoEl.innerHTML = `
         <div class="chart-info-item">
@@ -852,18 +972,28 @@
           </span>
         </div>
         <div class="chart-info-item">
-          <span class="chart-info-label">30日收益</span>
-          <span class="chart-info-value ${periodClass}">
-            ${fund.periodReturn >= 0 ? "+" : ""}${fund.periodReturn}%
+          <span class="chart-info-label">${w.label}收益</span>
+          <span class="chart-info-value ${retClass}">
+            ${(m.cumReturn || 0) >= 0 ? "+" : ""}${m.cumReturn != null ? m.cumReturn.toFixed(2) : "--"}%
           </span>
         </div>
         <div class="chart-info-item">
-          <span class="chart-info-label">区间最高</span>
-          <span class="chart-info-value">${fund.maxNav.toFixed(4)}</span>
+          <span class="chart-info-label">${w.label}最大回撤</span>
+          <span class="chart-info-value text-down">
+            -${m.maxDD != null ? m.maxDD.toFixed(2) : "--"}%
+          </span>
         </div>
         <div class="chart-info-item">
-          <span class="chart-info-label">区间最低</span>
-          <span class="chart-info-value">${fund.minNav.toFixed(4)}</span>
+          <span class="chart-info-label">区间年化波动</span>
+          <span class="chart-info-value">${m.vol != null ? m.vol.toFixed(2) : "--"}%</span>
+        </div>
+        <div class="chart-info-item">
+          <span class="chart-info-label">区间最高 / 最低</span>
+          <span class="chart-info-value">${m.maxNav != null ? m.maxNav.toFixed(4) : "--"} / ${m.minNav != null ? m.minNav.toFixed(4) : "--"}</span>
+        </div>
+        <div class="chart-info-item" style="max-width: 300px">
+          <span class="chart-info-label">区间日期${capped ? "（成立不足，显示至今）" : ""}</span>
+          <span style="font-size: 12px; color: var(--text-secondary)">${m.startDate || "--"} ~ ${m.endDate || "--"}（${m.count || 0} 个交易日）</span>
         </div>
         <div class="chart-info-item" style="max-width: 300px">
           <span class="chart-info-label">基金简介</span>
@@ -873,19 +1003,77 @@
     }
   }
 
-  // ============ 时间范围按钮 ============
+  // ============ 时间区间按钮 ============
+  function applyWindow(key) {
+    state.windowKey = key;
+    // 同步顶部区间按钮高亮
+    const btns = document.getElementById("timeframeBtns");
+    if (btns) {
+      btns.querySelectorAll(".tf-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.key === key);
+      });
+    }
+    // 同步汇总表高亮
+    const ws = document.getElementById("windowSummary");
+    if (ws) {
+      ws.querySelectorAll("tr[data-key]").forEach((tr) => {
+        tr.classList.toggle("ws-active", tr.dataset.key === key);
+      });
+    }
+    updateChart();
+  }
+
   function initTimeframeButtons() {
     const btns = document.getElementById("timeframeBtns");
     if (!btns) return;
 
     btns.querySelectorAll(".tf-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        btns.querySelectorAll(".tf-btn").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        state.chartRange = parseInt(btn.dataset.range);
-        updateChart();
+        applyWindow(btn.dataset.key);
       });
     });
+
+    // 汇总表行点击切换区间
+    const ws = document.getElementById("windowSummary");
+    if (ws) {
+      ws.addEventListener("click", (e) => {
+        const tr = e.target.closest("tr[data-key]");
+        if (tr) applyWindow(tr.dataset.key);
+      });
+    }
+  }
+
+  // ============ 区间表现汇总（7 个区间：区间收益 + 最大回撤）============
+  function renderWindowSummary() {
+    const body = document.getElementById("windowSummary");
+    if (!body) return;
+    const fund = FUNDS[state.selectedFundIndex];
+
+    let html =
+      '<table class="window-summary-table"><thead><tr>' +
+      "<th>区间</th><th>区间收益</th><th>最大回撤</th><th>年化波动</th><th>区间日期</th>" +
+      '</tr></thead><tbody>';
+
+    TIME_WINDOWS.forEach((w) => {
+      const slice = getWindowSlice(fund, w.key);
+      const m = computeMetrics(slice);
+      if (!m) return;
+      const retClass = m.cumReturn >= 0 ? "text-up" : "text-down";
+      const capped = isCappedWindow(fund, w.key);
+      const label = w.label + (capped ? " *" : "");
+      html +=
+        `<tr data-key="${w.key}" class="${w.key === state.windowKey ? "ws-active" : ""}">` +
+        `<td class="ws-label">${label}</td>` +
+        `<td class="${retClass}">${m.cumReturn >= 0 ? "+" : ""}${m.cumReturn.toFixed(2)}%</td>` +
+        `<td class="text-down">-${m.maxDD.toFixed(2)}%</td>` +
+        `<td>${m.vol.toFixed(2)}%</td>` +
+        `<td class="ws-date">${m.startDate} ~ ${m.endDate}</td>` +
+        "</tr>";
+    });
+    html += "</tbody></table>";
+    html +=
+      '<p class="ws-note">* 基金成立时间不足该区间，已显示成立至今数据。最大回撤 = 区间内净值从历史高点回落的最大幅度；年化波动 = 日收益标准差 × √252。数据来源：天天基金真实净值。</p>';
+    body.innerHTML = html;
   }
 
   // ============ 对比模式 ============
