@@ -125,6 +125,7 @@
     renderWindowSummary();
     updateBarAndTableVisibility();
     renderNewsTimeline();
+    renderNewsHighlights();
     initNav();
     initBackToTop();
     initTimeframeButtons();
@@ -1100,67 +1101,133 @@
   }
 
   // ============ 新闻时间线 ============
+  // ============ 每日深度解读（NEWS_DEEP） ============
+  function getNewsDeep() {
+    return window.NEWS_DEEP || [];
+  }
+
+  // 关联基金标签点击 -> 切换选中基金并滚动到趋势区
+  function selectFundFromNews(code) {
+    const idx = FUNDS.findIndex((f) => f.code === code);
+    if (idx < 0) return;
+    state.selectedFundIndex = idx;
+    state.comparedFunds = new Set([idx]);
+    if (typeof updateFundSelector === "function") updateFundSelector();
+    if (typeof updateChart === "function") updateChart();
+    const sec = document.getElementById("trend");
+    if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // 近期要点：取最新 4 条，点击展开对应卡片
+  function renderNewsHighlights() {
+    const box = document.getElementById("newsHighlights");
+    if (!box) return;
+    const all = getNewsDeep().slice().sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+    const top = all.slice(0, 4);
+    if (!top.length) { box.innerHTML = ""; return; }
+    const gidx = new Map();
+    all.forEach((n, i) => gidx.set(n, i));
+    box.innerHTML =
+      '<div class="nh-label">📌 近期要点（点击展开深度解读）</div><div class="nh-list">' +
+      top
+        .map((n) => {
+          const gi = gidx.get(n);
+          return `<button class="nh-item" data-gi="${gi}">
+            <span class="nh-meta">${n.dateCN}${n.time ? " " + n.time : ""} · ${n.category}</span>
+            <span class="nh-title">${n.title}</span>
+          </button>`;
+        })
+        .join("") +
+      "</div>";
+    box.querySelectorAll(".nh-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const gi = parseInt(btn.dataset.gi);
+        const card = document.getElementById("news-card-" + gi);
+        if (card) {
+          card.classList.add("expanded");
+          const tog = card.querySelector(".news-card-toggle");
+          if (tog) tog.textContent = "收起 ▴";
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          card.classList.add("flash");
+          setTimeout(() => card.classList.remove("flash"), 1200);
+        }
+      });
+    });
+  }
+
   function renderNewsTimeline() {
     const timeline = document.getElementById("newsTimeline");
     if (!timeline) return;
-
+    const all = getNewsDeep();
     const filtered =
       state.newsCategory === "all"
-        ? NEWS_EVENTS
-        : NEWS_EVENTS.filter((n) => n.category === state.newsCategory);
+        ? all
+        : all.filter((n) => n.category === state.newsCategory);
 
-    // 按日期降序排列：最新新闻（日期最大）置顶
     const sorted = filtered
       .slice()
-      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
 
-    if (sorted.length === 0) {
-      timeline.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:40px">暂无该类别新闻</p>`;
+    if (!sorted.length) {
+      timeline.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:40px">暂无该类别资讯</p>`;
       return;
     }
 
-    timeline.innerHTML = sorted
-      .map((news, i) => {
-        const impactDots = [1, 2, 3]
-          .map((n) =>
-            `<span class="impact-dot ${n <= (news.impactLevel === "high" ? 3 : news.impactLevel === "medium" ? 2 : 1) ? "active" : ""}"></span>`
-          )
-          .join("");
+    const globalIndex = new Map();
+    all.forEach((n, i) => globalIndex.set(n, i));
 
-        const fundBadges = news.affectedFunds
+    timeline.innerHTML = sorted
+      .map((news) => {
+        const gi = globalIndex.get(news);
+        const full = news.summary || "";
+        const excerpt = full.replace(/\n/g, " ").slice(0, 80);
+        const fundBadges = (news.relatedFunds || [])
           .map((code) => {
             const fund = FUNDS.find((f) => f.code === code);
-            return fund ? `<span class="affected-fund">${fund.name}</span>` : "";
+            return fund ? `<span class="affected-fund" data-code="${code}" title="点击查看该基金">${fund.name}</span>` : "";
           })
           .join("");
-
+        const srcLink = news.url
+          ? `<a class="news-src-link" href="${news.url}" target="_blank" rel="noopener">查看原文 ↗</a>`
+          : "";
         return `
-          <div class="news-card sentiment-${news.sentiment} fade-in" style="animation-delay: ${i * 0.05}s">
-            <div class="news-card-inner">
-              <div class="news-card-header">
-                <span class="news-date">${news.dateCN}</span>
+          <div class="news-card fade-in" id="news-card-${gi}">
+            <div class="news-card-head" data-gi="${gi}">
+              <div class="news-card-meta">
+                <span class="news-date">${news.dateCN}${news.time ? " " + news.time : ""}</span>
                 <span class="news-category ${news.category}">${news.category}</span>
-                <span class="news-sentiment-badge ${news.sentiment}">
-                  ${news.sentiment === "positive" ? "利多" : news.sentiment === "negative" ? "利空" : "中性"}
-                </span>
               </div>
               <h3 class="news-title">${news.title}</h3>
-              <p class="news-impact">${news.impact}</p>
-              <div class="news-source">📌 可核实来源：${news.source || "公开宏观数据库"}</div>
-              <div class="news-footer">
-                <div class="news-tags">
-                  ${news.tags.map((t) => `<span class="news-tag">#${t}</span>`).join("")}
-                </div>
-                <div class="news-affected">
-                  <span class="impact-level-bar" title="影响等级">${impactDots}</span>
-                  ${fundBadges}
-                </div>
-              </div>
+              <p class="news-excerpt">${excerpt}${full.length > 80 ? "…" : ""}</p>
+              <div class="news-card-toggle">展开深度解读 ▾</div>
+            </div>
+            <div class="news-card-body">
+              <p class="news-summary">${full.replace(/\n/g, "<br>")}</p>
+              ${news.soWhat ? `<div class="news-sowhat"><span class="sowhat-label">所以呢 · 市场含义</span>${news.soWhat}</div>` : ""}
+              ${fundBadges ? `<div class="news-funds"><span class="funds-label">相关主题基金：</span>${fundBadges}</div>` : ""}
+              <div class="news-source">📌 来源：${news.source || "公开财经资讯"}${srcLink ? " · " + srcLink : ""}</div>
             </div>
           </div>
         `;
       })
       .join("");
+
+    // 展开/收起
+    timeline.querySelectorAll(".news-card-head").forEach((head) => {
+      head.addEventListener("click", () => {
+        const card = head.closest(".news-card");
+        card.classList.toggle("expanded");
+        const tog = card.querySelector(".news-card-toggle");
+        if (tog) tog.textContent = card.classList.contains("expanded") ? "收起 ▴" : "展开深度解读 ▾";
+      });
+    });
+    // 关联基金点击（不触发卡片收起）
+    timeline.querySelectorAll(".affected-fund").forEach((badge) => {
+      badge.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectFundFromNews(badge.dataset.code);
+      });
+    });
   }
 
   // ============ 新闻筛选 ============

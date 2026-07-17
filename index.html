@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
   <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
-  <link rel="stylesheet" href="css/style.css?v=20260718f">
+  <link rel="stylesheet" href="css/style.css?v=20260718g">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -182,26 +182,29 @@
     </div>
   </section>
 
-  <!-- ============ 每日新闻解读 ============ -->
+  <!-- ============ 每日深度解读 ============ -->
   <section id="news" class="section">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">宏观事件时间线 · 真实可核实</h2>
-        <p class="section-desc">下列为真实宏观事件，逐条标注可核实来源，并按实际发生/发布时间排序；仅做宏观传导机制与主题基金映射，不臆造单只基金当日虚构涨跌幅。</p>
+        <h2 class="section-title">每日深度解读 · 真实资讯</h2>
+        <p class="section-desc">按 <strong>港股 / 国际 / 内地 / 地产 / 金融市场 / 宏观政策</strong> 多维度聚合真实财经资讯，每条含深度正文与「所以呢·市场含义」解读，并映射到相关主题基金。来源逐条标注、可核实，<strong>不构成投资建议</strong>。</p>
       </div>
+
+      <!-- 今日要点 -->
+      <div class="news-highlights" id="newsHighlights"></div>
 
       <!-- 筛选标签 -->
       <div class="news-filters" id="newsFilters">
         <button class="filter-btn active" data-category="all">全部</button>
-        <button class="filter-btn" data-category="货币政策">货币政策</button>
-        <button class="filter-btn" data-category="科技产业">科技产业</button>
-        <button class="filter-btn" data-category="经济数据">经济数据</button>
-        <button class="filter-btn" data-category="地缘政治">地缘政治</button>
-        <button class="filter-btn" data-category="监管政策">监管政策</button>
-        <button class="filter-btn" data-category="市场情绪">市场情绪</button>
+        <button class="filter-btn" data-category="港股">港股</button>
+        <button class="filter-btn" data-category="国际">国际财经</button>
+        <button class="filter-btn" data-category="内地">内地财经</button>
+        <button class="filter-btn" data-category="地产">地产</button>
+        <button class="filter-btn" data-category="金融市场">金融市场</button>
+        <button class="filter-btn" data-category="宏观政策">宏观政策</button>
       </div>
 
-      <!-- 新闻时间线 -->
+      <!-- 新闻列表 -->
       <div class="news-timeline" id="newsTimeline">
         <!-- 由 JS 动态渲染 -->
       </div>
@@ -451,7 +454,8 @@
 
   <script src="js/realdata.js?v=20260718b"></script>
   <script src="js/data.js?v=20260718c"></script>
+  <script src="js/news_deep.js?v=20260718a"></script>
   <script src="js/holdings.js?v=20260718c"></script>
-  <script src="js/app.js?v=20260718f"></script>
+  <script src="js/app.js?v=20260718g"></script>
 </body>
 </html>
