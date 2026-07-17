@@ -116,6 +116,7 @@
   function init() {
     renderIndices();
     renderSentiment();
+    renderIndexTemperature();
     renderSentimentDetail();
     renderFundCards();
     renderFundSelector();
@@ -242,6 +243,229 @@
       <div class="sentiment-item">
         <span class="sentiment-label">原油</span>
         <span class="sentiment-value">${oilTxt}</span>
+      </div>
+    `;
+  }
+
+  // ============ 渲染指数温度（信息图卡片） ============
+  function renderIndexTemperature() {
+    const grid = document.getElementById("indexTemperatureGrid");
+    if (!grid) return;
+    const data = window.INDEX_TEMPERATURE;
+    if (!data || !data.items) return;
+
+    const snap = window.MARKET_SNAPSHOT;
+    const snapIdx = (k) =>
+      snap && snap.indices ? snap.indices.find((i) => i.key === k) : null;
+    const sentiment = window.MARKET_SENTIMENT || {};
+
+    const sourceEl = document.getElementById("indexTemperatureSource");
+    if (sourceEl && data.source) sourceEl.textContent = "数据来源说明：" + data.source;
+
+    grid.innerHTML = data.items
+      .map((item) => {
+        let value = item.value;
+        let change = item.change;
+        let changeStr = "—";
+        let valueLabel = "";
+
+        if (item.key === "vix") {
+          if (value == null && sentiment.vix != null) {
+            value = Number(sentiment.vix);
+          }
+          changeStr = "";
+          valueLabel = "";
+        } else if (item.key === "ndx") {
+          const si = snapIdx("ndx");
+          if (si) {
+            if (value == null && si.value != null) value = si.value;
+            if (change == null && si.change != null) change = si.change;
+          }
+        } else if (item.key === "spx") {
+          const si = snapIdx("spx");
+          if (si) {
+            if (value == null && si.value != null) value = si.value;
+            if (change == null && si.change != null) change = si.change;
+          }
+        }
+
+        if (value != null && typeof value === "number") {
+          valueLabel =
+            item.key === "vix"
+              ? value.toFixed(2)
+              : Number(value).toLocaleString("en-US", { maximumFractionDigits: 2 });
+        }
+        if (change != null && typeof change === "number") {
+          const arrow = change >= 0 ? "▲" : "▼";
+          changeStr = `${arrow} ${Math.abs(change).toFixed(2)}%`;
+        }
+
+        if (item.type === "vix") {
+          return renderVixCard(item, value, changeStr, valueLabel);
+        }
+        return renderIndexTempCard(item, value, changeStr, valueLabel);
+      })
+      .join("");
+  }
+
+  function renderVixCard(item, value, changeStr, valueLabel) {
+    const activeIdx = value != null
+      ? item.scale.findIndex((s) => value < s.max)
+      : -1;
+    const active = activeIdx >= 0 ? item.scale[activeIdx] : item.scale[item.scale.length - 1];
+    const total = item.scale.length;
+    const segmentWidth = 100 / total;
+
+    const scaleHtml = item.scale
+      .map((s, i) => {
+        const isActive = i === activeIdx;
+        return `
+          <div class="vix-segment" style="width:${segmentWidth}%;background:${s.color};${isActive ? "transform:scaleY(1.15);box-shadow:0 0 10px " + s.color + "80;z-index:2;" : ""}">
+            <span class="vix-segment-label">${s.label}</span>
+          </div>
+        `;
+      })
+      .join("");
+
+    const labelsHtml = item.scale
+      .map((s) => `
+        <div class="vix-scale-item">
+          <span class="vix-scale-emoji">${s.emoji}</span>
+          <span class="vix-scale-text">${s.text}</span>
+        </div>
+      `)
+      .join("");
+
+    return `
+      <div class="temp-card temp-card-vix">
+        <div class="temp-card-header">
+          <div>
+            <h3 class="temp-card-title">${item.title}</h3>
+            <p class="temp-card-subtitle">${item.subtitle}</p>
+          </div>
+        </div>
+        <div class="temp-card-body">
+          <div class="temp-metric-row">
+            <div class="temp-metric-main">
+              <div class="temp-metric-label">最新指数</div>
+              <div class="temp-metric-value" style="color:${active.color}">${valueLabel || "—"}</div>
+              ${changeStr ? `<div class="temp-metric-change">${changeStr}</div>` : ""}
+            </div>
+            <div class="temp-update-box">
+              <div class="temp-update-icon">⏱</div>
+              <div>
+                <div class="temp-update-label">更新时间</div>
+                <div class="temp-update-time">${item.updateTime || "—"}</div>
+              </div>
+            </div>
+          </div>
+          <div class="vix-explain">${item.explain}</div>
+          <div class="vix-scale-bar">${scaleHtml}</div>
+          <div class="vix-scale-labels">${labelsHtml}</div>
+          <div class="vix-current-state">
+            <span class="vix-state-emoji">${active.emoji}</span>
+            <span class="vix-state-text">当前状态：<strong style="color:${active.color}">${active.text}</strong></span>
+          </div>
+          <div class="vix-history">
+            <span class="vix-history-icon">📉</span>
+            <span>${item.historyNote}</span>
+          </div>
+        </div>
+        <div class="temp-card-footer">
+          <span>⏱ 更新时间 ${item.updateTime || "—"}</span>
+          <span>整理：科技基金趋势</span>
+          <span>来源：${item.valueSource || "—"}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderIndexTempCard(item, value, changeStr, valueLabel) {
+    const pct = item.percentiles || {};
+    const p1y = pct["1y"] != null ? pct["1y"] : 0;
+    const p5y = pct["5y"] != null ? pct["5y"] : 0;
+    const p10y = pct["10y"] != null ? pct["10y"] : 0;
+    const d = item.drawdown || {};
+
+    const percentileHtml = [
+      { key: "1y", label: "过去1年", val: p1y },
+      { key: "5y", label: "过去5年", val: p5y },
+      { key: "10y", label: "过去10年", val: p10y }
+    ]
+      .map((p) => `
+        <div class="percentile-item">
+          <div class="percentile-bar-bg">
+            <div class="percentile-bar-fill" style="width:${p.val}%;"></div>
+          </div>
+          <div class="percentile-value">${p.val}%</div>
+          <div class="percentile-label">处于${p.label}的位置</div>
+        </div>
+      `)
+      .join("");
+
+    return `
+      <div class="temp-card">
+        <div class="temp-card-header">
+          <div>
+            <h3 class="temp-card-title">${item.title}</h3>
+            <p class="temp-card-subtitle">${item.subtitle}</p>
+          </div>
+        </div>
+        <div class="temp-card-body">
+          <div class="temp-metric-row">
+            <div class="temp-metric-box">
+              <div class="temp-metric-icon">📊</div>
+              <div class="temp-metric-label">最新PE</div>
+              <div class="temp-metric-value">${item.pe != null ? item.pe.toFixed(2) : "—"}</div>
+              <div class="temp-metric-sub">远期市盈率：${item.forwardPe != null ? item.forwardPe.toFixed(2) : "—"}</div>
+              <div class="temp-metric-sub">远期PE处于过去10年的${item.pePercentile10Y != null ? item.pePercentile10Y : "—"}%</div>
+            </div>
+            <div class="temp-metric-box">
+              <div class="temp-metric-icon">📈</div>
+              <div class="temp-metric-label">目前指数</div>
+              <div class="temp-metric-value ${changeStr && changeStr.includes("▲") ? "text-up" : changeStr && changeStr.includes("▼") ? "text-down" : ""}">${valueLabel || "—"}</div>
+              ${changeStr ? `<div class="temp-metric-change">${changeStr}</div>` : ""}
+              <div class="temp-update-label">更新时间 ${item.updateTime || "—"}</div>
+            </div>
+          </div>
+
+          <div class="percentile-section">
+            <div class="percentile-title">PE-TTM历史分位值对比</div>
+            <div class="percentile-grid">${percentileHtml}</div>
+          </div>
+
+          <div class="drawdown-row">
+            <div class="drawdown-box">
+              <div class="drawdown-icon">📉</div>
+              <div>
+                <div class="drawdown-label">当前大跌幅度</div>
+                <div class="drawdown-value">${d.current != null ? d.current.toFixed(2) + "%" : "—"}</div>
+                <div class="drawdown-status">（${d.status || "—"}）</div>
+              </div>
+            </div>
+            <div class="drawdown-box">
+              <div class="drawdown-icon">📋</div>
+              <div>
+                <div class="drawdown-label">参考上轮大跌幅度</div>
+                <div class="drawdown-value">${d.last != null ? d.last.toFixed(2) + "%" : "—"}</div>
+                <div class="drawdown-status">（${d.lastRange || "—"}）</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="temp-tips">
+            <div class="temp-tips-icon">💡</div>
+            <div>
+              <div class="temp-tips-title">估值是否合理请参考：</div>
+              <div class="temp-tips-list">历史分位值水平、恐慌指数（见 VIX 卡）</div>
+            </div>
+          </div>
+        </div>
+        <div class="temp-card-footer">
+          <span>⏱ 更新时间 ${item.updateTime || "—"}</span>
+          <span>整理：科技基金趋势</span>
+          <span>来源：${item.valueSource || "—"}${item.note ? " · " + item.note : ""}</span>
+        </div>
       </div>
     `;
   }

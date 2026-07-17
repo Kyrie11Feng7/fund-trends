@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
   <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
-  <link rel="stylesheet" href="css/style.css?v=20260718h">
+  <link rel="stylesheet" href="css/style.css?v=20260718i">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -24,6 +24,7 @@
       <div class="nav-links">
         <a href="#hero" class="nav-link active">市场概览</a>
         <a href="#funds" class="nav-link">基金总览</a>
+        <a href="#indexTemperature" class="nav-link">指数温度</a>
         <a href="#chart" class="nav-link">趋势分析</a>
         <a href="#news" class="nav-link">每日解读</a>
         <a href="#sentiment" class="nav-link">情绪指标</a>
@@ -65,7 +66,19 @@
     </div>
   </section>
 
-  <!-- ============ 基金总览 ============ -->
+  <!-- ============ 指数温度（信息图卡片） ============ -->
+  <section id="indexTemperature" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">指数温度</h2>
+        <p class="section-desc">用一张图读懂 VIX、纳斯达克100 与 标普500 的当下位置与估值温度</p>
+      </div>
+      <div class="index-temperature-grid" id="indexTemperatureGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+      <p class="index-temperature-source" id="indexTemperatureSource"></p>
+    </div>
+  </section>
   <section id="funds" class="section">
     <div class="container">
       <div class="section-header">
@@ -458,6 +471,7 @@
   <script src="js/market_snapshot.js?v=20260718a"></script>
   <script src="js/news_deep.js?v=20260718a"></script>
   <script src="js/holdings.js?v=20260718c"></script>
-  <script src="js/app.js?v=20260718h"></script>
+  <script src="js/index_temperature.js?v=20260718i"></script>
+  <script src="js/app.js?v=20260718i"></script>
 </body>
 </html>

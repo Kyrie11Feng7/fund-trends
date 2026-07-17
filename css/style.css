@@ -1812,3 +1812,384 @@ canvas {
   .window-summary-table th,
   .window-summary-table td { padding: 8px 10px; }
 }
+
+/* ============ 指数温度（信息图卡片）============ */
+.index-temperature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.index-temperature-source {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 16px 0 0;
+  line-height: 1.6;
+}
+
+.temp-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+.temp-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.temp-card-header {
+  margin-bottom: 18px;
+}
+.temp-card-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+.temp-card-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.temp-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.temp-metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.temp-metric-main,
+.temp-metric-box,
+.temp-update-box {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.temp-metric-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.temp-metric-value {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.temp-metric-change {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.temp-metric-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.temp-update-box {
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+}
+.temp-update-icon {
+  font-size: 24px;
+}
+.temp-update-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.temp-update-time {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-purple);
+  font-family: var(--font-mono);
+}
+
+.temp-metric-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+/* VIX 刻度条 */
+.vix-explain {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+}
+
+.vix-scale-bar {
+  display: flex;
+  height: 18px;
+  border-radius: 100px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.vix-segment {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 700;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.vix-segment-label {
+  z-index: 1;
+}
+
+.vix-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.vix-scale-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  text-align: center;
+}
+
+.vix-scale-emoji {
+  font-size: 22px;
+}
+
+.vix-scale-text {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.vix-current-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.vix-state-emoji {
+  font-size: 26px;
+}
+
+.vix-history {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  padding: 10px 12px;
+  background: rgba(255, 82, 82, 0.06);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-down);
+}
+.vix-history-icon {
+  font-size: 18px;
+}
+
+/* 历史分位 */
+.percentile-section {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.percentile-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.percentile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.percentile-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.percentile-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.percentile-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--color-up), var(--color-accent));
+}
+
+.percentile-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.percentile-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* 跌幅 */
+.drawdown-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.drawdown-box {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.drawdown-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.drawdown-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.drawdown-value {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-down);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.drawdown-status {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+/* 提示 */
+.temp-tips {
+  background: rgba(255, 200, 57, 0.08);
+  border: 1px solid rgba(255, 200, 57, 0.18);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.temp-tips-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.temp-tips-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.temp-tips-list {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* 卡片底部 */
+.temp-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .index-temperature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .temp-card:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .index-temperature-grid {
+    grid-template-columns: 1fr;
+  }
+  .temp-card:nth-child(3) {
+    grid-column: auto;
+  }
+  .temp-metric-row {
+    grid-template-columns: 1fr;
+  }
+  .percentile-grid {
+    grid-template-columns: 1fr;
+  }
+  .drawdown-row {
+    grid-template-columns: 1fr;
+  }
+}
