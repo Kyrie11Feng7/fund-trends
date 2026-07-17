@@ -958,6 +958,7 @@
               </div>
               <h3 class="news-title">${news.title}</h3>
               <p class="news-impact">${news.impact}</p>
+              <div class="news-source">📌 可核实来源：${news.source || "公开宏观数据库"}</div>
               <div class="news-footer">
                 <div class="news-tags">
                   ${news.tags.map((t) => `<span class="news-tag">#${t}</span>`).join("")}
