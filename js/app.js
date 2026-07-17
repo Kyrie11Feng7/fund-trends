@@ -25,6 +25,7 @@
   function init() {
     renderIndices();
     renderSentiment();
+    renderSentimentDetail();
     renderFundCards();
     renderFundSelector();
     renderMainChart();
@@ -99,6 +100,86 @@
         <span class="sentiment-value">${s.oilPrice}</span>
       </div>
     `;
+  }
+
+  // ============ 渲染市场情绪详解（数值注入） ============
+  function renderSentimentDetail() {
+    const s = window.MARKET_SENTIMENT;
+    if (!s) return;
+
+    setText("sentDataDate", s.dataDate || "—");
+    setText("sentDataSource", s.dataSource || "");
+
+    const fg = Number(s.fearGreedIndex);
+    setText("fgValue", fg);
+    setTag("fgTag", s.sentimentLabel || fgLabel(fg), fgTagColor(fg));
+    setText("fgDesc", fgDescText(fg));
+    const fgPtr = document.getElementById("fgPointer");
+    if (fgPtr) fgPtr.style.left = clampPct(fg, 0, 100) + "%";
+
+    const vx = Number(s.vix);
+    setText("vixValue", vx.toFixed(2));
+    setTag("vixTag", s.vixLabel || vixLabel(vx), vixTagColor(vx));
+    setText("vixDesc", vixDescText(vx));
+    const vxPtr = document.getElementById("vixPointer");
+    if (vxPtr) vxPtr.style.left = clampPct((vx / 40) * 100, 0, 100) + "%";
+  }
+
+  function setTag(id, text, colorClass) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = "sent-gauge-tag " + colorClass;
+  }
+  function fgTagColor(v) {
+    if (v < 25) return "tag-red";
+    if (v < 50) return "tag-orange";
+    if (v === 50) return "tag-neutral";
+    if (v < 75) return "tag-green-soft";
+    return "tag-green";
+  }
+  function vixTagColor(v) {
+    if (v < 15) return "tag-green";
+    if (v < 20) return "tag-neutral";
+    if (v < 30) return "tag-orange";
+    if (v < 40) return "tag-red";
+    return "tag-red-deep";
+  }
+
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+  function clampPct(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+  function fgLabel(v) {
+    if (v < 25) return "极度恐惧";
+    if (v < 50) return "恐惧";
+    if (v === 50) return "中性";
+    if (v < 75) return "贪婪";
+    return "极度贪婪";
+  }
+  function vixLabel(v) {
+    if (v < 15) return "低波动·平静";
+    if (v < 20) return "正常波动";
+    if (v < 30) return "波动上升";
+    if (v < 40) return "高度恐慌";
+    return "极端恐慌";
+  }
+  function fgDescText(v) {
+    if (v < 25) return "极度恐惧：市场抛售情绪浓厚，常对应非理性低估，逆向投资者关注布局机会。";
+    if (v < 50) return "恐惧：投资者避险情绪偏浓，但未见极端恐慌，需结合估值与基本面判断。";
+    if (v === 50) return "中性：多空均衡，市场无明显情绪偏向。";
+    if (v < 75) return "贪婪：风险偏好上升、追涨情绪升温，需警惕估值过热。";
+    return "极度贪婪：市场过度乐观，历史经验提示回撤风险升高。";
+  }
+  function vixDescText(v) {
+    if (v < 15) return "低波动：市场平静甚至自满，保护性期权成本低，但『自满』本身也是风险信号。";
+    if (v < 20) return "正常波动：市场情绪平稳，趋势运行健康。";
+    if (v < 30) return "波动上升：不确定性增加，关注潜在风险事件。";
+    if (v < 40) return "高度恐慌：系统性担忧升温，股指通常承压。";
+    return "极端恐慌：危机模式，历史上往往是极端情绪释放的末端。";
   }
 
   // ============ 渲染基金卡片 ============
@@ -233,8 +314,8 @@
 
     selector.innerHTML = FUNDS.map((fund, i) => {
       return `
-        <button class="fund-chip ${i === state.selectedFundIndex ? "active" : ""}" data-index="${i}">
-          <span class="fund-chip-dot" style="background: ${colors[i]}"></span>
+          <button class="fund-chip ${i === state.selectedFundIndex ? "active" : ""}" data-index="${i}">
+          <span class="fund-chip-dot" style="background: ${colors[i % colors.length]}"></span>
           ${fund.name}
         </button>
       `;
@@ -316,7 +397,7 @@
     const datasets = indices.map((fundIdx, i) => {
       const fund = FUNDS[fundIdx];
       const fundData = fund.data.slice(-state.chartRange);
-      const color = colors[fundIdx];
+      const color = colors[fundIdx % colors.length];
 
       // 归一化净值（对比模式下以起点为100）
       const baseNav = fundData[0].nav;
@@ -435,14 +516,22 @@
   function updateChart() {
     if (!state.mainChart) return;
 
-    state.mainChart.data = getChartData();
-    state.mainChart.options = getChartOptions();
-    state.mainChart.update("active");
+    // 仅更新数据 + 图例显示状态，避免整体替换 options 触发整图重绘/重排版
+    const cd = getChartData();
+    state.mainChart.data.labels = cd.labels;
+    state.mainChart.data.datasets = cd.datasets;
+    state.mainChart.options.plugins.legend.display = state.compareMode;
+    state.mainChart.update("none"); // 切换时禁用动画，瞬间完成
 
     updateChartInfo();
     updateBarChart();
-    renderDailyTable();
-    updateBarAndTableVisibility();
+    // 每日明细表 / 持仓 / 归因 DOM 较重，推迟到下一帧渲染，保证图表/柱形图切换即时可见
+    requestAnimationFrame(() => {
+      renderDailyTable();
+      updateBarAndTableVisibility();
+      renderHoldings();
+      renderAttribution();
+    });
   }
 
   // ============ 每日涨跌柱状图 ============
@@ -554,22 +643,115 @@
 
   function updateBarChart() {
     if (!state.barChart) return;
-    state.barChart.data = getBarChartData();
-    state.barChart.options = getBarChartOptions();
-    state.barChart.update("active");
+    // 仅更新数据，禁用更新动画，保证切换基金时柱形图即时刷新
+    const bd = getBarChartData();
+    state.barChart.data.labels = bd.labels;
+    state.barChart.data.datasets = bd.datasets;
+    state.barChart.update("none");
   }
 
   function updateBarAndTableVisibility() {
     const barSection = document.getElementById("barChartSection");
     const tableSection = document.getElementById("dailyTableSection");
+    const analysisExtra = document.getElementById("analysisExtra");
 
     if (state.compareMode) {
       barSection?.classList.add("hidden");
       tableSection?.classList.add("hidden");
+      analysisExtra?.classList.add("hidden");
     } else {
       barSection?.classList.remove("hidden");
       tableSection?.classList.remove("hidden");
+      analysisExtra?.classList.remove("hidden");
     }
+  }
+
+  // ============ 持仓结构 ============
+  function renderHoldings() {
+    const listEl = document.getElementById("holdingsList");
+    const asOfEl = document.getElementById("holdingsAsOf");
+    if (!listEl) return;
+
+    const fund = FUNDS[state.selectedFundIndex];
+    const h = (window.FUND_HOLDINGS && window.FUND_HOLDINGS[fund.code]) || null;
+
+    if (!h || !h.stocks || h.stocks.length === 0) {
+      if (asOfEl) asOfEl.textContent = "";
+      listEl.innerHTML = `<p class="analysis-empty">该基金为指数型ETF，持仓为跟踪指数全部成分股，前十大持仓未单独披露；净值变动请参考上方指数与净值走势。</p>`;
+      return;
+    }
+
+    if (asOfEl) asOfEl.textContent = `(截至 ${h.asOf})`;
+    const maxW = Math.max(...h.stocks.map((s) => s.weight));
+    listEl.innerHTML = h.stocks
+      .map((s) => {
+        const isOverseas = s.market > 1;
+        const tag = isOverseas
+          ? s.market === 105 || s.market === 106
+            ? "美股"
+            : "海外"
+          : s.market === 0
+          ? "沪"
+          : "深";
+        const barW = Math.max(2, (s.weight / maxW) * 100);
+        return `
+          <div class="holding-row">
+            <div class="holding-top">
+              <span class="holding-name">${s.name}</span>
+              <span class="holding-tag ${isOverseas ? "tag-overseas" : "tag-ashare"}">${tag}</span>
+              <span class="holding-weight">${s.weight.toFixed(2)}%</span>
+            </div>
+            <div class="holding-bar"><div class="holding-bar-fill" style="width:${barW}%"></div></div>
+          </div>`;
+      })
+      .join("");
+  }
+
+  // ============ 涨跌归因 ============
+  function driverItem(d, isUp) {
+    const sign = d.change >= 0 ? "+" : "";
+    const csign = d.contrib >= 0 ? "+" : "";
+    return `
+      <div class="driver-item ${isUp ? "up" : "down"}">
+        <span class="driver-name">${d.name}</span>
+        <span class="driver-detail">权重 ${d.weight.toFixed(2)}% · 个股 ${sign}${d.change.toFixed(2)}%</span>
+        <span class="driver-contrib">贡献 ${csign}${d.contrib.toFixed(2)}pp</span>
+      </div>`;
+  }
+
+  function renderAttribution() {
+    const body = document.getElementById("attributionBody");
+    if (!body) return;
+
+    const fund = FUNDS[state.selectedFundIndex];
+    const h = (window.FUND_HOLDINGS && window.FUND_HOLDINGS[fund.code]) || null;
+
+    if (!h || !h.attribution || !h.attribution.available) {
+      const note =
+        h && h.attribution ? h.attribution.note : "该基金前十大持仓未披露，暂无法做涨跌归因。";
+      body.innerHTML = `<p class="analysis-empty">${note}</p>`;
+      return;
+    }
+
+    const a = h.attribution;
+    const upHtml = a.up.length
+      ? a.up.map((d) => driverItem(d, true)).join("")
+      : `<div class="attr-empty">当日无显著上涨持仓</div>`;
+    const downHtml = a.down.length
+      ? a.down.map((d) => driverItem(d, false)).join("")
+      : `<div class="attr-empty">当日无显著下跌持仓</div>`;
+
+    body.innerHTML = `
+      <div class="attr-col">
+        <div class="attr-col-title up">▲ 上涨主因</div>
+        ${upHtml}
+      </div>
+      <div class="attr-col">
+        <div class="attr-col-title down">▼ 下跌主因</div>
+        ${downHtml}
+      </div>
+      <p class="attr-note">说明：基金净值日与个股交易日可能相差 1 个交易日，本归因基于最新披露持仓与对应个股最近交易日真实涨跌幅，属近似解释，非精确复算。</p>
+    `;
   }
 
   // ============ 每日明细数据表 ============
@@ -739,12 +921,17 @@
         ? NEWS_EVENTS
         : NEWS_EVENTS.filter((n) => n.category === state.newsCategory);
 
-    if (filtered.length === 0) {
+    // 按日期降序排列：最新新闻（日期最大）置顶
+    const sorted = filtered
+      .slice()
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+
+    if (sorted.length === 0) {
       timeline.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:40px">暂无该类别新闻</p>`;
       return;
     }
 
-    timeline.innerHTML = filtered
+    timeline.innerHTML = sorted
       .map((news, i) => {
         const impactDots = [1, 2, 3]
           .map((n) =>
@@ -863,9 +1050,15 @@
 
   // ============ 工具函数 ============
   function hexToRgba(hex, alpha) {
+    if (typeof hex !== "string" || hex.length < 7) {
+      return `rgba(0, 214, 143, ${alpha})`;
+    }
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
+    if ([r, g, b].some((v) => Number.isNaN(v))) {
+      return `rgba(0, 214, 143, ${alpha})`;
+    }
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
   <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260718d">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -26,6 +26,7 @@
         <a href="#funds" class="nav-link">基金总览</a>
         <a href="#chart" class="nav-link">趋势分析</a>
         <a href="#news" class="nav-link">每日解读</a>
+        <a href="#sentiment" class="nav-link">情绪指标</a>
       </div>
       <button class="nav-toggle" aria-label="菜单">
         <span></span><span></span><span></span>
@@ -39,7 +40,7 @@
       <div class="hero-content">
         <div class="hero-badge">
           <span class="pulse-dot"></span>
-          <span>实时数据更新中</span>
+          <span>真实净值数据 · 天天基金</span>
         </div>
         <h1 class="hero-title">全球科技基金<span class="gradient-text">趋势分析</span></h1>
         <p class="hero-subtitle">
@@ -52,6 +53,9 @@
       <div class="indices-grid" id="indicesGrid">
         <!-- 由 JS 动态渲染 -->
       </div>
+      <p style="font-size:12px;color:var(--text-muted);margin:10px 0 0;text-align:center">
+        全球指数与市场情绪为参考快照（示意），非实时行情；下方基金净值与涨跌幅均为天天基金真实历史数据。
+      </p>
 
       <!-- 市场情绪指标 -->
       <div class="sentiment-bar" id="sentimentBar">
@@ -138,6 +142,22 @@
             <!-- 由 JS 动态渲染 -->
           </div>
         </div>
+
+        <!-- 持仓结构与涨跌归因 -->
+        <div class="fund-analysis-extra" id="analysisExtra">
+          <div class="analysis-card">
+            <div class="analysis-card-head">
+              <h3>持仓结构 <span class="analysis-sub" id="holdingsAsOf"></span></h3>
+            </div>
+            <div class="holdings-list" id="holdingsList"></div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-head">
+              <h3>涨跌归因 <span class="analysis-sub">最新披露持仓 × 个股真实涨跌幅</span></h3>
+            </div>
+            <div class="attribution-body" id="attributionBody"></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -147,7 +167,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">每日深度解读</h2>
-        <p class="section-desc">世界新闻 x 基金涨跌 — 每一次波动都有迹可循</p>
+        <p class="section-desc">世界新闻 x 基金涨跌 — 新闻为编辑性市场背景解读，基金净值与涨跌幅均来自天天基金真实历史数据</p>
       </div>
 
       <!-- 筛选标签 -->
@@ -164,6 +184,196 @@
       <!-- 新闻时间线 -->
       <div class="news-timeline" id="newsTimeline">
         <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 市场情绪指标详解 ============ -->
+  <section id="sentiment" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">市场情绪指标详解</h2>
+        <p class="section-desc">恐惧贪婪指数 &amp; VIX 恐慌指数 —— 读懂市场情绪的"温度计"，帮你看清此刻是贪婪还是恐惧</p>
+      </div>
+
+      <p class="sentiment-data-note">
+        当前数值为<strong>真实行情快照</strong>（数据日期 <span id="sentDataDate"></span>）：<span id="sentDataSource"></span>。
+        以下为指标科普，所有历史极值均标注公开数据来源，<strong>不构成任何投资建议</strong>。
+      </p>
+
+      <!-- 概览卡：两大指数当前值 + 区间指针 -->
+      <div class="sentiment-overview">
+        <!-- 恐惧贪婪指数 -->
+        <div class="sent-gauge-card">
+          <div class="sent-gauge-head">
+            <h3>恐惧贪婪指数</h3>
+            <span class="sent-gauge-tag" id="fgTag">恐惧</span>
+          </div>
+          <div class="sent-gauge-value"><span id="fgValue">39</span><small>/100</small></div>
+          <div class="sent-gauge-bar">
+            <div class="sent-gauge-fill"></div>
+            <div class="sent-gauge-pointer" id="fgPointer"></div>
+          </div>
+          <div class="sent-gauge-scale">
+            <span>0·极度恐惧</span><span>50·中性</span><span>100·极度贪婪</span>
+          </div>
+          <p class="sent-gauge-desc" id="fgDesc"></p>
+        </div>
+        <!-- VIX -->
+        <div class="sent-gauge-card">
+          <div class="sent-gauge-head">
+            <h3>VIX 恐慌指数</h3>
+            <span class="sent-gauge-tag" id="vixTag">波动上升</span>
+          </div>
+          <div class="sent-gauge-value"><span id="vixValue">21.67</span></div>
+          <div class="sent-gauge-bar sent-gauge-bar-vix">
+            <div class="sent-gauge-fill"></div>
+            <div class="sent-gauge-pointer" id="vixPointer"></div>
+          </div>
+          <div class="sent-gauge-scale">
+            <span>0·平静</span><span>20·正常</span><span>40+·恐慌</span>
+          </div>
+          <p class="sent-gauge-desc" id="vixDesc"></p>
+        </div>
+      </div>
+
+      <!-- 一、恐惧贪婪指数 -->
+      <div class="sent-explain">
+        <h3 class="sent-explain-title">一、恐惧贪婪指数（Fear &amp; Greed Index）是什么？</h3>
+        <p>
+          恐惧贪婪指数由 <strong>CNN Business</strong> 编制，是一个把多种市场信号汇总成单一分数的二级市场情绪指标，取值 <strong>0–100</strong>：
+          <strong>0 = 极度恐惧</strong>，<strong>100 = 极度贪婪</strong>。它的底层逻辑来自巴菲特的名言——
+          "别人贪婪时我恐惧，别人恐惧时我贪婪"。它衡量的不是价格高低，而是<strong>市场参与者的集体心理位置</strong>。
+        </p>
+
+        <h4>0–100 怎么读？（CNN 官方区间划分）</h4>
+        <table class="sent-table">
+          <thead>
+            <tr><th>分数区间</th><th>状态</th><th>市场含义</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0 – 24</td><td>极度恐惧 Extreme Fear</td><td>抛售情绪浓厚，常对应非理性低估，逆向投资者的关注区</td></tr>
+            <tr><td>25 – 49</td><td>恐惧 Fear</td><td>避险情绪偏浓，但未见极端恐慌</td></tr>
+            <tr><td>50</td><td>中性 Neutral</td><td>多空均衡，无明显情绪偏向</td></tr>
+            <tr><td>51 – 74</td><td>贪婪 Greed</td><td>风险偏好上升、追涨情绪升温</td></tr>
+            <tr><td>75 – 100</td><td>极度贪婪 Extreme Greed</td><td>市场过度乐观，历史经验提示回撤风险升高</td></tr>
+          </tbody>
+        </table>
+
+        <h4>它由哪 7 个分项合成？（各分项等权平均）</h4>
+        <p class="sent-sub">每个分项先标准化到 0–100，再做等权平均得到综合指数，每日更新：</p>
+        <table class="sent-table">
+          <thead>
+            <tr><th>分项</th><th>衡量什么</th><th>恐惧 / 贪婪信号</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>① 股价动量</td><td>标普500 当前点位 vs 其 125 日移动均线</td><td>大幅低于均线→恐惧；远高于→贪婪</td></tr>
+            <tr><td>② 股价强度</td><td>纽交所创 52 周新高 vs 新低的股票数量差</td><td>新高股多→贪婪；新低股多→恐惧</td></tr>
+            <tr><td>③ 股价广度</td><td>基于涨跌成交量的 McClellan Oscillator</td><td>普涨→贪婪；普跌→恐惧</td></tr>
+            <tr><td>④ 看跌/看涨期权比</td><td>CBOE 看跌期权与看涨期权成交量之比</td><td>看跌比高→恐惧；低→贪婪</td></tr>
+            <tr><td>⑤ 市场波动率</td><td>VIX 及其近期变化</td><td>VIX 飙升→恐惧（与 VIX 联动）</td></tr>
+            <tr><td>⑥ 避险需求</td><td>质优股与国债过去 20 日回报差</td><td>股票跑输国债→恐惧（资金避险）</td></tr>
+            <tr><td>⑦ 垃圾债需求</td><td>投资级债(LQD)与垃圾债(HYG)利差</td><td>利差收窄→贪婪（风险偏好高）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>历史极端案例</h4>
+        <ul class="sent-list">
+          <li><strong>2020 年 3 月（新冠崩盘）：</strong>指数一度跌至 <strong>4</strong>（极度恐惧），同期 VIX 飙上 80+。</li>
+          <li><strong>2021 年初（牛市顶部）：</strong>指数多次站上 <strong>90</strong>（极度贪婪），市场乐观到极点。</li>
+          <li><strong>2022 年 10 月（美股底部区域）：</strong>指数在 <strong>20</strong> 附近徘徊，恐慌逐渐出清。</li>
+        </ul>
+
+        <h4>实战怎么用？</h4>
+        <ul class="sent-list">
+          <li><strong>作为逆向指标：</strong>极度恐惧（0–24）往往是中长线布局机会；极度贪婪（75–100）需警惕估值过热与回撤。</li>
+          <li>它只是"温度计"，<strong>不预测方向</strong>；极端值可能持续多日（如 2020.3 连续极度恐惧）。</li>
+          <li>务必配合 VIX、估值分位、基本面共同判断，不要单独依赖。</li>
+        </ul>
+      </div>
+
+      <!-- 二、VIX -->
+      <div class="sent-explain">
+        <h3 class="sent-explain-title">二、VIX 恐慌指数（波动率指数）是什么？</h3>
+        <p>
+          VIX 由 <strong>芝加哥期权交易所（CBOE）</strong> 编制，俗称"恐慌指数"。它衡量的是<strong>标普500 指数未来 30 天的隐含波动率（implied volatility）</strong>——
+          不是价格、也不是涨跌，而是市场对未来波动的"焦虑程度"。VIX 越高，说明投资者预期未来一个月市场越动荡。
+        </p>
+        <p class="sent-sub">
+          <strong>计算原理（不是直接观测，而是"反推"）：</strong>期权价格里蕴含了市场对标的未来波动的预期——波动率越高，期权越贵。
+          CBOE 选取到期日在 23–37 天的一篮子标普500 看涨/看跌期权，用<strong>方差互换（variance swap）的无模型方法</strong>反推出 30 日预期波动率，
+          年化后开方得到 VIX。口语化理解：<strong>VIX = 20，相当于市场预期未来一年标普500 年化波动约 20%</strong>。
+        </p>
+
+        <h4>怎么读 VIX？</h4>
+        <table class="sent-table">
+          <thead>
+            <tr><th>VIX 区间</th><th>状态</th><th>解读</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>&lt; 15</td><td>低波动·平静</td><td>市场平静甚至自满——"自满"本身也是风险信号</td></tr>
+            <tr><td>15 – 20</td><td>正常波动</td><td>情绪平稳，趋势运行健康</td></tr>
+            <tr><td>20 – 30</td><td>波动上升</td><td>不确定性增加，关注潜在风险事件</td></tr>
+            <tr><td>30 – 40</td><td>高度恐慌</td><td>系统性担忧升温，股指通常承压</td></tr>
+            <tr><td>&gt; 40</td><td>极端恐慌</td><td>危机模式（长期均值约 19–20）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>历史峰值回顾（数据来源：CBOE 公开历史）</h4>
+        <div class="vix-peak-grid">
+          <div class="vix-peak-card peak-high">
+            <div class="vix-peak-date">2008-10-27</div>
+            <div class="vix-peak-val">收盘 80.86</div>
+            <div class="vix-peak-note">金融危机，盘中最高 89.53（历史最高）</div>
+          </div>
+          <div class="vix-peak-card peak-high">
+            <div class="vix-peak-date">2020-03-16</div>
+            <div class="vix-peak-val">收盘 82.69</div>
+            <div class="vix-peak-note">新冠崩盘，盘中突破 80</div>
+          </div>
+          <div class="vix-peak-card peak-mid">
+            <div class="vix-peak-date">2024-08-05</div>
+            <div class="vix-peak-val">盘中 ≈ 38</div>
+            <div class="vix-peak-note">日元套息交易平仓，全球波动骤升</div>
+          </div>
+          <div class="vix-peak-card peak-low">
+            <div class="vix-peak-date">2017 年</div>
+            <div class="vix-peak-val">多次 &lt; 10</div>
+            <div class="vix-peak-note">最低约 9.51，市场极度平静</div>
+          </div>
+        </div>
+
+        <h4>实战怎么用？</h4>
+        <ul class="sent-list">
+          <li><strong>波动率晴雨表：</strong>VIX 与股指高度负相关，VIX 上升通常对应股指下跌。</li>
+          <li><strong>对冲参考：</strong>VIX 高时保护性看跌期权(put)更贵；VIX 低时买入保护成本更低。</li>
+          <li><strong>风险预警：</strong>VIX 突然跳升常是风险事件的前兆；持续低位+股指新高则趋势健康。</li>
+          <li>VIX 不适合直接当买卖信号，但可作为<strong>仓位与对冲的"温度计"</strong>。</li>
+        </ul>
+      </div>
+
+      <!-- 三、两者关系 -->
+      <div class="sent-explain">
+        <h3 class="sent-explain-title">三、两个指数如何结合看？</h3>
+        <p>
+          两者<strong>高度负相关</strong>——恐惧贪婪指数的第 5 个分项就是 VIX，所以 VIX 高时恐惧贪婪指数通常低。
+          但恐惧贪婪更全面（涵盖动量、期权比、垃圾债等），VIX 更纯粹地反映波动率。把它俩放在一起，能更快判断市场所处的情绪象限：
+        </p>
+        <table class="sent-table">
+          <thead>
+            <tr><th>恐惧贪婪指数</th><th>VIX</th><th>组合信号</th><th>应对思路</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>低（0–24）极度恐惧</td><td>高（&gt; 30）</td><td>极端恐惧</td><td>逆向布局区，关注分批买入机会</td></tr>
+            <tr><td>中（40–60）中性</td><td>中（15–25）</td><td>情绪中性</td><td>趋势跟随，无需过度反应</td></tr>
+            <tr><td>高（75–100）极度贪婪</td><td>低（&lt; 15）</td><td>极度贪婪</td><td>警惕过热回撤，考虑兑现/对冲</td></tr>
+            <tr><td>低（25–49）恐惧</td><td>中高（25–35）</td><td>谨慎偏恐惧</td><td>观察是否恶化，结合基本面定夺</td></tr>
+          </tbody>
+        </table>
+        <p class="sent-sub">
+          <strong>一句话总结：</strong>恐惧贪婪指数告诉你"市场现在有多贪/有多怕"，VIX 告诉你"未来一个月可能有多颠"。
+          两者都低（贪+平静）时要留份清醒，两者都高（怕+动荡）时反而可能藏着机会——但永远用它们做"情绪体检"，而不是唯一的买卖依据。
+        </p>
       </div>
     </div>
   </section>
@@ -205,7 +415,7 @@
       </div>
       <div class="footer-disclaimer">
         <p>
-          <strong>免责声明：</strong>本网站所展示的基金净值数据为基于真实市场走势特征的模拟数据，仅供演示和学习使用，不代表任何真实基金的实际情况。新闻事件分析基于公开信息整理，不构成任何投资建议。投资有风险，入市需谨慎。本网站不承担任何因使用本站内容而产生的投资损失责任。
+          <strong>数据说明与免责声明：</strong>本网站所展示的基金<strong>每日单位净值与涨跌幅均为真实历史数据</strong>，来源为天天基金（东方财富 eastmoney）公开净值接口，抓取于 2026-07-17，区间约为 2026-06-01 至 2026-07-17（QDII 基金净值为 T+1/T+2 披露，交易日数量可能少于 A 股基金）。新闻事件为<strong>编辑性市场背景解读</strong>，用于说明波动可能的宏观/行业动因，不构成对特定基金当日真实涨跌的断言，亦不构成任何投资建议。顶部<strong>全球指数与市场情绪为参考快照（示意），非实时行情</strong>。投资有风险，入市需谨慎；本网站不对因使用本站内容产生的任何投资损失负责。
         </p>
         <p class="copyright">© 2026 科技基金趋势分析 · Powered by WorkBuddy</p>
       </div>
@@ -219,7 +429,9 @@
     </svg>
   </button>
 
-  <script src="js/data.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/realdata.js?v=20260718a"></script>
+  <script src="js/data.js?v=20260718b"></script>
+  <script src="js/holdings.js?v=20260718c"></script>
+  <script src="js/app.js?v=20260718d"></script>
 </body>
 </html>
