@@ -626,11 +626,11 @@
     const range = max - min || 1;
 
     const isUp = navs[navs.length - 1] >= navs[0];
-    const color = isUp ? "#00d68f" : "#ff5252";
+    const color = isUp ? "#ff5252" : "#00d68f";
 
     // 渐变填充
     const gradient = ctx.createLinearGradient(0, 0, 0, h);
-    gradient.addColorStop(0, isUp ? "rgba(0,214,143,0.2)" : "rgba(255,82,82,0.2)");
+    gradient.addColorStop(0, isUp ? "rgba(255,82,82,0.2)" : "rgba(0,214,143,0.2)");
     gradient.addColorStop(1, "rgba(0,0,0,0)");
 
     // 路径
@@ -932,12 +932,12 @@
     const labels = data.map((d) => tickLabel(d, state.windowKey));
     const changes = data.map((d) => d.change);
 
-    // 颜色：涨绿跌红
+    // 颜色：涨红跌绿（中国市场惯例）
     const bgColors = changes.map((c) =>
-      c >= 0 ? "rgba(0, 214, 143, 0.7)" : "rgba(255, 82, 82, 0.7)"
+      c >= 0 ? "rgba(255, 82, 82, 0.7)" : "rgba(0, 214, 143, 0.7)"
     );
     const hoverColors = changes.map((c) =>
-      c >= 0 ? "rgba(0, 214, 143, 1)" : "rgba(255, 82, 82, 1)"
+      c >= 0 ? "rgba(255, 82, 82, 1)" : "rgba(0, 214, 143, 1)"
     );
 
     return {

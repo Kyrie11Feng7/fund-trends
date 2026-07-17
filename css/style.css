@@ -26,6 +26,11 @@
   --color-up-bg: rgba(0, 214, 143, 0.1);
   --color-down: #ff5252;
   --color-down-bg: rgba(255, 82, 82, 0.1);
+  /* 涨跌专用色：中国市场惯例「红涨绿跌」（与品牌主色 --color-up/--color-down 解耦） */
+  --color-gain: #ff5252;            /* 涨 = 红 */
+  --color-gain-bg: rgba(255, 82, 82, 0.1);
+  --color-loss: #00d68f;            /* 跌 = 绿 */
+  --color-loss-bg: rgba(0, 214, 143, 0.1);
   --color-neutral: #8b8fa3;
   --color-accent: #448aff;
   --color-gold: #ffc839;
@@ -336,10 +341,10 @@ canvas {
   text-align: center;
 }
 
-.text-up { color: var(--color-up); }
-.text-down { color: var(--color-down); }
-.bg-up { background: var(--color-up-bg); color: var(--color-up); }
-.bg-down { background: var(--color-down-bg); color: var(--color-down); }
+.text-up { color: var(--color-gain); }
+.text-down { color: var(--color-loss); }
+.bg-up { background: var(--color-gain-bg); color: var(--color-gain); }
+.bg-down { background: var(--color-loss-bg); color: var(--color-loss); }
 
 /* ============ 市场情绪条 ============ */
 .sentiment-bar {
@@ -461,7 +466,7 @@ canvas {
 }
 
 .fund-card.down::before {
-  background: var(--color-down);
+  background: var(--color-loss);
 }
 
 .fund-card-header {
@@ -520,13 +525,13 @@ canvas {
 }
 
 .fund-change.up {
-  background: var(--color-up-bg);
-  color: var(--color-up);
+  background: var(--color-gain-bg);
+  color: var(--color-gain);
 }
 
 .fund-change.down {
-  background: var(--color-down-bg);
-  color: var(--color-down);
+  background: var(--color-loss-bg);
+  color: var(--color-loss);
 }
 
 .fund-sparkline {
@@ -552,8 +557,8 @@ canvas {
   font-family: var(--font-mono);
 }
 
-.fund-period .up { color: var(--color-up); }
-.fund-period .down { color: var(--color-down); }
+.fund-period .up { color: var(--color-gain); }
+.fund-period .down { color: var(--color-loss); }
 
 .fund-manager {
   font-size: 12px;
@@ -800,11 +805,11 @@ canvas {
 }
 
 .daily-table .col-change.up {
-  color: var(--color-up);
+  color: var(--color-gain);
 }
 
 .daily-table .col-change.down {
-  color: var(--color-down);
+  color: var(--color-loss);
 }
 
 .daily-table .col-bar {
@@ -826,12 +831,12 @@ canvas {
 }
 
 .daily-table .change-bar-fill.up {
-  background: var(--color-up);
+  background: var(--color-gain);
   margin-left: 50%;
 }
 
 .daily-table .change-bar-fill.down {
-  background: var(--color-down);
+  background: var(--color-loss);
   margin-right: 50%;
 }
 
@@ -860,8 +865,8 @@ canvas {
   border-radius: 50%;
 }
 
-.daily-table .news-dot.positive { background: var(--color-up); }
-.daily-table .news-dot.negative { background: var(--color-down); }
+.daily-table .news-dot.positive { background: var(--color-gain); }
+.daily-table .news-dot.negative { background: var(--color-loss); }
 
 /* ============ 新闻筛选 ============ */
 .news-filters {
@@ -1463,8 +1468,8 @@ canvas {
   gap: 6px;
 }
 
-.attr-col-title.up { color: var(--color-up); }
-.attr-col-title.down { color: #ff5252; }
+.attr-col-title.up { color: var(--color-gain); }
+.attr-col-title.down { color: var(--color-loss); }
 
 .driver-item {
   display: flex;
@@ -1478,8 +1483,8 @@ canvas {
   font-size: 12.5px;
 }
 
-.driver-item.up { border-left-color: var(--color-up); }
-.driver-item.down { border-left-color: #ff5252; }
+.driver-item.up { border-left-color: var(--color-gain); }
+.driver-item.down { border-left-color: var(--color-loss); }
 
 .driver-name {
   font-weight: 600;
@@ -1504,8 +1509,8 @@ canvas {
   text-align: right;
 }
 
-.driver-item.up .driver-contrib { color: var(--color-up); }
-.driver-item.down .driver-contrib { color: #ff5252; }
+.driver-item.up .driver-contrib { color: var(--color-gain); }
+.driver-item.down .driver-contrib { color: var(--color-loss); }
 
 .attr-empty {
   font-size: 12.5px;
