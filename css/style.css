@@ -322,6 +322,20 @@ canvas {
   font-weight: 600;
 }
 
+.index-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.indices-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 10px 0 0;
+  text-align: center;
+}
+
 .text-up { color: var(--color-up); }
 .text-down { color: var(--color-down); }
 .bg-up { background: var(--color-up-bg); color: var(--color-up); }

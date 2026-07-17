@@ -138,18 +138,46 @@
     const grid = document.getElementById("indicesGrid");
     if (!grid) return;
 
-    grid.innerHTML = GLOBAL_INDICES.map((idx) => {
-      const isUp = idx.change >= 0;
-      return `
-        <div class="index-card">
-          <div class="index-name">${idx.name}</div>
-          <div class="index-value">${idx.value}</div>
-          <div class="index-change ${isUp ? "text-up" : "text-down"}">
-            ${isUp ? "▲" : "▼"} ${Math.abs(idx.change).toFixed(2)}%
+    const snap = window.MARKET_SNAPSHOT;
+    const dateEl = document.getElementById("indicesDate");
+    if (dateEl && snap && snap.date) {
+      dateEl.textContent =
+        "行情快照数据日期：" + snap.date + (snap.source ? " · " + snap.source : "");
+    }
+
+    // 优先使用 neodata 真实行情快照；异常时回退到静态数据
+    const items =
+      snap && snap.indices && snap.indices.length ? snap.indices : GLOBAL_INDICES;
+
+    grid.innerHTML = items
+      .map((idx) => {
+        const hasChange = idx.change != null && !isNaN(idx.change);
+        const isUp = hasChange && idx.change >= 0;
+        const changeTxt = hasChange
+          ? `${isUp ? "▲" : "▼"} ${Math.abs(idx.change).toFixed(2)}%`
+          : "—";
+        const unit = idx.unit ? (idx.unit === "%" ? "" : " " + idx.unit) : "";
+        const valueTxt =
+          idx.value != null
+            ? Number(idx.value).toLocaleString("en-US", {
+                maximumFractionDigits: 2,
+              }) + unit
+            : "—";
+        const extra = idx.extra
+          ? `<div class="index-sub">5日 ${
+              idx.extra.w5 >= 0 ? "+" : ""
+            }${idx.extra.w5}% · YTD +${idx.extra.ytd}%</div>`
+          : "";
+        return `
+          <div class="index-card">
+            <div class="index-name">${idx.name}</div>
+            <div class="index-value">${valueTxt}</div>
+            <div class="index-change ${hasChange ? (isUp ? "text-up" : "text-down") : ""}">${changeTxt}</div>
+            ${extra}
           </div>
-        </div>
-      `;
-    }).join("");
+        `;
+      })
+      .join("");
   }
 
   // ============ 渲染市场情绪 ============
@@ -158,6 +186,29 @@
     if (!bar) return;
 
     const s = MARKET_SENTIMENT;
+    const snap = window.MARKET_SNAPSHOT;
+    const snapIdx = (k) =>
+      snap && snap.indices ? snap.indices.find((i) => i.key === k) : null;
+
+    const tenY = snapIdx("us10y");
+    const gold = snapIdx("gold");
+    const oil = snapIdx("oil");
+
+    const tenYearTxt =
+      tenY && tenY.value != null ? tenY.value.toFixed(2) + "%" : s.tenYearYield;
+    const goldTxt =
+      gold && gold.value != null
+        ? "$" +
+          Number(gold.value).toLocaleString("en-US", { maximumFractionDigits: 2 }) +
+          "/oz"
+        : s.goldPrice;
+    const oilTxt =
+      oil && oil.value != null
+        ? "$" +
+          Number(oil.value).toLocaleString("en-US", { maximumFractionDigits: 2 }) +
+          "/bbl"
+        : s.oilPrice;
+
     const sentimentColor =
       s.fearGreedIndex >= 70
         ? "text-up"
@@ -178,7 +229,7 @@
       </div>
       <div class="sentiment-item">
         <span class="sentiment-label">10年美债收益率</span>
-        <span class="sentiment-value">${s.tenYearYield}</span>
+        <span class="sentiment-value">${tenYearTxt}</span>
       </div>
       <div class="sentiment-item">
         <span class="sentiment-label">美元指数</span>
@@ -186,11 +237,11 @@
       </div>
       <div class="sentiment-item">
         <span class="sentiment-label">黄金</span>
-        <span class="sentiment-value">${s.goldPrice}</span>
+        <span class="sentiment-value">${goldTxt}</span>
       </div>
       <div class="sentiment-item">
         <span class="sentiment-label">原油</span>
-        <span class="sentiment-value">${s.oilPrice}</span>
+        <span class="sentiment-value">${oilTxt}</span>
       </div>
     `;
   }
@@ -839,31 +890,63 @@
     const fund = FUNDS[state.selectedFundIndex];
     const h = (window.FUND_HOLDINGS && window.FUND_HOLDINGS[fund.code]) || null;
 
-    if (!h || !h.attribution || !h.attribution.available) {
+    // ETF / 未披露持仓：直接说明
+    if (!h || !h.stocks || !h.stocks.length) {
+      body.innerHTML = `<p class="analysis-empty">${
+        h && h.attribution && h.attribution.note
+          ? h.attribution.note
+          : "该基金为指数型ETF，持仓为跟踪指数全部成分股，前十大持仓未单独披露；净值变动请参考上方指数与净值走势。"
+      }</p>`;
+      return;
+    }
+
+    // 基于真实个股涨跌幅（neodata）动态计算 A股持仓贡献
+    const sc = (window.MARKET_SNAPSHOT && window.MARKET_SNAPSHOT.stockChanges) || {};
+    const up = [];
+    const down = [];
+    h.stocks.forEach((s) => {
+      const isAshare = s.market === 0 || s.market === 1;
+      if (isAshare && sc[s.code] != null) {
+        const change = sc[s.code];
+        const contrib = (s.weight * change) / 100;
+        const item = { name: s.name, weight: s.weight, change: change, contrib: contrib };
+        if (change >= 0) up.push(item);
+        else down.push(item);
+      }
+    });
+    up.sort((a, b) => b.contrib - a.contrib);
+    down.sort((a, b) => a.contrib - b.contrib);
+
+    // 纯海外持仓（无 A股个股行情覆盖）：保留原说明
+    if (!up.length && !down.length) {
       const note =
-        h && h.attribution ? h.attribution.note : "该基金前十大持仓未披露，暂无法做涨跌归因。";
+        h.attribution && h.attribution.note
+          ? h.attribution.note
+          : "该基金持仓以美股/港股为主，个股当日涨跌幅未在A股行情接口覆盖，暂无法做成分归因。";
       body.innerHTML = `<p class="analysis-empty">${note}</p>`;
       return;
     }
 
-    const a = h.attribution;
-    const upHtml = a.up.length
-      ? a.up.map((d) => driverItem(d, true)).join("")
+    const upHtml = up.length
+      ? up.map((d) => driverItem(d, true)).join("")
       : `<div class="attr-empty">当日无显著上涨持仓</div>`;
-    const downHtml = a.down.length
-      ? a.down.map((d) => driverItem(d, false)).join("")
+    const downHtml = down.length
+      ? down.map((d) => driverItem(d, false)).join("")
       : `<div class="attr-empty">当日无显著下跌持仓</div>`;
 
+    const snapDate = window.MARKET_SNAPSHOT && window.MARKET_SNAPSHOT.date;
     body.innerHTML = `
       <div class="attr-col">
-        <div class="attr-col-title up">▲ 上涨主因</div>
+        <div class="attr-col-title up">▲ 上涨主因（A股持仓）</div>
         ${upHtml}
       </div>
       <div class="attr-col">
-        <div class="attr-col-title down">▼ 下跌主因</div>
+        <div class="attr-col-title down">▼ 下跌主因（A股持仓）</div>
         ${downHtml}
       </div>
-      <p class="attr-note">说明：基金净值日与个股交易日可能相差 1 个交易日，本归因基于最新披露持仓与对应个股最近交易日真实涨跌幅，属近似解释，非精确复算。</p>
+      <p class="attr-note">归因基于「最新披露持仓（截至 ${h.asOf || "—"}）」与对应 A股个股真实涨跌幅（数据日期 ${
+        snapDate || "—"
+      }，来源 neodata），按 权重 × 涨跌幅 = 贡献(pp) 计算；美股/港股持仓因个股行情未在A股接口覆盖，未计入。基金净值日与个股交易日可能相差 1 个交易日，属近似解释，非精确复算。</p>
     `;
   }
 
@@ -1114,7 +1197,7 @@
     state.comparedFunds = new Set([idx]);
     if (typeof updateFundSelector === "function") updateFundSelector();
     if (typeof updateChart === "function") updateChart();
-    const sec = document.getElementById("trend");
+    const sec = document.getElementById("chart");
     if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

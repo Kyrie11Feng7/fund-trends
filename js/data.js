@@ -323,14 +323,15 @@ FUNDS.forEach((fund) => {
   fund.latestNav = latest.nav;
   fund.latestDate = latest.date;
   fund.latestChange = latest.change;
-  // 近30日收益（取最后最多30个交易日）
+  // 近30日收益（取最后最多30个交易日），用复权净值 acc 计算，口径与趋势分析一致
+  const val = (d) => (d.acc != null ? d.acc : d.nav);
   const n = Math.min(30, data.length);
   const past = data[data.length - n];
   fund.periodReturn = parseFloat(
-    (((latest.nav - past.nav) / past.nav) * 100).toFixed(2)
+    (((val(latest) - val(past)) / val(past)) * 100).toFixed(2)
   );
-  fund.maxNav = Math.max.apply(null, data.map((d) => d.nav));
-  fund.minNav = Math.min.apply(null, data.map((d) => d.nav));
+  fund.maxNav = Math.max.apply(null, data.map((d) => val(d)));
+  fund.minNav = Math.min.apply(null, data.map((d) => val(d)));
   fund.avgChange = parseFloat(
     (data.reduce((s, d) => s + d.change, 0) / data.length).toFixed(2)
   );
