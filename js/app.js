@@ -113,11 +113,84 @@
   // ============ DOM Ready ============
   document.addEventListener("DOMContentLoaded", init);
 
+  let etfBoardRegion = "us";
+  let etfBoardSortKey = "size";
+  let etfBoardSortDir = -1;
+
+  function renderEtfBoard() {
+    const board = window.ETF_BOARD;
+    const wrap = document.getElementById("etfTableWrap");
+    const tabs = document.getElementById("etfTabs");
+    if (!board || !wrap || !tabs) return;
+    const srcEl = document.getElementById("etfBoardSource");
+    if (srcEl) {
+      srcEl.textContent = "数据来源：" + (board.source || "腾讯自选股") + " ｜ 数据日期：" + (board.date || "") + " ｜ 规模=最新规模；近20日=区间涨跌%；估值百分位=PE_TTM历史分位（越低越便宜）；溢折率=月均折溢价%（负为折价）";
+    }
+    const regions = [
+      { key: "us", label: "美股科技 ETF" },
+      { key: "hk", label: "港股科技 ETF" },
+      { key: "stib", label: "科创板 ETF" }
+    ].filter(function (r) { return board[r.key] && board[r.key].length; });
+    tabs.innerHTML = regions.map(function (r) {
+      return '<button class="etf-tab ' + (r.key === etfBoardRegion ? "active" : "") + '" data-region="' + r.key + '">' + r.label + '<span class="etf-tab-count">' + board[r.key].length + "</span></button>";
+    }).join("");
+    tabs.querySelectorAll(".etf-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        etfBoardRegion = btn.dataset.region;
+        renderEtfBoard();
+      });
+    });
+    const rows = (board[etfBoardRegion] || []).slice().sort(function (a, b) {
+      const va = a[etfBoardSortKey] != null ? a[etfBoardSortKey] : -Infinity;
+      const vb = b[etfBoardSortKey] != null ? b[etfBoardSortKey] : -Infinity;
+      return (va - vb) * etfBoardSortDir;
+    });
+    const fmtSize = function (v) { return v == null ? "—" : (v / 1e8).toLocaleString("zh-CN", { maximumFractionDigits: 1 }) + "亿"; };
+    const fmtSigned = function (v) { return v == null ? "—" : (v >= 0 ? "+" : "") + v.toFixed(2) + "%"; };
+    const cols = [
+      { key: "size", label: "规模" },
+      { key: "chg20d", label: "近20日" },
+      { key: "valPct", label: "估值百分位" },
+      { key: "disc", label: "溢折率" }
+    ];
+    const arrow = function (k) { return k === etfBoardSortKey ? (etfBoardSortDir < 0 ? " ↓" : " ↑") : ""; };
+    const head = '<tr><th class="etf-rank">#</th><th>代码</th><th>名称</th>' +
+      cols.map(function (c) { return '<th class="etf-sortable ' + (c.key === etfBoardSortKey ? "active" : "") + '" data-key="' + c.key + '">' + c.label + arrow(c.key) + "</th>"; }).join("") + "</tr>";
+    const body = rows.map(function (r, i) {
+      const chgCls = r.chg20d == null ? "" : (r.chg20d >= 0 ? "text-up" : "text-down");
+      const discCls = r.disc == null ? "" : (r.disc >= 0 ? "etf-disc-premium" : "etf-disc-discount");
+      let valStyle = "";
+      if (r.valPct != null) {
+        if (r.valPct <= 20) valStyle = "color:var(--color-loss)";
+        else if (r.valPct >= 80) valStyle = "color:var(--color-gain)";
+      }
+      return '<tr>' +
+        '<td class="etf-rank">' + (i + 1) + "</td>" +
+        '<td class="etf-code">' + r.code + "</td>" +
+        '<td class="etf-name">' + r.name + "</td>" +
+        '<td class="etf-num">' + fmtSize(r.size) + "</td>" +
+        '<td class="etf-num ' + chgCls + '">' + fmtSigned(r.chg20d) + "</td>" +
+        '<td class="etf-num" style="' + valStyle + '">' + (r.valPct == null ? "—" : r.valPct.toFixed(0)) + "</td>" +
+        '<td class="etf-num ' + discCls + '">' + fmtSigned(r.disc) + "</td>" +
+        "</tr>";
+    }).join("");
+    wrap.innerHTML = '<div class="etf-table-scroll"><table class="etf-table"><thead>' + head + "</thead><tbody>" + body + "</tbody></table></div>";
+    wrap.querySelectorAll(".etf-sortable").forEach(function (th) {
+      th.addEventListener("click", function () {
+        const k = th.dataset.key;
+        if (etfBoardSortKey === k) etfBoardSortDir *= -1;
+        else { etfBoardSortKey = k; etfBoardSortDir = -1; }
+        renderEtfBoard();
+      });
+    });
+  }
+
   function init() {
     renderIndices();
     renderSentiment();
     renderIndexTemperature();
     renderSentimentDetail();
+    renderEtfBoard();
     renderFundCards();
     renderFundSelector();
     renderMainChart();
