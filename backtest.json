@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "note": "DEMO 回测结果：基于 fund_nav.json 的示意序列，按信号规则模拟「超卖待反弹」买入持有 N 日的策略表现。接入真实数据后由 pipeline.js 重算。",
+    "strategy": "当短期信号为「超卖待反弹」(RSI6<35 且 close<=bollLower) 时，于次日买入并持有 5 个交易日，比较持有期收益是否为正。",
+    "asOf": "2026-07-17"
+  },
+  "summary": {
+    "signalName": "超卖待反弹",
+    "holdDays": 5,
+    "sampleSignals": 18,
+    "winRate": 0.611,
+    "avgReturnPct": 1.84,
+    "bestReturnPct": 6.32,
+    "worstReturnPct": -3.15,
+    "benchmarkWinRate": 0.527
+  },
+  "byGroup": [
+    { "group": "G1", "name": "纳指100/美股成长", "sampleSignals": 4, "winRate": 0.75, "avgReturnPct": 2.31 },
+    { "group": "G2", "name": "信息科技/半导体/AI", "sampleSignals": 7, "winRate": 0.571, "avgReturnPct": 1.42 },
+    { "group": "G3", "name": "全球新能源车", "sampleSignals": 2, "winRate": 0.5, "avgReturnPct": 0.88 },
+    { "group": "G4", "name": "A股科创主题", "sampleSignals": 1, "winRate": 1.0, "avgReturnPct": 3.05 },
+    { "group": "G5", "name": "新兴/亚洲/混合", "sampleSignals": 4, "winRate": 0.625, "avgReturnPct": 1.69 }
+  ],
+  "disclaimer": "回测为技术信号的历史模拟，含幸存偏差与过拟合风险，非未来收益保证，不构成投资建议。"
+}
