@@ -479,7 +479,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">信号回测参考</h2>
-        <p class="section-desc">对「短期超卖待反弹」信号的模拟回测（示例数据，非实盘业绩）。用于检验信号在历史样本上的命中率与平均收益，帮助理解信号有效性边界。</p>
+        <p class="section-desc">基于各基金<b>真实历史净值</b>的「短期信号前瞻验证」回测：逐日判定信号标签，统计该标签出现后未来 5 个交易日的前瞻收益，用于检验信号有效性边界（非实盘业绩，含过拟合/幸存偏差风险）。</p>
       </div>
       <div class="backtest-overview" id="backtestOverview">
         <!-- 由 JS 动态渲染 -->
@@ -488,7 +488,11 @@
         <canvas id="backtestChart"></canvas>
       </div>
       <div class="backtest-table-wrap" id="backtestTableWrap">
-        <!-- 由 JS 动态渲染 -->
+        <!-- 由 JS 动态渲染：分组命中率 -->
+      </div>
+      <h3 class="backtest-subtitle">各信号标签的前瞻收益（真实样本）</h3>
+      <div class="backtest-table-wrap" id="backtestSignalTable">
+        <!-- 由 JS 动态渲染：信号→前瞻收益 -->
       </div>
     </div>
   </section>
