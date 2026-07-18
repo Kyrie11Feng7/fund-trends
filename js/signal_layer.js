@@ -50,7 +50,13 @@
     '.signal-funds{min-width:1000px;}',
     '.sf-spark{width:96px;height:30px;display:block;}',
     '.sf-stat{font-weight:600;font-variant-numeric:tabular-nums;}',
-    '.sf-name-cell{display:flex;align-items:center;gap:8px;}'
+    '.sf-name-cell{display:flex;align-items:center;gap:8px;}',
+    /* 信号/回测解释表格 */
+    '.signal-legend-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;color:var(--text-secondary);}',
+    '.signal-legend-table th,.signal-legend-table td{padding:10px 12px;text-align:left;border:1px solid var(--border-color);}',
+    '.signal-legend-table th{background:var(--bg-elevated);color:var(--text-primary);font-weight:600;}',
+    '.signal-legend-table td b{font-weight:600;}',
+    '.backtest-explain{margin:0 0 18px;}'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -60,17 +66,18 @@
     try { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#8b8fa3'; }
     catch (e) { return '#8b8fa3'; }
   }
-  // 分数→颜色：高=绿(偏多/健康) 低=红(偏空/风险) 中=黄/灰
+  // 分数→颜色：中国市场惯例「涨红跌绿」
+  // 高=红(偏多/积极) 低=绿(偏空/风险) 中=黄/灰
   function scoreColor(score) {
-    if (score >= 70) return getCss('--color-up');
+    if (score >= 70) return getCss('--color-gain');
     if (score >= 55) return getCss('--color-gold');
     if (score >= 40) return getCss('--color-neutral');
     if (score >= 30) return '#ff8f40';
-    return getCss('--color-down');
+    return getCss('--color-loss');
   }
   function riskColor(r) {
-    if (r === '高') return getCss('--color-down');
-    if (r === '中低') return getCss('--color-up');
+    if (r === '高') return getCss('--color-gain');     // 高风险=红
+    if (r === '中低') return getCss('--color-loss');   // 中低风险=绿
     if (r === '中') return getCss('--color-gold');
     return getCss('--color-neutral');
   }
@@ -117,7 +124,7 @@
       return x.toFixed(1) + ',' + y.toFixed(1);
     });
     var up = data[n - 1] >= data[0];
-    var col = up ? getCss('--color-up') : getCss('--color-down');
+    var col = up ? getCss('--color-gain') : getCss('--color-loss');  // 涨红跌绿
     return '<svg class="sf-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true">' +
       '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linejoin="round"/></svg>';
   }
@@ -128,13 +135,12 @@
   }
   function retColor(v) {
     if (v == null) return getCss('--text-muted');
-    return v >= 0 ? getCss('--color-up') : getCss('--color-down');
+    return v >= 0 ? getCss('--color-gain') : getCss('--color-loss');   // 涨红跌绿
   }
   function ddColor(v) {
     if (v == null) return getCss('--text-muted');
-    if (v <= -25) return getCss('--color-down');
-    if (v <= -15) return getCss('--color-gold');
-    return getCss('--color-up');
+    // 最大回撤为负(亏损)=绿；正值极少，按红处理
+    return v >= 0 ? getCss('--color-gain') : getCss('--color-loss');
   }
 
   /* ---------- 渲染：25 只信号表（含真实风险字段 + 走势） ---------- */
@@ -179,13 +185,17 @@
     }
   }
 
-  function initMethodology() {
-    var btn = $('methodologyToggle'), panel = $('methodologyPanel');
+  function initExplainToggles() {
+    initToggle('methodologyToggle', 'methodologyPanel', '数据口径与方法论');
+    initToggle('backtestExplainToggle', 'backtestExplainPanel', '回测含义说明');
+  }
+  function initToggle(btnId, panelId, label) {
+    var btn = $(btnId), panel = $(panelId);
     if (!btn || !panel) return;
     btn.addEventListener('click', function () {
       var open = panel.hasAttribute('hidden');
-      if (open) { panel.removeAttribute('hidden'); btn.setAttribute('aria-expanded', 'true'); btn.textContent = '收起数据口径与方法论 ▴'; }
-      else { panel.setAttribute('hidden', ''); btn.setAttribute('aria-expanded', 'false'); btn.textContent = '查看数据口径与方法论 ▾'; }
+      if (open) { panel.removeAttribute('hidden'); btn.setAttribute('aria-expanded', 'true'); btn.textContent = '收起' + label + ' ▴'; }
+      else { panel.setAttribute('hidden', ''); btn.setAttribute('aria-expanded', 'false'); btn.textContent = label + ' ▾'; }
     });
   }
 
@@ -201,7 +211,7 @@
           '前瞻窗口 <b>' + s.holdDays + '日</b>' +
           '样本 <b>' + s.sampleSignals + '</b>' +
           '命中率 <b>' + (s.winRate * 100).toFixed(1) + '%</b>' +
-          '平均收益 <b style="color:' + getCss('--color-up') + '">' + (s.avgReturnPct >= 0 ? '+' : '') + s.avgReturnPct + '%</b>' +
+          '平均收益 <b style="color:' + (s.avgReturnPct >= 0 ? getCss('--color-gain') : getCss('--color-loss')) + '">' + (s.avgReturnPct >= 0 ? '+' : '') + s.avgReturnPct + '%</b>' +
           '基准命中 <b>' + (s.benchmarkWinRate * 100).toFixed(1) + '%</b>' +
           '</div>';
       }
@@ -213,7 +223,7 @@
             '<td><span class="sf-group">' + esc(r.group) + '</span></td>' +
             '<td>' + esc(r.name) + '</td>' +
             '<td style="color:' + scoreColor(r.winRate * 100) + '">' + (r.winRate * 100).toFixed(1) + '%</td>' +
-            '<td style="color:' + (r.avgReturnPct >= 0 ? getCss('--color-up') : getCss('--color-down')) + '">' + ret + '</td>' +
+            '<td style="color:' + (r.avgReturnPct >= 0 ? getCss('--color-gain') : getCss('--color-loss')) + '">' + ret + '</td>' +
             '<td>' + r.sampleSignals + '</td>' +
             '</tr>';
         }).join('');
@@ -228,7 +238,7 @@
             '<td>' + esc(r.signal) + '</td>' +
             '<td>' + r.count + '</td>' +
             '<td style="color:' + scoreColor(r.winRate * 100) + '">' + (r.winRate * 100).toFixed(1) + '%</td>' +
-            '<td style="color:' + (r.avgFwdReturnPct >= 0 ? getCss('--color-up') : getCss('--color-down')) + '">' + ret + '</td>' +
+            '<td style="color:' + (r.avgFwdReturnPct >= 0 ? getCss('--color-gain') : getCss('--color-loss')) + '">' + ret + '</td>' +
             '</tr>';
         }).join('');
         stw.innerHTML = '<table class="signal-table"><thead><tr><th>信号标签</th><th>出现次数</th><th>5日胜率</th><th>平均前瞻5日收益</th></tr></thead><tbody>' + srows + '</tbody></table>';
@@ -264,7 +274,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initSignals();
-    initMethodology();
+    initExplainToggles();
     initBacktest();
   });
 })();
