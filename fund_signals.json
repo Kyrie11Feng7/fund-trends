@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "asOf": "2026-07-17",
+    "source": "westock-data 美股底层指数 + A股可交易代理技术面",
+    "scale": "shortScore/midScore 0-100，越高越偏多/越健康",
+    "disclaimer": "信号为技术面趋势标签，非买卖建议"
+  },
+  "groups": {
+    "G1": { "name": "纳指100/美股成长", "driver": "QQQ", "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低" },
+    "G2": { "name": "信息科技/半导体/AI", "driver": "XLK+SOXX", "shortLabel": "分化·超卖(半导体最弱)", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高" },
+    "G3": { "name": "全球新能源车", "driver": "海外NEV指数", "shortLabel": "弱势", "shortScore": 30, "midLabel": "中性偏弱", "midScore": 55, "risk": "中" },
+    "G4": { "name": "A股科创主题", "driver": "科创板/创业板", "shortLabel": "相对走强(独立)", "shortScore": 62, "midLabel": "政策驱动独立行情", "midScore": 72, "risk": "中" },
+    "G5": { "name": "新兴/亚洲/混合", "driver": "MSCI EM/ACWI", "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中" }
+  },
+  "funds": [
+    { "code": "513100", "name": "纳斯达克100ETF", "group": "G1", "measured": true, "shortLabel": "超卖待反弹", "shortScore": 40, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "实测：RSI6=26.3贴布林下轨，MA120/250上方" },
+    { "code": "017436", "name": "华宝纳斯达克精选", "group": "G1", "measured": false, "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "继承G1(QQQ)" },
+    { "code": "006555", "name": "浦银安盛全球智能科技", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2(XLK+SOXX)" },
+    { "code": "270023", "name": "广发全球精选", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
+    { "code": "017730", "name": "嘉实全球产业升级", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "偏科技制造的全球主动" },
+    { "code": "000043", "name": "嘉实美国成长", "group": "G1", "measured": false, "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "罗素1000成长，继承G1" },
+    { "code": "161128", "name": "易方达标普信息科技", "group": "G2", "measured": true, "shortLabel": "超卖待反弹", "shortScore": 37, "midLabel": "长牛结构未破", "midScore": 70, "risk": "高", "note": "实测：RSI6=32.8贴下轨，MA120/250上方" },
+    { "code": "161130", "name": "易方达纳斯达克100", "group": "G1", "measured": true, "shortLabel": "超卖待反弹", "shortScore": 39, "midLabel": "长牛结构未破", "midScore": 78, "risk": "中低", "note": "实测：贴MA60，长牛未破" },
+    { "code": "012920", "name": "易方达全球成长精选", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
+    { "code": "006373", "name": "国富全球科技", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
+    { "code": "539002", "name": "建信新兴市场混合", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5；30日收益最弱(-16.17%)" },
+    { "code": "001668", "name": "汇添富全球移动互联", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
+    { "code": "005698", "name": "华夏全球科技先锋", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2；30日收益-19.94%最惨" },
+    { "code": "002891", "name": "华夏移动互联", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2；30日-17.06%" },
+    { "code": "016701", "name": "银华海外数字经济", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
+    { "code": "501226", "name": "长城全球新能源车", "group": "G3", "measured": false, "shortLabel": "弱势", "shortScore": 30, "midLabel": "中性偏弱", "midScore": 55, "risk": "中", "note": "无序列，定性；受关税/需求担忧" },
+    { "code": "017145", "name": "华宝海外新能源汽车", "group": "G3", "measured": false, "shortLabel": "弱势", "shortScore": 30, "midLabel": "中性偏弱", "midScore": 55, "risk": "中", "note": "继承G3" },
+    { "code": "501312", "name": "华宝海外科技", "group": "G2", "measured": true, "shortLabel": "超卖但趋势强", "shortScore": 30, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "实测：CCI=-270/RSI6=19.9极度超卖，弹性最大" },
+    { "code": "008253", "name": "华宝致远混合", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
+    { "code": "017093", "name": "景顺长城纳斯达克科技", "group": "G1", "measured": false, "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "纳指科技集中(类QQQ子集)，继承G1" },
+    { "code": "016664", "name": "天弘全球高端制造", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
+    { "code": "006751", "name": "富国全球科技互联网", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2；当日-8.14%最猛" },
+    { "code": "457001", "name": "国富亚洲机会", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
+    { "code": "007349", "name": "华夏科技创新A", "group": "G4", "measured": false, "shortLabel": "相对走强(独立)", "shortScore": 62, "midLabel": "政策驱动独立行情", "midScore": 72, "risk": "中", "note": "与美股分化，30日+12.9%；科创板政策驱动" },
+    { "code": "007345", "name": "富国科技创新A", "group": "G4", "measured": false, "shortLabel": "相对走强(独立)", "shortScore": 62, "midLabel": "政策驱动独立行情", "midScore": 72, "risk": "中", "note": "与美股分化，30日+0.51%" }
+  ]
+}
