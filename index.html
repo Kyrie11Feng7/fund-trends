@@ -28,6 +28,7 @@
         <a href="#chart" class="nav-link">趋势分析</a>
         <a href="#news" class="nav-link">每日解读</a>
         <a href="#sentiment" class="nav-link">情绪指标</a>
+        <a href="#etfBoard" class="nav-link">科技ETF榜单</a>
       </div>
       <button class="nav-toggle" aria-label="菜单">
         <span></span><span></span><span></span>
@@ -416,6 +417,20 @@
   </section>
 
   <!-- ============ 页脚 ============ -->
+  <section id="etfBoard" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">科技 ETF 榜单</h2>
+        <p class="section-desc">基于腾讯自选股真实数据，按地区梳理科技 ETF 的规模、近20日表现、估值水位与折溢价，辅助你横向对比与发现标的</p>
+      </div>
+      <div class="etf-board-wrap">
+        <div class="etf-tabs" id="etfTabs"></div>
+        <div class="etf-table-wrap" id="etfTableWrap"></div>
+        <p class="etf-board-source" id="etfBoardSource"></p>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
@@ -482,6 +497,7 @@
   <script src="js/news_deep.js?v=20260718a"></script>
   <script src="js/holdings.js?v=20260718c"></script>
   <script src="js/index_temperature.js?v=20260718i"></script>
+  <script src="js/etf_board.js?v=20260718a"></script>
   <script src="js/app.js?v=20260718j"></script>
 </body>
 </html>
