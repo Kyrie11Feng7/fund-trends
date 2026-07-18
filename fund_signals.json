@@ -14,7 +14,7 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中低"
+      "risk": "中"
     },
     "G2": {
       "name": "信息科技/半导体/AI",
@@ -41,7 +41,7 @@
       "shortScore": 34,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "高"
+      "risk": "中"
     },
     "G5": {
       "name": "新兴/亚洲/混合",
@@ -63,13 +63,13 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中",
+      "risk": "高",
       "note": "实测：真实净值 6.4634@2026-07-16，RSI6=44.8，MA250上方",
       "nav": 6.4634,
       "navDate": "2026-07-16",
       "ret30": -7.57,
-      "drawdown": -18.87,
-      "annualVol": 21
+      "drawdown": -25.54,
+      "annualVol": 25.2
     },
     {
       "code": "161130",
@@ -85,8 +85,8 @@
       "nav": 4.3813,
       "navDate": "2026-07-16",
       "ret30": -5.1,
-      "drawdown": -13.88,
-      "annualVol": 17.4
+      "drawdown": -21.76,
+      "annualVol": 21.2
     },
     {
       "code": "270023",
@@ -97,13 +97,13 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中",
+      "risk": "中低",
       "note": "实测：真实净值 6.8672@2026-07-16，RSI6=34.2，MA250上方",
       "nav": 6.8672,
       "navDate": "2026-07-16",
       "ret30": -7.22,
-      "drawdown": -15.25,
-      "annualVol": 25
+      "drawdown": -18.74,
+      "annualVol": 23.6
     },
     {
       "code": "457001",
@@ -119,8 +119,8 @@
       "nav": 3.0268,
       "navDate": "2026-07-16",
       "ret30": -10.52,
-      "drawdown": -15.15,
-      "annualVol": 27.8
+      "drawdown": -20.4,
+      "annualVol": 26.7
     },
     {
       "code": "501226",
@@ -136,8 +136,8 @@
       "nav": 2.6695,
       "navDate": "2026-07-16",
       "ret30": -10.6,
-      "drawdown": -14.65,
-      "annualVol": 29.1
+      "drawdown": -23.85,
+      "annualVol": 29.4
     },
     {
       "code": "501312",
@@ -153,8 +153,8 @@
       "nav": 2.2382,
       "navDate": "2026-07-16",
       "ret30": -7.2,
-      "drawdown": -17.62,
-      "annualVol": 25.7
+      "drawdown": -30.08,
+      "annualVol": 29.6
     },
     {
       "code": "513100",
@@ -165,13 +165,13 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中低",
+      "risk": "中",
       "note": "实测：真实净值 9.8295@2026-07-16，RSI6=42.6，MA250上方",
       "nav": 9.8295,
       "navDate": "2026-07-16",
       "ret30": -5.52,
-      "drawdown": -14.19,
-      "annualVol": 18.3
+      "drawdown": -22.57,
+      "annualVol": 22.3
     },
     {
       "code": "539002",
@@ -187,8 +187,8 @@
       "nav": 2.307,
       "navDate": "2026-07-16",
       "ret30": -13.92,
-      "drawdown": -21.64,
-      "annualVol": 37.8
+      "drawdown": -31.24,
+      "annualVol": 37.4
     },
     {
       "code": "017436",
@@ -199,13 +199,13 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中低",
+      "risk": "中",
       "note": "实测：真实净值 2.2365@2026-07-16，RSI6=42.2，MA250上方",
       "nav": 2.2365,
       "navDate": "2026-07-16",
       "ret30": -10.69,
-      "drawdown": -20.31,
-      "annualVol": 21.5
+      "drawdown": -29.87,
+      "annualVol": 27.6
     },
     {
       "code": "000043",
@@ -216,13 +216,13 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中低",
+      "risk": "中",
       "note": "实测：真实净值 6.165@2026-07-16，RSI6=36.5，MA250上方",
       "nav": 6.165,
       "navDate": "2026-07-16",
       "ret30": -5.76,
-      "drawdown": -14.86,
-      "annualVol": 19.1
+      "drawdown": -23.84,
+      "annualVol": 22.4
     },
     {
       "code": "017093",
@@ -233,13 +233,13 @@
       "shortScore": 30,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中低",
+      "risk": "中",
       "note": "实测：真实净值 2.765@2026-07-16，RSI6=48.6，MA250上方",
       "nav": 2.765,
       "navDate": "2026-07-16",
       "ret30": -4.43,
-      "drawdown": -17.47,
-      "annualVol": 21.2
+      "drawdown": -24.7,
+      "annualVol": 25
     },
     {
       "code": "006555",
@@ -256,7 +256,7 @@
       "navDate": "2026-07-16",
       "ret30": -16.82,
       "drawdown": -26.46,
-      "annualVol": 37.3
+      "annualVol": 34.5
     },
     {
       "code": "017730",
@@ -272,8 +272,8 @@
       "nav": 4.2892,
       "navDate": "2026-07-16",
       "ret30": -2.2,
-      "drawdown": -16.59,
-      "annualVol": 30.7
+      "drawdown": -27.98,
+      "annualVol": 31.1
     },
     {
       "code": "012920",
@@ -290,7 +290,7 @@
       "navDate": "2026-07-16",
       "ret30": -10.91,
       "drawdown": -22.18,
-      "annualVol": 34.5
+      "annualVol": 31.3
     },
     {
       "code": "006373",
@@ -306,8 +306,8 @@
       "nav": 6.8919,
       "navDate": "2026-07-16",
       "ret30": -12.91,
-      "drawdown": -19.23,
-      "annualVol": 33.9
+      "drawdown": -22.26,
+      "annualVol": 31.7
     },
     {
       "code": "001668",
@@ -323,8 +323,8 @@
       "nav": 5.163,
       "navDate": "2026-07-16",
       "ret30": -8.48,
-      "drawdown": -15.92,
-      "annualVol": 24.1
+      "drawdown": -24.28,
+      "annualVol": 25.5
     },
     {
       "code": "005698",
@@ -340,8 +340,8 @@
       "nav": 3.02,
       "navDate": "2026-07-16",
       "ret30": -20.15,
-      "drawdown": -28.93,
-      "annualVol": 37.8
+      "drawdown": -31.14,
+      "annualVol": 37.2
     },
     {
       "code": "002891",
@@ -358,7 +358,7 @@
       "navDate": "2026-07-16",
       "ret30": -17.85,
       "drawdown": -25.28,
-      "annualVol": 38.5
+      "annualVol": 33.4
     },
     {
       "code": "016701",
@@ -374,8 +374,8 @@
       "nav": 2.0622,
       "navDate": "2026-07-16",
       "ret30": -8.07,
-      "drawdown": -18.07,
-      "annualVol": 24.4
+      "drawdown": -25.86,
+      "annualVol": 27
     },
     {
       "code": "006751",
@@ -392,7 +392,7 @@
       "navDate": "2026-07-17",
       "ret30": -13.55,
       "drawdown": -24.29,
-      "annualVol": 45
+      "annualVol": 39.8
     },
     {
       "code": "017145",
@@ -408,8 +408,8 @@
       "nav": 1.5375,
       "navDate": "2026-07-16",
       "ret30": -17.73,
-      "drawdown": -24.66,
-      "annualVol": 27.9
+      "drawdown": -28.44,
+      "annualVol": 31.7
     },
     {
       "code": "007349",
@@ -420,13 +420,13 @@
       "shortScore": 38,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "高",
+      "risk": "中",
       "note": "实测：真实净值 3.1363@2026-07-17，RSI6=13.2，MA250上方",
       "nav": 3.1363,
       "navDate": "2026-07-17",
       "ret30": 7.04,
       "drawdown": -19.6,
-      "annualVol": 37.6
+      "annualVol": 33.4
     },
     {
       "code": "007345",
@@ -442,8 +442,8 @@
       "nav": 2.5227,
       "navDate": "2026-07-17",
       "ret30": -2.15,
-      "drawdown": -12.1,
-      "annualVol": 27.8
+      "drawdown": -18,
+      "annualVol": 25.9
     },
     {
       "code": "008253",
@@ -459,8 +459,8 @@
       "nav": 1.8139,
       "navDate": "2026-07-16",
       "ret30": -17.84,
-      "drawdown": -22.1,
-      "annualVol": 37.9
+      "drawdown": -28.17,
+      "annualVol": 35
     },
     {
       "code": "016664",
@@ -476,8 +476,8 @@
       "nav": 2.9763,
       "navDate": "2026-07-16",
       "ret30": -17.97,
-      "drawdown": -25.48,
-      "annualVol": 37.8
+      "drawdown": -30.15,
+      "annualVol": 35.1
     }
   ]
 }
