@@ -132,7 +132,9 @@
       { key: "stib", label: "科创板 ETF" }
     ].filter(function (r) { return board[r.key] && board[r.key].length; });
     tabs.innerHTML = regions.map(function (r) {
-      return '<button class="etf-tab ' + (r.key === etfBoardRegion ? "active" : "") + '" data-region="' + r.key + '">' + r.label + '<span class="etf-tab-count">' + board[r.key].length + "</span></button>";
+      return '<button class="etf-tab ' + (r.key === etfBoardRegion ? "active" : "") + '" data-region="' + r.key + '">' +
+        '<span class="etf-tab-label">' + r.label + '</span>' +
+        '<span class="etf-tab-count">' + board[r.key].length + "</span></button>";
     }).join("");
     tabs.querySelectorAll(".etf-tab").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -154,8 +156,8 @@
       { key: "disc", label: "溢折率" }
     ];
     const arrow = function (k) { return k === etfBoardSortKey ? (etfBoardSortDir < 0 ? " ↓" : " ↑") : ""; };
-    const head = '<tr><th class="etf-rank">#</th><th>代码</th><th>名称</th>' +
-      cols.map(function (c) { return '<th class="etf-sortable ' + (c.key === etfBoardSortKey ? "active" : "") + '" data-key="' + c.key + '">' + c.label + arrow(c.key) + "</th>"; }).join("") + "</tr>";
+    const head = '<tr><th class="etf-rank">#</th><th class="etf-code-col">代码</th><th class="etf-name-col">名称</th>' +
+      cols.map(function (c) { return '<th class="etf-sortable etf-num-col ' + (c.key === etfBoardSortKey ? "active" : "") + '" data-key="' + c.key + '">' + c.label + arrow(c.key) + "</th>"; }).join("") + "</tr>";
     const body = rows.map(function (r, i) {
       const chgCls = r.chg20d == null ? "" : (r.chg20d >= 0 ? "text-up" : "text-down");
       const discCls = r.disc == null ? "" : (r.disc >= 0 ? "etf-disc-premium" : "etf-disc-discount");
