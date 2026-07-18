@@ -1,8 +1,7 @@
-me: 每日信号更新
+name: 每日信号更新
 
 on:
   schedule:
-    # 每个交易日收盘后（北京时间约 16:30 / UTC 08:30）触发；周一至周五
     - cron: '30 8 * * 1-5'
   workflow_dispatch: {}
 
@@ -32,8 +31,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain fund_signals.json)" ]; then
-            git add fund_signals.json
+          if [ -n "$(git status --porcelain fund_signals.json fund_nav.json backtest.json)" ]; then
+            git add fund_signals.json fund_nav.json backtest.json
             git commit -m "chore: daily signal update $(date +%F)"
             git push
           else
