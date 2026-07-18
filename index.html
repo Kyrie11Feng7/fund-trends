@@ -1,711 +1,570 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="科技基金趋势分析 v2.0：分组归因、前瞻信号、净值曲线、回测与交互对比。覆盖纳斯达克100、半导体、新能源车、A股科创与新兴市场科技基金。" />
-  <title>科技基金趋势分析 · Fund Trends v2.0</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' },
-            danger: { 50: '#fef2f2', 100: '#fee2e2', 500: '#ef4444', 600: '#dc2626' },
-            success: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a' },
-            warning: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706' }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    .score-bar { height: 6px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
-    .score-bar > i { display: block; height: 100%; border-radius: 999px; }
-    .fund-row:focus-within { outline: 2px solid #2563eb; outline-offset: -2px; }
-    .detail-link { cursor: pointer; }
-    .detail-link:hover { text-decoration: underline; }
-    @media (max-width: 640px) {
-      .fund-table thead { display: none; }
-      .fund-table, .fund-table tbody, .fund-table tr, .fund-table td { display: block; width: 100%; }
-      .fund-table td { position: relative; padding-left: 40%; border-bottom: 0; }
-      .fund-table td::before { content: attr(data-label); position: absolute; left: 1rem; top: 0.75rem; font-weight: 600; color: #374151; }
-      .fund-table tr { border-bottom: 1px solid #e5e7eb; }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
+  <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
+  <link rel="stylesheet" href="css/style.css?v=20260718l">
+  <script src="js/lib/chart.umd.min.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-primary-700 focus:text-white focus:px-4 focus:py-2 focus:rounded">跳转到主要内容</a>
+<body>
 
-  <!-- Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-900 flex items-center justify-center text-white font-bold">F</div>
-        <div>
-          <h1 class="text-lg font-bold leading-tight text-slate-900">科技基金趋势分析</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">v2.0 · 分组归因 · 前瞻信号 · 净值曲线 · 回测</p>
-        </div>
+  <!-- ============ 导航栏 ============ -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M4 20L10 12L14 16L20 6L24 10" stroke="#00d68f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="24" cy="10" r="2.5" fill="#00d68f"/>
+        </svg>
+        <span>科技基金<span class="logo-accent">趋势</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#hero" class="nav-link active">市场概览</a>
+        <a href="#funds" class="nav-link">基金总览</a>
+        <a href="#indexTemperature" class="nav-link">指数温度</a>
+        <a href="#chart" class="nav-link">趋势分析</a>
+        <a href="#news" class="nav-link">每日解读</a>
+        <a href="#sentiment" class="nav-link">情绪指标</a>
+        <a href="#etfBoard" class="nav-link">科技ETF榜单</a>
+        <a href="#signals" class="nav-link">前瞻信号</a>
+        <a href="#backtest" class="nav-link">回测参考</a>
       </div>
-      <div class="flex items-center gap-2 sm:gap-4">
-        <span class="text-xs text-slate-500 hidden md:inline">数据基准：<time id="asOfDate" datetime="2026-07-17">2026-07-17</time></span>
-        <button id="methodologyBtn" class="text-sm font-medium text-primary-700 hover:text-primary-900 px-3 py-1.5 rounded-md hover:bg-primary-50 transition" aria-haspopup="dialog" aria-controls="methodologyDialog">数据口径</button>
+      <button class="nav-toggle" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ Hero / 市场概览 ============ -->
+  <section id="hero" class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          <span>真实净值数据 · 天天基金</span>
+        </div>
+        <h1 class="hero-title">全球科技基金<span class="gradient-text">趋势分析</span></h1>
+        <p class="hero-subtitle">
+          追踪纳斯达克、新兴市场等核心科技基金每日涨跌，<br>
+          结合世界局势与全球新闻，深度解读每一次波动背后的逻辑。
+        </p>
+      </div>
+
+      <!-- 全球指数概览 -->
+      <div class="indices-grid" id="indicesGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+      <p class="indices-date" id="indicesDate"></p>
+      <p style="font-size:12px;color:var(--text-muted);margin:10px 0 0;text-align:center">
+        全球指数 / 黄金 / 原油 / 美债收益率为 neodata 真实行情快照（数据日期 2026-07-17，美债为 2026-06-30 月末值）；恐惧贪婪指数与 VIX 来自 CNN；美元指数为参考值。下方基金净值与涨跌幅均为天天基金真实历史数据。
+      </p>
+
+      <!-- 市场情绪指标 -->
+      <div class="sentiment-bar" id="sentimentBar">
+        <!-- 由 JS 动态渲染 -->
       </div>
     </div>
-  </header>
+  </section>
 
-  <main id="main" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+  <!-- ============ 指数温度（信息图卡片） ============ -->
+  <section id="indexTemperature" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">指数温度</h2>
+        <p class="section-desc">用一张图读懂 VIX、纳斯达克100 与 标普500 的当下位置与估值温度</p>
+      </div>
+      <div class="index-temperature-grid" id="indexTemperatureGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+      <p class="index-temperature-source" id="indexTemperatureSource"></p>
+    </div>
+  </section>
+  <section id="funds" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">基金总览</h2>
+        <p class="section-desc">25只核心科技基金，覆盖纳斯达克100、全球科技、新兴市场、新能源车、A股科创等关键赛道</p>
+      </div>
+      <div class="fund-grid" id="fundGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
 
-    <!-- Hero -->
-    <section class="bg-gradient-to-br from-primary-700 to-primary-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg" aria-labelledby="hero-title">
-      <div class="grid md:grid-cols-2 gap-6 items-center">
-        <div class="space-y-4">
-          <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur rounded-full px-3 py-1 text-xs font-medium">
-            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse" aria-hidden="true"></span>
-            <span id="updateBadge">每日自动更新 · 当前已同步至 2026-07-17</span>
+  <!-- ============ 前瞻信号层（分组归因 + 三色信号） ============ -->
+  <section id="signals" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">前瞻信号 · 分组归因</h2>
+        <p class="section-desc">按底层资产把 25 只基金归为 5 组（G1 纳指100 · G2 信息科技/半导体/AI · G3 新能源车 · G4 A股科创 · G5 新兴混合），基于技术面给出短期动能、中期结构、风险等级三色信号。数据基准 <span id="sigAsOf" class="sig-asof">—</span></p>
+      </div>
+
+      <!-- 分组卡片 -->
+      <div class="signal-group-grid" id="signalGroupGrid">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+
+      <!-- 25 只基金信号表 -->
+      <div class="signal-table-wrap" id="signalTableWrap">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+
+      <!-- 数据口径 / 方法论 -->
+      <div class="signal-methodology">
+        <button class="methodology-toggle" id="methodologyToggle" aria-expanded="false">查看数据口径与方法论 ▾</button>
+        <div class="methodology-panel" id="methodologyPanel" hidden>
+          <h4>分组规则</h4>
+          <p>每只基金按其跟踪的底层指数/赛道归入 G1–G5，组内共享同一技术面代理标的（纳指100=QQQ、信息科技/半导体=XLK+SOXX、新能源=海外NEV、A股科创=科创板/创业板、新兴混合=MSCI EM）。</p>
+          <h4>信号算法</h4>
+          <ul>
+            <li><strong>短期动能</strong>：RSI6&lt;35 且收盘价≤布林下轨 → 超卖待反弹；若 ADX&gt;25 则「超卖但趋势强」（反弹易中继）；MACD 转正且站上 MA20 → 偏强；其余为弱势下行。得分 0–100，越高越偏多。</li>
+            <li><strong>中期结构</strong>：收盘价在 MA120 与 MA250 上方 → 长牛结构未破；仅在 MA250 上方 → 中性；跌破年线 → 趋势转弱。</li>
+            <li><strong>风险等级</strong>：按赛道波动属性标注（纳指100 中低、半导体/AI 高、其余中），并结合短期信号强度微调。</li>
+          </ul>
+          <h4>数据来源与局限</h4>
+          <p>信号基于美股底层指数（westock-data）与 A 股可交易代理（513100/161128/161130/501312）的真实技术面计算得出；组内其他基金继承该组信号。当前净值为示例数据（DEMO），真实净值接入后信号将更精确。本信号为技术面趋势标签，<strong>非买卖建议</strong>。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 趋势分析图表 ============ -->
+  <section id="chart" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">趋势分析</h2>
+        <p class="section-desc">选择基金查看净值走势，支持多基金叠加对比</p>
+      </div>
+
+      <!-- 基金选择器 -->
+      <div class="chart-controls">
+        <div class="fund-selector" id="fundSelector">
+          <!-- 由 JS 动态渲染 -->
+        </div>
+        <div class="chart-actions">
+          <div class="timeframe-btns" id="timeframeBtns">
+            <button class="tf-btn" data-key="since">成立以来</button>
+            <button class="tf-btn" data-key="5y">近5年</button>
+            <button class="tf-btn" data-key="3y">近3年</button>
+            <button class="tf-btn active" data-key="1y">近1年</button>
+            <button class="tf-btn" data-key="6m">近半年</button>
+            <button class="tf-btn" data-key="3m">近3月</button>
+            <button class="tf-btn" data-key="1m">近1月</button>
           </div>
-          <h2 id="hero-title" class="text-2xl sm:text-3xl font-bold leading-tight">短线超卖、中期长牛未破</h2>
-          <p class="text-primary-100 text-sm sm:text-base leading-relaxed">
-            覆盖 <strong class="text-white">25 只</strong> 科技主题基金，按底层资产分为 <strong class="text-white">5 组</strong>。
-            点击基金可查看<strong class="text-white">净值曲线</strong>，多选可<strong class="text-white">对比</strong>，底部提供<strong class="text-white">回测</strong>参考。
-          </p>
-          <div class="flex flex-wrap gap-2 pt-2">
-            <span class="px-3 py-1 rounded-full bg-white/15 text-xs font-medium">短线：超卖待反弹</span>
-            <span class="px-3 py-1 rounded-full bg-white/15 text-xs font-medium">中期：长牛修正</span>
-            <span class="px-3 py-1 rounded-full bg-white/15 text-xs font-medium">含净值曲线</span>
-            <span class="px-3 py-1 rounded-full bg-white/15 text-xs font-medium">含回测</span>
+          <button class="chart-toggle-btn" id="compareToggle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 12L6 8L9 11L14 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            对比模式
+          </button>
+        </div>
+      </div>
+
+      <!-- 图表容器 -->
+      <div class="chart-wrapper">
+        <div class="chart-info" id="chartInfo">
+          <!-- 由 JS 动态渲染当前选中基金信息 -->
+        </div>
+        <!-- 净值趋势折线图 -->
+        <div class="chart-canvas-wrap">
+          <canvas id="mainChart"></canvas>
+        </div>
+        <p class="chart-caption" id="chartCaption"></p>
+        <!-- 每日涨跌幅柱状图 -->
+        <div class="chart-bar-section" id="barChartSection">
+          <div class="chart-section-label">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="8" width="4" height="7" rx="1" fill="#00d68f"/>
+              <rect x="7" y="3" width="4" height="12" rx="1" fill="#ff5252"/>
+              <rect x="13" y="6" width="2" height="9" rx="1" fill="#00d68f"/>
+            </svg>
+            <span>每日涨跌幅</span>
           </div>
-        </div>
-        <div class="bg-white/10 rounded-xl p-5 backdrop-blur-sm">
-          <h3 class="text-sm font-semibold mb-3 text-primary-50">分组强弱矩阵</h3>
-          <div class="space-y-3" id="groupMiniMatrix"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Group overview -->
-    <section aria-labelledby="groups-title">
-      <div class="flex items-center justify-between mb-4">
-        <h2 id="groups-title" class="text-xl font-bold text-slate-900">分组归因与信号</h2>
-        <button id="resetGroupFilter" class="text-sm text-primary-700 hover:underline hidden">重置分组</button>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="groupCards"></div>
-    </section>
-
-    <!-- Screener -->
-    <section aria-labelledby="screener-title" class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-      <h2 id="screener-title" class="text-xl font-bold text-slate-900 mb-4">基金筛选器</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-          <label for="searchInput" class="block text-sm font-medium text-slate-700 mb-1">搜索基金/代码</label>
-          <input type="search" id="searchInput" placeholder="输入名称或代码" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500" />
-        </div>
-        <div>
-          <label for="groupFilter" class="block text-sm font-medium text-slate-700 mb-1">分组</label>
-          <select id="groupFilter" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500">
-            <option value="all">全部 5 组</option>
-            <option value="G1">G1 纳指100/美股成长</option>
-            <option value="G2">G2 信息科技/半导体/AI</option>
-            <option value="G3">G3 全球新能源车</option>
-            <option value="G4">G4 A股科创主题</option>
-            <option value="G5">G5 新兴/亚洲/混合</option>
-          </select>
-        </div>
-        <div>
-          <label for="riskFilter" class="block text-sm font-medium text-slate-700 mb-1">风险等级</label>
-          <select id="riskFilter" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500">
-            <option value="all">全部</option>
-            <option value="高">高</option>
-            <option value="中">中</option>
-            <option value="中低">中低</option>
-          </select>
-        </div>
-        <div>
-          <label for="sortBy" class="block text-sm font-medium text-slate-700 mb-1">排序</label>
-          <select id="sortBy" class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500">
-            <option value="shortScore">短期动能分（高→低）</option>
-            <option value="midScore">中期结构分（高→低）</option>
-            <option value="code">基金代码</option>
-            <option value="risk">风险等级</option>
-            <option value="group">分组</option>
-          </select>
-        </div>
-      </div>
-      <div class="mt-4 flex flex-wrap gap-2" id="activeFilters" aria-live="polite"></div>
-    </section>
-
-    <!-- Comparison bar -->
-    <section id="compareBar" class="hidden bg-primary-50 border border-primary-200 rounded-xl p-4" aria-live="polite">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="text-sm text-primary-900">已选择 <strong id="compareCount">0</strong> 只基金进行对比（建议 2–4 只）</div>
-        <div class="flex gap-2">
-          <button id="clearCompareBtn" class="text-sm px-3 py-1.5 rounded-md border border-primary-300 text-primary-700 hover:bg-white transition">清空</button>
-          <button id="viewCompareBtn" class="text-sm px-3 py-1.5 rounded-md bg-primary-700 text-white hover:bg-primary-800 transition">查看对比</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Fund table -->
-    <section aria-labelledby="table-title">
-      <h2 id="table-title" class="text-xl font-bold text-slate-900 mb-4">基金明细 <span class="text-sm font-normal text-slate-500" id="resultCount">共 25 只</span></h2>
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left fund-table" role="table" aria-describedby="table-title">
-            <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
-              <tr>
-                <th scope="col" class="px-4 py-3">对比</th>
-                <th scope="col" class="px-4 py-3">基金</th>
-                <th scope="col" class="px-4 py-3">分组</th>
-                <th scope="col" class="px-4 py-3">短期动能</th>
-                <th scope="col" class="px-4 py-3">中期结构</th>
-                <th scope="col" class="px-4 py-3">风险</th>
-                <th scope="col" class="px-4 py-3">数据来源</th>
-                <th scope="col" class="px-4 py-3">说明</th>
-              </tr>
-            </thead>
-            <tbody id="fundTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- Backtest section -->
-    <section aria-labelledby="backtest-title" class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 id="backtest-title" class="text-xl font-bold text-slate-900">信号回测参考</h2>
-        <span id="backtestBadge" class="text-xs px-2 py-1 rounded-full bg-warning-100 text-warning-700 border border-warning-200">DEMO 示意</span>
-      </div>
-      <p class="text-sm text-slate-600 mb-4">策略：当短期信号为「超卖待反弹」时次日买入并持有 5 个交易日，统计收益为正的胜率。下表为基于示意序列的模拟结果，接入真实数据后由每日管线重算。</p>
-      <div class="grid md:grid-cols-2 gap-6">
-        <div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" id="backtestStats"></div>
-          <div class="bg-slate-50 rounded-lg p-4">
-            <canvas id="backtestChart" height="180" aria-label="各组回测胜率对比图" role="img"></canvas>
+          <div class="chart-bar-wrap">
+            <canvas id="barChart"></canvas>
           </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm" role="table" aria-describedby="backtest-title">
-            <thead class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold">
-              <tr><th class="px-3 py-2 text-left">分组</th><th class="px-3 py-2 text-right">信号次数</th><th class="px-3 py-2 text-right">胜率</th><th class="px-3 py-2 text-right">平均收益</th></tr>
-            </thead>
-            <tbody id="backtestTable" class="divide-y divide-slate-100"></tbody>
-          </table>
+        <!-- 每日明细数据表 -->
+        <div class="daily-table-section" id="dailyTableSection">
+          <div class="chart-section-label">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="14" height="14" rx="2" stroke="#8b8fa3" stroke-width="1.5" fill="none"/>
+              <line x1="1" y2="5" x2="15" y2="5" stroke="#8b8fa3" stroke-width="1"/>
+              <line x1="6" y1="1" x2="6" y2="15" stroke="#8b8fa3" stroke-width="1"/>
+            </svg>
+            <span>每日明细</span>
+          </div>
+          <div class="daily-table-wrap" id="dailyTableWrap">
+            <!-- 由 JS 动态渲染 -->
+          </div>
+        </div>
+
+        <!-- 区间表现汇总：7 个区间的区间收益与最大回撤 -->
+        <div class="window-summary-section" id="windowSummarySection">
+          <div class="chart-section-label">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="14" height="14" rx="2" stroke="#8b8fa3" stroke-width="1.5" fill="none"/>
+              <line x1="1" y2="5" x2="15" y2="5" stroke="#8b8fa3" stroke-width="1"/>
+              <line x1="6" y1="1" x2="6" y2="15" stroke="#8b8fa3" stroke-width="1"/>
+            </svg>
+            <span>区间表现汇总（真实净值计算）</span>
+          </div>
+          <div class="window-summary-wrap" id="windowSummary">
+            <!-- 由 JS 动态渲染 -->
+          </div>
+        </div>
+
+        <!-- 持仓结构与涨跌归因 -->
+        <div class="fund-analysis-extra" id="analysisExtra">
+          <div class="analysis-card">
+            <div class="analysis-card-head">
+              <h3>持仓结构 <span class="analysis-sub" id="holdingsAsOf"></span></h3>
+            </div>
+            <div class="holdings-list" id="holdingsList"></div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-card-head">
+              <h3>涨跌归因 <span class="analysis-sub">最新披露持仓 × 个股真实涨跌幅</span></h3>
+            </div>
+            <div class="attribution-body" id="attributionBody"></div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-  </main>
-
-  <!-- Disclaimer -->
-  <footer class="bg-slate-900 text-slate-300 py-8 mt-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="border-l-4 border-warning-500 pl-4 mb-4">
-        <p class="text-sm font-semibold text-white">免责声明</p>
-        <p class="text-sm mt-1 leading-relaxed">本页面所有内容基于公开数据与算法生成，仅供学习与研究参考，不构成任何投资建议、个股推荐或买卖依据。基金投资有风险，过往业绩不预示未来表现，投资者应独立判断并承担风险。</p>
+  <!-- ============ 每日深度解读 ============ -->
+  <section id="news" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">每日深度解读 · 真实资讯</h2>
+        <p class="section-desc">按 <strong>港股 / 国际 / 内地 / 地产 / 金融市场 / 宏观政策</strong> 多维度聚合真实财经资讯，每条含深度正文与「所以呢·市场含义」解读，并映射到相关主题基金。来源逐条标注、可核实，<strong>不构成投资建议</strong>。</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-slate-400">
-        <div>数据更新：每日收盘后自动同步</div>
-        <div>数据来源：westock-data / 腾讯自选股 / 公开行情</div>
-        <div>分组代理：QQQ、XLK、SOXX、科创板、MSCI EM</div>
-        <div>版本：v2.0 信号层 + 净值曲线 + 回测 · 2026-07-17</div>
+
+      <!-- 今日要点 -->
+      <div class="news-highlights" id="newsHighlights"></div>
+
+      <!-- 筛选标签 -->
+      <div class="news-filters" id="newsFilters">
+        <button class="filter-btn active" data-category="all">全部</button>
+        <button class="filter-btn" data-category="港股">港股</button>
+        <button class="filter-btn" data-category="国际">国际财经</button>
+        <button class="filter-btn" data-category="内地">内地财经</button>
+        <button class="filter-btn" data-category="地产">地产</button>
+        <button class="filter-btn" data-category="金融市场">金融市场</button>
+        <button class="filter-btn" data-category="宏观政策">宏观政策</button>
+      </div>
+
+      <!-- 新闻列表 -->
+      <div class="news-timeline" id="newsTimeline">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 市场情绪指标详解 ============ -->
+  <section id="sentiment" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">市场情绪指标详解</h2>
+        <p class="section-desc">恐惧贪婪指数 &amp; VIX 恐慌指数 —— 读懂市场情绪的"温度计"，帮你看清此刻是贪婪还是恐惧</p>
+      </div>
+
+      <p class="sentiment-data-note">
+        当前数值为<strong>真实行情快照</strong>（数据日期 <span id="sentDataDate"></span>）：<span id="sentDataSource"></span>。
+        以下为指标科普，所有历史极值均标注公开数据来源，<strong>不构成任何投资建议</strong>。
+      </p>
+
+      <!-- 概览卡：两大指数当前值 + 区间指针 -->
+      <div class="sentiment-overview">
+        <!-- 恐惧贪婪指数 -->
+        <div class="sent-gauge-card">
+          <div class="sent-gauge-head">
+            <h3>恐惧贪婪指数</h3>
+            <span class="sent-gauge-tag" id="fgTag">恐惧</span>
+          </div>
+          <div class="sent-gauge-value"><span id="fgValue">39</span><small>/100</small></div>
+          <div class="sent-gauge-bar">
+            <div class="sent-gauge-fill"></div>
+            <div class="sent-gauge-pointer" id="fgPointer"></div>
+          </div>
+          <div class="sent-gauge-scale">
+            <span>0·极度恐惧</span><span>50·中性</span><span>100·极度贪婪</span>
+          </div>
+          <p class="sent-gauge-desc" id="fgDesc"></p>
+        </div>
+        <!-- VIX -->
+        <div class="sent-gauge-card">
+          <div class="sent-gauge-head">
+            <h3>VIX 恐慌指数</h3>
+            <span class="sent-gauge-tag" id="vixTag">波动上升</span>
+          </div>
+          <div class="sent-gauge-value"><span id="vixValue">21.67</span></div>
+          <div class="sent-gauge-bar sent-gauge-bar-vix">
+            <div class="sent-gauge-fill"></div>
+            <div class="sent-gauge-pointer" id="vixPointer"></div>
+          </div>
+          <div class="sent-gauge-scale">
+            <span>0·平静</span><span>20·正常</span><span>40+·恐慌</span>
+          </div>
+          <p class="sent-gauge-desc" id="vixDesc"></p>
+        </div>
+      </div>
+
+      <!-- 一、恐惧贪婪指数 -->
+      <div class="sent-explain">
+        <h3 class="sent-explain-title">一、恐惧贪婪指数（Fear &amp; Greed Index）是什么？</h3>
+        <p>
+          恐惧贪婪指数由 <strong>CNN Business</strong> 编制，是一个把多种市场信号汇总成单一分数的二级市场情绪指标，取值 <strong>0–100</strong>：
+          <strong>0 = 极度恐惧</strong>，<strong>100 = 极度贪婪</strong>。它的底层逻辑来自巴菲特的名言——
+          "别人贪婪时我恐惧，别人恐惧时我贪婪"。它衡量的不是价格高低，而是<strong>市场参与者的集体心理位置</strong>。
+        </p>
+
+        <h4>0–100 怎么读？（CNN 官方区间划分）</h4>
+        <table class="sent-table">
+          <thead>
+            <tr><th>分数区间</th><th>状态</th><th>市场含义</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0 – 24</td><td>极度恐惧 Extreme Fear</td><td>抛售情绪浓厚，常对应非理性低估，逆向投资者的关注区</td></tr>
+            <tr><td>25 – 49</td><td>恐惧 Fear</td><td>避险情绪偏浓，但未见极端恐慌</td></tr>
+            <tr><td>50</td><td>中性 Neutral</td><td>多空均衡，无明显情绪偏向</td></tr>
+            <tr><td>51 – 74</td><td>贪婪 Greed</td><td>风险偏好上升、追涨情绪升温</td></tr>
+            <tr><td>75 – 100</td><td>极度贪婪 Extreme Greed</td><td>市场过度乐观，历史经验提示回撤风险升高</td></tr>
+          </tbody>
+        </table>
+
+        <h4>它由哪 7 个分项合成？（各分项等权平均）</h4>
+        <p class="sent-sub">每个分项先标准化到 0–100，再做等权平均得到综合指数，每日更新：</p>
+        <table class="sent-table">
+          <thead>
+            <tr><th>分项</th><th>衡量什么</th><th>恐惧 / 贪婪信号</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>① 股价动量</td><td>标普500 当前点位 vs 其 125 日移动均线</td><td>大幅低于均线→恐惧；远高于→贪婪</td></tr>
+            <tr><td>② 股价强度</td><td>纽交所创 52 周新高 vs 新低的股票数量差</td><td>新高股多→贪婪；新低股多→恐惧</td></tr>
+            <tr><td>③ 股价广度</td><td>基于涨跌成交量的 McClellan Oscillator</td><td>普涨→贪婪；普跌→恐惧</td></tr>
+            <tr><td>④ 看跌/看涨期权比</td><td>CBOE 看跌期权与看涨期权成交量之比</td><td>看跌比高→恐惧；低→贪婪</td></tr>
+            <tr><td>⑤ 市场波动率</td><td>VIX 及其近期变化</td><td>VIX 飙升→恐惧（与 VIX 联动）</td></tr>
+            <tr><td>⑥ 避险需求</td><td>质优股与国债过去 20 日回报差</td><td>股票跑输国债→恐惧（资金避险）</td></tr>
+            <tr><td>⑦ 垃圾债需求</td><td>投资级债(LQD)与垃圾债(HYG)利差</td><td>利差收窄→贪婪（风险偏好高）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>历史极端案例</h4>
+        <ul class="sent-list">
+          <li><strong>2020 年 3 月（新冠崩盘）：</strong>指数一度跌至 <strong>4</strong>（极度恐惧），同期 VIX 飙上 80+。</li>
+          <li><strong>2021 年初（牛市顶部）：</strong>指数多次站上 <strong>90</strong>（极度贪婪），市场乐观到极点。</li>
+          <li><strong>2022 年 10 月（美股底部区域）：</strong>指数在 <strong>20</strong> 附近徘徊，恐慌逐渐出清。</li>
+        </ul>
+
+        <h4>实战怎么用？</h4>
+        <ul class="sent-list">
+          <li><strong>作为逆向指标：</strong>极度恐惧（0–24）往往是中长线布局机会；极度贪婪（75–100）需警惕估值过热与回撤。</li>
+          <li>它只是"温度计"，<strong>不预测方向</strong>；极端值可能持续多日（如 2020.3 连续极度恐惧）。</li>
+          <li>务必配合 VIX、估值分位、基本面共同判断，不要单独依赖。</li>
+        </ul>
+      </div>
+
+      <!-- 二、VIX -->
+      <div class="sent-explain">
+        <h3 class="sent-explain-title">二、VIX 恐慌指数（波动率指数）是什么？</h3>
+        <p>
+          VIX 由 <strong>芝加哥期权交易所（CBOE）</strong> 编制，俗称"恐慌指数"。它衡量的是<strong>标普500 指数未来 30 天的隐含波动率（implied volatility）</strong>——
+          不是价格、也不是涨跌，而是市场对未来波动的"焦虑程度"。VIX 越高，说明投资者预期未来一个月市场越动荡。
+        </p>
+        <p class="sent-sub">
+          <strong>计算原理（不是直接观测，而是"反推"）：</strong>期权价格里蕴含了市场对标的未来波动的预期——波动率越高，期权越贵。
+          CBOE 选取到期日在 23–37 天的一篮子标普500 看涨/看跌期权，用<strong>方差互换（variance swap）的无模型方法</strong>反推出 30 日预期波动率，
+          年化后开方得到 VIX。口语化理解：<strong>VIX = 20，相当于市场预期未来一年标普500 年化波动约 20%</strong>。
+        </p>
+
+        <h4>怎么读 VIX？</h4>
+        <table class="sent-table">
+          <thead>
+            <tr><th>VIX 区间</th><th>状态</th><th>解读</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>&lt; 15</td><td>低波动·平静</td><td>市场平静甚至自满——"自满"本身也是风险信号</td></tr>
+            <tr><td>15 – 20</td><td>正常波动</td><td>情绪平稳，趋势运行健康</td></tr>
+            <tr><td>20 – 30</td><td>波动上升</td><td>不确定性增加，关注潜在风险事件</td></tr>
+            <tr><td>30 – 40</td><td>高度恐慌</td><td>系统性担忧升温，股指通常承压</td></tr>
+            <tr><td>&gt; 40</td><td>极端恐慌</td><td>危机模式（长期均值约 19–20）</td></tr>
+          </tbody>
+        </table>
+
+        <h4>历史峰值回顾（数据来源：CBOE 公开历史）</h4>
+        <div class="vix-peak-grid">
+          <div class="vix-peak-card peak-high">
+            <div class="vix-peak-date">2008-10-27</div>
+            <div class="vix-peak-val">收盘 80.86</div>
+            <div class="vix-peak-note">金融危机，盘中最高 89.53（历史最高）</div>
+          </div>
+          <div class="vix-peak-card peak-high">
+            <div class="vix-peak-date">2020-03-16</div>
+            <div class="vix-peak-val">收盘 82.69</div>
+            <div class="vix-peak-note">新冠崩盘，盘中突破 80</div>
+          </div>
+          <div class="vix-peak-card peak-mid">
+            <div class="vix-peak-date">2024-08-05</div>
+            <div class="vix-peak-val">盘中 ≈ 38</div>
+            <div class="vix-peak-note">日元套息交易平仓，全球波动骤升</div>
+          </div>
+          <div class="vix-peak-card peak-low">
+            <div class="vix-peak-date">2017 年</div>
+            <div class="vix-peak-val">多次 &lt; 10</div>
+            <div class="vix-peak-note">最低约 9.51，市场极度平静</div>
+          </div>
+        </div>
+
+        <h4>实战怎么用？</h4>
+        <ul class="sent-list">
+          <li><strong>波动率晴雨表：</strong>VIX 与股指高度负相关，VIX 上升通常对应股指下跌。</li>
+          <li><strong>对冲参考：</strong>VIX 高时保护性看跌期权(put)更贵；VIX 低时买入保护成本更低。</li>
+          <li><strong>风险预警：</strong>VIX 突然跳升常是风险事件的前兆；持续低位+股指新高则趋势健康。</li>
+          <li>VIX 不适合直接当买卖信号，但可作为<strong>仓位与对冲的"温度计"</strong>。</li>
+        </ul>
+      </div>
+
+      <!-- 三、两者关系 -->
+      <div class="sent-explain">
+        <h3 class="sent-explain-title">三、两个指数如何结合看？</h3>
+        <p>
+          两者<strong>高度负相关</strong>——恐惧贪婪指数的第 5 个分项就是 VIX，所以 VIX 高时恐惧贪婪指数通常低。
+          但恐惧贪婪更全面（涵盖动量、期权比、垃圾债等），VIX 更纯粹地反映波动率。把它俩放在一起，能更快判断市场所处的情绪象限：
+        </p>
+        <table class="sent-table">
+          <thead>
+            <tr><th>恐惧贪婪指数</th><th>VIX</th><th>组合信号</th><th>应对思路</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>低（0–24）极度恐惧</td><td>高（&gt; 30）</td><td>极端恐惧</td><td>逆向布局区，关注分批买入机会</td></tr>
+            <tr><td>中（40–60）中性</td><td>中（15–25）</td><td>情绪中性</td><td>趋势跟随，无需过度反应</td></tr>
+            <tr><td>高（75–100）极度贪婪</td><td>低（&lt; 15）</td><td>极度贪婪</td><td>警惕过热回撤，考虑兑现/对冲</td></tr>
+            <tr><td>低（25–49）恐惧</td><td>中高（25–35）</td><td>谨慎偏恐惧</td><td>观察是否恶化，结合基本面定夺</td></tr>
+          </tbody>
+        </table>
+        <p class="sent-sub">
+          <strong>一句话总结：</strong>恐惧贪婪指数告诉你"市场现在有多贪/有多怕"，VIX 告诉你"未来一个月可能有多颠"。
+          两者都低（贪+平静）时要留份清醒，两者都高（怕+动荡）时反而可能藏着机会——但永远用它们做"情绪体检"，而不是唯一的买卖依据。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 页脚 ============ -->
+  <section id="etfBoard" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">科技 ETF 榜单</h2>
+        <p class="section-desc">基于腾讯自选股真实数据，按地区梳理科技 ETF 的规模、近20日表现、估值水位与折溢价，辅助你横向对比与发现标的</p>
+        <div class="etf-legend">
+          <span class="etf-legend-item"><i class="etf-legend-dot up"></i>涨（红）</span>
+          <span class="etf-legend-item"><i class="etf-legend-dot down"></i>跌（绿）</span>
+          <span class="etf-legend-note">配色原则：红=涨、绿=跌（中国市场惯例）。估值百分位越低越便宜（绿）、越高越贵（红）；溢折率为负即折价（绿）。</span>
+        </div>
+      </div>
+      <div class="etf-board-wrap">
+        <div class="etf-tabs" id="etfTabs"></div>
+        <div class="etf-table-wrap" id="etfTableWrap"></div>
+        <p class="etf-board-source" id="etfBoardSource"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 信号回测参考 ============ -->
+  <section id="backtest" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">信号回测参考</h2>
+        <p class="section-desc">对「短期超卖待反弹」信号的模拟回测（示例数据，非实盘业绩）。用于检验信号在历史样本上的命中率与平均收益，帮助理解信号有效性边界。</p>
+      </div>
+      <div class="backtest-overview" id="backtestOverview">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+      <div class="backtest-chart-wrap">
+        <canvas id="backtestChart"></canvas>
+      </div>
+      <div class="backtest-table-wrap" id="backtestTableWrap">
+        <!-- 由 JS 动态渲染 -->
+      </div>
+    </div>
+  </section>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+              <path d="M4 20L10 12L14 16L20 6L24 10" stroke="#00d68f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>科技基金趋势</span>
+          </div>
+          <p class="footer-desc">结合全球新闻视角的科技基金趋势分析平台</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>导航</h4>
+            <a href="#hero">市场概览</a>
+            <a href="#funds">基金总览</a>
+            <a href="#chart">趋势分析</a>
+            <a href="#news">每日解读</a>
+          </div>
+          <div class="footer-col">
+            <h4>覆盖基金</h4>
+            <a href="#funds">纳斯达克100 ETF</a>
+            <a href="#funds">建信新兴市场</a>
+            <a href="#funds">华宝纳斯达克精选</a>
+            <a href="#funds">景顺长城纳斯达克科技</a>
+          </div>
+          <div class="footer-col">
+            <h4>数据说明</h4>
+            <a href="#news">新闻来源</a>
+            <a href="#chart">分析方法</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-disclaimer">
+        <p>
+          <strong>数据说明与免责声明：</strong>本网站所展示的基金<strong>每日单位净值与涨跌幅均为真实历史数据</strong>，来源为天天基金（东方财富 eastmoney）公开净值接口，抓取于 2026-07-18，区间为各基金成立以来至 2026-07-16（QDII 基金净值为 T+1/T+2 披露，交易日数量可能少于 A 股基金）。新闻资讯为 neodata 聚合的<strong>真实财经报道</strong>，逐条标注来源、可核实，含编辑性市场解读，不构成对特定基金当日真实涨跌的断言，亦不构成任何投资建议。顶部<strong>全球指数、黄金、原油、美债收益率为 neodata 真实行情快照（数据日期 2026-07-17，美债为 2026-06-30 月末值）</strong>；恐惧贪婪指数与 VIX 来自 CNN；美元指数为参考值。投资有风险，入市需谨慎；本网站不对因使用本站内容产生的任何投资损失负责。
+        </p>
+                <p style="font-size:13px;color:var(--text-muted);margin:14px 0 0">
+          🌐 <strong>主站（GitHub Pages）：</strong>
+          <a href="https://kyrie11feng7.github.io/fund-trends/" target="_blank" rel="noopener" style="color:var(--color-up)">kyrie11feng7.github.io/fund-trends</a>
+          <span style="opacity:.8">（境外节点，国内部分地区可能需科学上网）</span>
+        </p>
+        <p style="font-size:13px;color:var(--text-muted);margin:6px 0 0">
+          ⚠️ <strong>自定义域名已取消：</strong>kejijijin.feng.com 已不再绑定，请使用上方默认地址访问。
+        </p>
+        <p style="font-size:13px;color:var(--text-muted);margin:6px 0 0">
+          🔗 <strong>国内镜像（jsDelivr，推荐国内使用，已验证可直连）：</strong>
+          <a href="https://cdn.jsdelivr.net/gh/Kyrie11Feng7/fund-trends@main/index.html" target="_blank" rel="noopener" style="color:var(--color-up)">cdn.jsdelivr.net/gh/Kyrie11Feng7/fund-trends</a>
+        </p>
+
+        <p class="copyright">© 2026 科技基金趋势分析 · Powered by WorkBuddy</p>
       </div>
     </div>
   </footer>
 
-  <!-- Methodology dialog -->
-  <div id="methodologyDialog" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="methodology-title">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" id="methodologyBackdrop"></div>
-    <div class="absolute inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl overflow-y-auto">
-      <div class="p-6 sm:p-8 space-y-6">
-        <div class="flex items-start justify-between">
-          <h2 id="methodology-title" class="text-xl font-bold text-slate-900">数据口径与方法论</h2>
-          <button id="closeMethodology" class="text-slate-400 hover:text-slate-600" aria-label="关闭">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
-        <div class="space-y-4 text-sm text-slate-700">
-          <div>
-            <h3 class="font-semibold text-slate-900">1. 更新时间</h3>
-            <p>数据以交易日收盘后 <strong>T+1</strong> 自动同步；本页基准为 <strong>2026-07-17</strong>。每日管线由 GitHub Actions 定时触发（见仓库 .github/workflows）。</p>
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-900">2. 分组归因规则</h3>
-            <ul class="list-disc pl-5 mt-1 space-y-1">
-              <li><strong>G1 纳指100/美股成长</strong>：底层 QQQ。</li>
-              <li><strong>G2 信息科技/半导体/AI</strong>：底层 XLK + SOXX。</li>
-              <li><strong>G3 全球新能源车</strong>：海外 NEV 指数。</li>
-              <li><strong>G4 A股科创主题</strong>：科创板/创业板，与美股独立分化。</li>
-              <li><strong>G5 新兴/亚洲/混合</strong>：MSCI EM / ACWI，美股科技低 beta 版。</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-900">3. 前瞻信号算法</h3>
-            <p class="font-mono bg-slate-50 p-3 rounded-lg text-xs mt-1">
-              oversold = rsi6 &lt; 35 且 close &lt;= bollLower<br/>
-              belowShort = close &lt; ma20 且 macd &lt; 0<br/>
-              strongTrend = adx &gt; 25<br/><br/>
-              短期：oversold&amp;!strongTrend→超卖待反弹；oversold&amp;strongTrend→超卖但趋势强；!belowShort&amp;macd&gt;0→偏强；其他→弱势下行<br/>
-              中期：close&gt;ma120&amp;close&gt;ma250→长牛结构未破；close&gt;ma250→中性；其他→趋势转弱
-            </p>
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-900">4. 净值曲线与回测</h3>
-            <p>净值曲线读取 fund_nav.json（当前为示意序列）；回测读取 backtest.json，策略为「超卖待反弹」买入持有 5 日。两者均为示意，真实数据由 pipeline.js 生成。</p>
-          </div>
-          <div>
-            <h3 class="font-semibold text-slate-900">5. 局限说明</h3>
-            <p>实时 quote 接口在部分数据源不可用，使用 K 线收盘价替代；纯场外 QDII 使用底层分组代理信号；净值与回测当前为 DEMO，需接入真实历史数据。</p>
-          </div>
-        </div>
-        <div class="bg-slate-50 rounded-lg p-4 text-xs text-slate-500">本方法论为技术趋势标签，非买卖建议。</div>
-      </div>
-    </div>
-  </div>
+  <!-- 返回顶部按钮 -->
+  <button class="back-to-top" id="backToTop" aria-label="返回顶部">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M10 16V4M4 10L10 4L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
 
-  <!-- NAV detail modal -->
-  <div id="navModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="nav-title">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" id="navBackdrop"></div>
-    <div class="absolute inset-4 sm:inset-10 md:inset-20 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-      <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
-        <div>
-          <h2 id="nav-title" class="text-xl font-bold text-slate-900">净值曲线</h2>
-          <p id="navSubtitle" class="text-sm text-slate-500"></p>
-        </div>
-        <button id="closeNav" class="text-slate-400 hover:text-slate-600" aria-label="关闭">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-      <div class="flex-1 overflow-auto p-4 sm:p-6 space-y-4">
-        <div class="bg-slate-50 rounded-lg p-4">
-          <canvas id="navChart" height="260" aria-label="基金净值曲线图" role="img"></canvas>
-        </div>
-        <div id="navStats" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
-        <p class="text-xs text-slate-400">注：当前为示意净值序列，接入真实数据后由 pipeline.js 更新 fund_nav.json。</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Comparison modal (improved) -->
-  <div id="compareModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="compare-title">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" id="compareBackdrop"></div>
-    <div class="absolute inset-4 sm:inset-10 md:inset-16 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-      <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between">
-        <h2 id="compare-title" class="text-xl font-bold text-slate-900">基金对比</h2>
-        <button id="closeCompare" class="text-slate-400 hover:text-slate-600" aria-label="关闭">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-      <div class="flex-1 overflow-auto p-4 sm:p-6 space-y-6">
-        <div class="grid md:grid-cols-2 gap-6">
-          <div class="bg-slate-50 rounded-lg p-4">
-            <h3 class="text-sm font-semibold text-slate-700 mb-2">净值走势对比（归一化）</h3>
-            <canvas id="compareNavChart" height="220" aria-label="对比基金净值走势图" role="img"></canvas>
-          </div>
-          <div class="bg-slate-50 rounded-lg p-4">
-            <h3 class="text-sm font-semibold text-slate-700 mb-2">综合评分雷达</h3>
-            <canvas id="compareRadarChart" height="220" aria-label="对比基金评分雷达图" role="img"></canvas>
-          </div>
-        </div>
-        <div id="compareContent" class="grid gap-4"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ============ Embedded fallback signals (prefer external fetch) ============
-    const FALLBACK_SIGNALS = {
-      "meta": { "asOf": "2026-07-17", "source": "westock-data 美股底层指数 + A股可交易代理技术面" },
-      "groups": {
-        "G1": { "name": "纳指100/美股成长", "driver": "QQQ", "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低" },
-        "G2": { "name": "信息科技/半导体/AI", "driver": "XLK+SOXX", "shortLabel": "分化·超卖(半导体最弱)", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高" },
-        "G3": { "name": "全球新能源车", "driver": "海外NEV指数", "shortLabel": "弱势", "shortScore": 30, "midLabel": "中性偏弱", "midScore": 55, "risk": "中" },
-        "G4": { "name": "A股科创主题", "driver": "科创板/创业板", "shortLabel": "相对走强(独立)", "shortScore": 62, "midLabel": "政策驱动独立行情", "midScore": 72, "risk": "中" },
-        "G5": { "name": "新兴/亚洲/混合", "driver": "MSCI EM/ACWI", "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中" }
-      },
-      "funds": [
-        { "code": "513100", "name": "纳斯达克100ETF", "group": "G1", "measured": true, "shortLabel": "超卖待反弹", "shortScore": 40, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "实测：RSI6=26.3贴布林下轨，MA120/250上方" },
-        { "code": "017436", "name": "华宝纳斯达克精选", "group": "G1", "measured": false, "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "继承G1(QQQ)" },
-        { "code": "006555", "name": "浦银安盛全球智能科技", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2(XLK+SOXX)" },
-        { "code": "270023", "name": "广发全球精选", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
-        { "code": "017730", "name": "嘉实全球产业升级", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "偏科技制造的全球主动" },
-        { "code": "000043", "name": "嘉实美国成长", "group": "G1", "measured": false, "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "罗素1000成长，继承G1" },
-        { "code": "161128", "name": "易方达标普信息科技", "group": "G2", "measured": true, "shortLabel": "超卖待反弹", "shortScore": 37, "midLabel": "长牛结构未破", "midScore": 70, "risk": "高", "note": "实测：RSI6=32.8贴下轨，MA120/250上方" },
-        { "code": "161130", "name": "易方达纳斯达克100", "group": "G1", "measured": true, "shortLabel": "超卖待反弹", "shortScore": 39, "midLabel": "长牛结构未破", "midScore": 78, "risk": "中低", "note": "实测：贴MA60，长牛未破" },
-        { "code": "012920", "name": "易方达全球成长精选", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
-        { "code": "006373", "name": "国富全球科技", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
-        { "code": "539002", "name": "建信新兴市场混合", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5；30日收益最弱(-16.17%)" },
-        { "code": "001668", "name": "汇添富全球移动互联", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
-        { "code": "005698", "name": "华夏全球科技先锋", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2；30日收益-19.94%最惨" },
-        { "code": "002891", "name": "华夏移动互联", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2；30日-17.06%" },
-        { "code": "016701", "name": "银华海外数字经济", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2" },
-        { "code": "501226", "name": "长城全球新能源车", "group": "G3", "measured": false, "shortLabel": "弱势", "shortScore": 30, "midLabel": "中性偏弱", "midScore": 55, "risk": "中", "note": "无序列，定性；受关税/需求担忧" },
-        { "code": "017145", "name": "华宝海外新能源汽车", "group": "G3", "measured": false, "shortLabel": "弱势", "shortScore": 30, "midLabel": "中性偏弱", "midScore": 55, "risk": "中", "note": "继承G3" },
-        { "code": "501312", "name": "华宝海外科技", "group": "G2", "measured": true, "shortLabel": "超卖但趋势强", "shortScore": 30, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "实测：CCI=-270/RSI6=19.9极度超卖，弹性最大" },
-        { "code": "008253", "name": "华宝致远混合", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
-        { "code": "017093", "name": "景顺长城纳斯达克科技", "group": "G1", "measured": false, "shortLabel": "超卖待反弹", "shortScore": 38, "midLabel": "长牛结构未破", "midScore": 80, "risk": "中低", "note": "纳指科技集中(类QQQ子集)，继承G1" },
-        { "code": "016664", "name": "天弘全球高端制造", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
-        { "code": "006751", "name": "富国全球科技互联网", "group": "G2", "measured": false, "shortLabel": "分化·超卖", "shortScore": 33, "midLabel": "长牛但结构最弱", "midScore": 68, "risk": "高", "note": "继承G2；当日-8.14%最猛" },
-        { "code": "457001", "name": "国富亚洲机会", "group": "G5", "measured": false, "shortLabel": "跟随反弹", "shortScore": 40, "midLabel": "低beta修正", "midScore": 60, "risk": "中", "note": "继承G5" },
-        { "code": "007349", "name": "华夏科技创新A", "group": "G4", "measured": false, "shortLabel": "相对走强(独立)", "shortScore": 62, "midLabel": "政策驱动独立行情", "midScore": 72, "risk": "中", "note": "与美股分化，30日+12.9%；科创板政策驱动" },
-        { "code": "007345", "name": "富国科技创新A", "group": "G4", "measured": false, "shortLabel": "相对走强(独立)", "shortScore": 62, "midLabel": "政策驱动独立行情", "midScore": 72, "risk": "中", "note": "与美股分化，30日+0.51%" }
-      ]
-    };
-
-    let SIGNALS = FALLBACK_SIGNALS;
-    let NAV_DATA = null;
-    let BACKTEST = null;
-
-    const GROUP_META = { G1: 'success', G2: 'danger', G3: 'warning', G4: 'indigo', G5: 'primary' };
-    const RISK_ORDER = { '中低': 1, '中': 2, '高': 3 };
-    const state = { search: '', group: 'all', risk: 'all', sortBy: 'shortScore', compare: new Set() };
-    const charts = {};
-
-    function colorClass(score, type = 'bg') {
-      if (score >= 60) return `${type}-success-500`;
-      if (score >= 40) return `${type}-warning-500`;
-      return `${type}-danger-500`;
-    }
-    function riskColor(risk) {
-      if (risk === '高') return 'bg-danger-100 text-danger-700 border-danger-200';
-      if (risk === '中低') return 'bg-success-100 text-success-700 border-success-200';
-      return 'bg-warning-100 text-warning-700 border-warning-200';
-    }
-    function groupBadgeClass(group) {
-      return ({ G1: 'bg-success-100 text-success-700', G2: 'bg-danger-100 text-danger-700', G3: 'bg-warning-100 text-warning-700', G4: 'bg-indigo-100 text-indigo-700', G5: 'bg-primary-100 text-primary-700' })[group] || 'bg-slate-100 text-slate-700';
-    }
-    function scoreColorText(score) {
-      if (score >= 60) return 'text-success-600';
-      if (score >= 40) return 'text-warning-600';
-      return 'text-danger-600';
-    }
-    function renderScoreBar(score) {
-      return `<div class="score-bar w-20 sm:w-24" aria-hidden="true"><i class="${colorClass(score)}" style="width:${score}%"></i></div><span class="text-xs text-slate-500 ml-2">${score}</span>`;
-    }
-    function fmtPct(x) { return (x >= 0 ? '+' : '') + x.toFixed(2) + '%'; }
-
-    // ===== Data loading =====
-    async function loadData() {
-      try {
-        const r = await fetch('fund_signals.json', { cache: 'no-store' });
-        if (r.ok) SIGNALS = await r.json();
-      } catch (e) { /* use fallback */ }
-      try {
-        const r = await fetch('fund_nav.json', { cache: 'no-store' });
-        if (r.ok) NAV_DATA = await r.json();
-      } catch (e) { NAV_DATA = null; }
-      try {
-        const r = await fetch('backtest.json', { cache: 'no-store' });
-        if (r.ok) BACKTEST = await r.json();
-      } catch (e) { BACKTEST = null; }
-      if (SIGNALS.meta && SIGNALS.meta.asOf) {
-        document.getElementById('asOfDate').textContent = SIGNALS.meta.asOf;
-        document.getElementById('asOfDate').setAttribute('datetime', SIGNALS.meta.asOf);
-        document.getElementById('updateBadge').textContent = `每日自动更新 · 当前已同步至 ${SIGNALS.meta.asOf}`;
-      }
-    }
-
-    // ===== Renderers =====
-    function renderGroupCards() {
-      const container = document.getElementById('groupCards');
-      const matrix = document.getElementById('groupMiniMatrix');
-      const groups = Object.entries(SIGNALS.groups).map(([k, g]) => ({ key: k, ...g }));
-      container.innerHTML = groups.map(g => `
-        <article class="group-card bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition cursor-pointer" data-group="${g.key}" tabindex="0" role="button" aria-pressed="false" aria-label="筛选 ${g.key} ${g.name}">
-          <div class="flex items-center justify-between mb-3">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg ${groupBadgeClass(g.key)}">${g.key}</span>
-            <span class="text-xs font-medium px-2 py-0.5 rounded-full border ${riskColor(g.risk)}">${g.risk}风险</span>
-          </div>
-          <h3 class="font-semibold text-slate-900 mb-1">${g.name}</h3>
-          <p class="text-xs text-slate-500 mb-3">驱动：${g.driver}</p>
-          <div class="space-y-2">
-            <div>
-              <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">短期</span><span class="font-medium ${scoreColorText(g.shortScore)}">${g.shortLabel}</span></div>
-              ${renderScoreBar(g.shortScore)}
-            </div>
-            <div>
-              <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">中期</span><span class="font-medium ${scoreColorText(g.midScore)}">${g.midLabel}</span></div>
-              ${renderScoreBar(g.midScore)}
-            </div>
-          </div>
-        </article>
-      `).join('');
-      matrix.innerHTML = groups.map(g => `
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-primary-100">${g.key} ${g.name}</span>
-          <span class="font-medium ${g.shortScore >= 50 ? 'text-green-300' : 'text-yellow-300'}">${g.shortLabel}</span>
-        </div>
-      `).join('');
-      container.querySelectorAll('.group-card').forEach(card => {
-        card.addEventListener('click', () => {
-          document.getElementById('groupFilter').value = card.dataset.group;
-          state.group = card.dataset.group;
-          updateState();
-          document.getElementById('screener-title').scrollIntoView({ behavior: 'smooth' });
-        });
-        card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
-      });
-    }
-
-    function filteredFunds() {
-      let list = SIGNALS.funds.slice();
-      if (state.search) {
-        const s = state.search.toLowerCase();
-        list = list.filter(f => f.code.includes(s) || f.name.toLowerCase().includes(s));
-      }
-      if (state.group !== 'all') list = list.filter(f => f.group === state.group);
-      if (state.risk !== 'all') list = list.filter(f => f.risk === state.risk);
-      const k = state.sortBy;
-      list.sort((a, b) => {
-        if (k === 'code') return a.code.localeCompare(b.code);
-        if (k === 'risk') return RISK_ORDER[a.risk] - RISK_ORDER[b.risk];
-        if (k === 'group') return a.group.localeCompare(b.group);
-        return b[k] - a[k];
-      });
-      return list;
-    }
-
-    function renderActiveFilters() {
-      const el = document.getElementById('activeFilters');
-      const chips = [];
-      if (state.search) chips.push({ key: 'search', label: `搜索：${state.search}` });
-      if (state.group !== 'all') chips.push({ key: 'group', label: `${state.group} ${SIGNALS.groups[state.group].name}` });
-      if (state.risk !== 'all') chips.push({ key: 'risk', label: `风险：${state.risk}` });
-      el.innerHTML = chips.length === 0 ? '' : chips.map(c => `
-        <button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-xs text-slate-700 hover:bg-slate-200 transition" data-filter="${c.key}" aria-label="清除 ${c.label}">
-          ${c.label}
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      `).join('');
-      el.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
-        const key = btn.dataset.filter;
-        if (key === 'search') { state.search = ''; document.getElementById('searchInput').value = ''; }
-        if (key === 'group') { state.group = 'all'; document.getElementById('groupFilter').value = 'all'; }
-        if (key === 'risk') { state.risk = 'all'; document.getElementById('riskFilter').value = 'all'; }
-        updateState();
-      }));
-      const reset = document.getElementById('resetGroupFilter');
-      if (state.group !== 'all') reset.classList.remove('hidden'); else reset.classList.add('hidden');
-    }
-
-    function renderFundTable() {
-      const list = filteredFunds();
-      document.getElementById('resultCount').textContent = `共 ${list.length} 只`;
-      const tbody = document.getElementById('fundTableBody');
-      tbody.innerHTML = list.map(f => {
-        const g = SIGNALS.groups[f.group];
-        const sel = state.compare.has(f.code);
-        return `
-          <tr class="fund-row hover:bg-slate-50 transition" data-code="${f.code}">
-            <td class="px-4 py-3" data-label="对比"><input type="checkbox" class="compare-checkbox rounded border-slate-300 text-primary-600 focus:ring-primary-500" value="${f.code}" ${sel ? 'checked' : ''} aria-label="选择 ${f.name} 对比" /></td>
-            <td class="px-4 py-3" data-label="基金">
-              <div class="font-semibold text-slate-900 detail-link" data-code="${f.code}" role="button" tabindex="0" aria-label="查看 ${f.name} 净值曲线">${f.name}</div>
-              <div class="text-xs text-slate-500">${f.code}</div>
-            </td>
-            <td class="px-4 py-3" data-label="分组"><button class="text-xs font-medium px-2 py-1 rounded-md ${groupBadgeClass(f.group)} hover:opacity-80 transition filter-group" data-group="${f.group}">${f.group} · ${g.name}</button></td>
-            <td class="px-4 py-3" data-label="短期动能"><div class="flex items-center gap-2"><span class="text-xs font-medium ${scoreColorText(f.shortScore)}">${f.shortLabel}</span>${renderScoreBar(f.shortScore)}</div></td>
-            <td class="px-4 py-3" data-label="中期结构"><div class="flex items-center gap-2"><span class="text-xs font-medium ${scoreColorText(f.midScore)}">${f.midLabel}</span>${renderScoreBar(f.midScore)}</div></td>
-            <td class="px-4 py-3" data-label="风险"><span class="text-xs font-medium px-2 py-0.5 rounded-full border ${riskColor(f.risk)}">${f.risk}</span></td>
-            <td class="px-4 py-3" data-label="数据来源"><span class="text-xs ${f.measured ? 'text-success-600 font-medium' : 'text-slate-500'}">${f.measured ? '实测' : '分组代理'}</span></td>
-            <td class="px-4 py-3" data-label="说明"><span class="text-xs text-slate-600">${f.note}</span></td>
-          </tr>
-        `;
-      }).join('');
-      tbody.querySelectorAll('.compare-checkbox').forEach(cb => cb.addEventListener('change', e => {
-        if (e.target.checked) state.compare.add(e.target.value); else state.compare.delete(e.target.value);
-        updateCompareBar(); renderFundTable();
-      }));
-      tbody.querySelectorAll('.filter-group').forEach(btn => btn.addEventListener('click', () => {
-        document.getElementById('groupFilter').value = btn.dataset.group;
-        state.group = btn.dataset.group; updateState();
-      }));
-      tbody.querySelectorAll('.detail-link').forEach(el => {
-        el.addEventListener('click', () => openNavModal(el.dataset.code));
-        el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openNavModal(el.dataset.code); } });
-      });
-    }
-
-    function updateCompareBar() {
-      const bar = document.getElementById('compareBar');
-      document.getElementById('compareCount').textContent = state.compare.size;
-      if (state.compare.size > 0) bar.classList.remove('hidden'); else bar.classList.add('hidden');
-    }
-
-    // ===== NAV modal =====
-    function getNavSeries(code) {
-      if (!NAV_DATA) return null;
-      const fund = NAV_DATA.series.find(s => s.code === code);
-      if (fund) return fund;
-      const f = SIGNALS.funds.find(x => x.code === code);
-      if (f) {
-        const proxy = NAV_DATA.series.find(s => s.code === proxyForGroup(f.group));
-        if (proxy) return { ...proxy, code, name: f.name + '（组代理）' };
-      }
-      return null;
-    }
-    function proxyForGroup(g) {
-      return ({ G1: '513100', G2: '161128', G3: '501226', G4: '007349', G5: '270023' })[g] || '513100';
-    }
-    function openNavModal(code) {
-      const f = SIGNALS.funds.find(x => x.code === code);
-      const series = getNavSeries(code);
-      document.getElementById('navSubtitle').textContent = `${f.name} · ${f.code} · ${SIGNALS.groups[f.group].name}`;
-      const modal = document.getElementById('navModal');
-      modal.classList.remove('hidden');
-      if (!series) {
-        document.getElementById('navChart').parentElement.innerHTML = '<p class="text-sm text-slate-500">暂无净值数据（DEMO 模式下该基金使用分组代理，请接入真实数据）。</p>';
-        document.getElementById('navStats').innerHTML = '';
-        return;
-      }
-      const ctx = document.getElementById('navChart');
-      if (charts.nav) charts.nav.destroy();
-      const returns = series.nav.map((v, i) => i === 0 ? 0 : (v / series.nav[i - 1] - 1) * 100);
-      const maxDD = computeMaxDrawdown(series.nav);
-      const totalRet = (series.nav[series.nav.length - 1] / series.nav[0] - 1) * 100;
-      charts.nav = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: series.dates,
-          datasets: [{ label: '净值', data: series.nav, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.08)', fill: true, tension: 0.3, pointRadius: 2 }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v.toFixed(2) } } } }
-      });
-      document.getElementById('navStats').innerHTML = `
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">区间收益</div><div class="font-bold ${totalRet >= 0 ? 'text-success-600' : 'text-danger-600'}">${fmtPct(totalRet)}</div></div>
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">最大回撤</div><div class="font-bold text-danger-600">${maxDD.toFixed(2)}%</div></div>
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">最新净值</div><div class="font-bold text-slate-900">${series.nav[series.nav.length - 1].toFixed(3)}</div></div>
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">日均波动</div><div class="font-bold text-slate-900">${std(returns).toFixed(2)}%</div></div>
-      `;
-    }
-    function computeMaxDrawdown(arr) {
-      let peak = arr[0], mdd = 0;
-      for (const v of arr) { if (v > peak) peak = v; const dd = (v / peak - 1) * 100; if (dd < mdd) mdd = dd; }
-      return mdd;
-    }
-    function std(arr) {
-      const m = arr.reduce((a, b) => a + b, 0) / arr.length;
-      return Math.sqrt(arr.reduce((a, b) => a + (b - m) ** 2, 0) / arr.length);
-    }
-
-    // ===== Comparison modal (improved) =====
-    function renderComparison() {
-      const selected = SIGNALS.funds.filter(f => state.compare.has(f.code));
-      const content = document.getElementById('compareContent');
-      content.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${Math.min(selected.length, 4)} gap-4">` + selected.map(f => {
-        const g = SIGNALS.groups[f.group];
-        return `
-          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
-            <div class="font-bold text-slate-900 mb-1">${f.name}</div>
-            <div class="text-xs text-slate-500 mb-4">${f.code} · ${g.name}</div>
-            <div class="space-y-3">
-              <div><div class="text-xs text-slate-500 mb-1">短期动能</div><div class="flex items-center gap-2"><span class="text-sm font-medium ${scoreColorText(f.shortScore)}">${f.shortLabel}</span>${renderScoreBar(f.shortScore)}</div></div>
-              <div><div class="text-xs text-slate-500 mb-1">中期结构</div><div class="flex items-center gap-2"><span class="text-sm font-medium ${scoreColorText(f.midScore)}">${f.midLabel}</span>${renderScoreBar(f.midScore)}</div></div>
-              <div><div class="text-xs text-slate-500 mb-1">风险等级</div><span class="text-xs font-medium px-2 py-0.5 rounded-full border ${riskColor(f.risk)}">${f.risk}</span></div>
-              <div><div class="text-xs text-slate-500 mb-1">数据来源</div><div class="text-xs ${f.measured ? 'text-success-600 font-medium' : 'text-slate-600'}">${f.measured ? '实测' : '分组代理'}</div></div>
-              <div><div class="text-xs text-slate-500 mb-1">说明</div><div class="text-xs text-slate-600">${f.note}</div></div>
-            </div>
-          </div>`;
-      }).join('') + `</div>`;
-
-      // NAV comparison (normalized)
-      const palette = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed'];
-      const navSets = selected.map((f, i) => {
-        const s = getNavSeries(f.code);
-        if (!s) return null;
-        const base = s.nav[0];
-        return { label: f.name, data: s.nav.map(v => (v / base - 1) * 100), borderColor: palette[i % palette.length], backgroundColor: 'transparent', tension: 0.3, pointRadius: 1, borderWidth: 2 };
-      }).filter(Boolean);
-      const labels = (getNavSeries(selected[0].code) || {}).dates || [];
-      if (charts.cmpNav) charts.cmpNav.destroy();
-      charts.cmpNav = new Chart(document.getElementById('compareNavChart'), {
-        type: 'line',
-        data: { labels, datasets: navSets },
-        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, scales: { y: { ticks: { callback: v => v.toFixed(0) + '%' } } } }
-      });
-
-      // Radar
-      const radarSets = selected.map((f, i) => {
-        const resilience = f.risk === '中低' ? 90 : f.risk === '中' ? 65 : 40;
-        const confidence = f.measured ? 95 : 65;
-        return {
-          label: f.name,
-          data: [f.shortScore, f.midScore, resilience, confidence],
-          borderColor: palette[i % palette.length],
-          backgroundColor: palette[i % palette.length] + '22',
-          borderWidth: 2, pointRadius: 2
-        };
-      });
-      if (charts.cmpRadar) charts.cmpRadar.destroy();
-      charts.cmpRadar = new Chart(document.getElementById('compareRadarChart'), {
-        type: 'radar',
-        data: { labels: ['短期动能', '中期结构', '抗跌性', '数据可信度'], datasets: radarSets },
-        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, font: { size: 9 } } } } }
-      });
-    }
-
-    // ===== Backtest =====
-    function renderBacktest() {
-      if (!BACKTEST) { document.getElementById('backtestStats').innerHTML = '<p class="text-sm text-slate-500">回测数据未加载。</p>'; return; }
-      const s = BACKTEST.summary;
-      document.getElementById('backtestStats').innerHTML = `
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">策略</div><div class="font-bold text-slate-900 text-sm">${s.signalName}</div></div>
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">持有</div><div class="font-bold text-slate-900 text-sm">${s.holdDays} 日</div></div>
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">胜率</div><div class="font-bold text-success-600 text-sm">${(s.winRate * 100).toFixed(1)}%</div></div>
-        <div class="bg-slate-50 rounded-lg p-3"><div class="text-xs text-slate-500">平均收益</div><div class="font-bold ${s.avgReturnPct >= 0 ? 'text-success-600' : 'text-danger-600'} text-sm">${fmtPct(s.avgReturnPct)}</div></div>
-      `;
-      document.getElementById('backtestTable').innerHTML = BACKTEST.byGroup.map(g => `
-        <tr>
-          <td class="px-3 py-2"><span class="text-xs font-medium px-2 py-0.5 rounded-md ${groupBadgeClass(g.group)}">${g.group}</span> ${g.name}</td>
-          <td class="px-3 py-2 text-right">${g.sampleSignals}</td>
-          <td class="px-3 py-2 text-right font-medium text-success-600">${(g.winRate * 100).toFixed(1)}%</td>
-          <td class="px-3 py-2 text-right font-medium ${g.avgReturnPct >= 0 ? 'text-success-600' : 'text-danger-600'}">${fmtPct(g.avgReturnPct)}</td>
-        </tr>
-      `).join('');
-      if (charts.bt) charts.bt.destroy();
-      charts.bt = new Chart(document.getElementById('backtestChart'), {
-        type: 'bar',
-        data: {
-          labels: BACKTEST.byGroup.map(g => g.group),
-          datasets: [{ label: '胜率(%)', data: BACKTEST.byGroup.map(g => +(g.winRate * 100).toFixed(1)), backgroundColor: '#2563eb', borderRadius: 4 }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } }
-      });
-    }
-
-    function updateState() { renderActiveFilters(); renderFundTable(); }
-
-    // ===== Dialogs =====
-    const methodologyDialog = document.getElementById('methodologyDialog');
-    document.getElementById('methodologyBtn').addEventListener('click', () => methodologyDialog.classList.remove('hidden'));
-    document.getElementById('closeMethodology').addEventListener('click', () => methodologyDialog.classList.add('hidden'));
-    document.getElementById('methodologyBackdrop').addEventListener('click', () => methodologyDialog.classList.add('hidden'));
-
-    const navModal = document.getElementById('navModal');
-    document.getElementById('closeNav').addEventListener('click', () => navModal.classList.add('hidden'));
-    document.getElementById('navBackdrop').addEventListener('click', () => navModal.classList.add('hidden'));
-
-    const compareModal = document.getElementById('compareModal');
-    document.getElementById('viewCompareBtn').addEventListener('click', () => { renderComparison(); compareModal.classList.remove('hidden'); });
-    document.getElementById('closeCompare').addEventListener('click', () => compareModal.classList.add('hidden'));
-    document.getElementById('compareBackdrop').addEventListener('click', () => compareModal.classList.add('hidden'));
-    document.getElementById('clearCompareBtn').addEventListener('click', () => { state.compare.clear(); updateCompareBar(); renderFundTable(); });
-
-    ['searchInput', 'groupFilter', 'riskFilter', 'sortBy'].forEach(id => {
-      document.getElementById(id).addEventListener(id === 'searchInput' ? 'input' : 'change', e => { state[id.replace('Filter', '').replace('Input', '') === 'search' ? 'search' : id === 'groupFilter' ? 'group' : id === 'riskFilter' ? 'risk' : 'sortBy'] = e.target.value; updateState(); });
-    });
-    document.getElementById('resetGroupFilter').addEventListener('click', () => { state.group = 'all'; document.getElementById('groupFilter').value = 'all'; updateState(); });
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { methodologyDialog.classList.add('hidden'); navModal.classList.add('hidden'); compareModal.classList.add('hidden'); } });
-
-    // ===== Init =====
-    (async function init() {
-      await loadData();
-      renderGroupCards();
-      renderBacktest();
-      updateState();
-      updateCompareBar();
-    })();
-  </script>
+  <script src="js/realdata.js?v=20260718b"></script>
+  <script src="js/data.js?v=20260718c"></script>
+  <script src="js/market_snapshot.js?v=20260718a"></script>
+  <script src="js/news_deep.js?v=20260718a"></script>
+  <script src="js/holdings.js?v=20260718c"></script>
+  <script src="js/index_temperature.js?v=20260718i"></script>
+  <script src="js/etf_board.js?v=20260718a"></script>
+  <script src="js/etf_board.js?v=20260718a"></script>
+  <script src="js/app.js?v=20260718j"></script>
+  <script src="js/signal_layer.js?v=20260719a"></script>
 </body>
 </html>
+<!-- build trigger 1784377963 -->
