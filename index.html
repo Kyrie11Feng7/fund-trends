@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
   <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
-  <link rel="stylesheet" href="css/style.css?v=20260718l">
+  <link rel="stylesheet" href="css/style.css?v=20260719a">
   <script src="js/lib/chart.umd.min.js"></script>
 </head>
 <body>
@@ -29,6 +29,9 @@
         <a href="#sentiment" class="nav-link">情绪指标</a>
         <a href="#etfBoard" class="nav-link">科技ETF榜单</a>
         <a href="#signals" class="nav-link">前瞻信号</a>
+        <a href="#analytics" class="nav-link">风险指标</a>
+        <a href="#portfolio" class="nav-link">组合</a>
+        <a href="#correlation" class="nav-link">相关性</a>
         <a href="#backtest" class="nav-link">回测参考</a>
       </div>
       <button class="nav-toggle" aria-label="菜单">
@@ -36,6 +39,9 @@
       </button>
     </div>
   </nav>
+
+  <!-- ============ 数据时效横幅（P0-4） ============ -->
+  <div id="dataBanner" class="data-banner ok">数据时效校验中…</div>
 
   <!-- ============ Hero / 市场概览 ============ -->
   <section id="hero" class="hero">
@@ -544,6 +550,41 @@
       </div>
     </div>
   </section>
+  <!-- ============ 基金分析（风险调整指标）P1-1/P1-2 ============ -->
+  <section id="analytics" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">基金分析 · 风险调整指标</h2>
+        <p class="section-desc">基于 <b>fund_nav.json</b> 真实净值实时计算：近30日收益、最大回撤、年化波动，以及经风险调整后的 <b>Sharpe / Sortino / Calmar</b>。可点击表头排序、按类型筛选，辅助横向对比与选基。</p>
+      </div>
+      <p class="indices-date">口径：无风险利率假设 <b>2%</b>，按 <b>252</b> 交易日年化；Sharpe=(年化收益−rf)/年化波动，Sortino 用下行波动，Calmar=年化收益/|最大回撤|。样本不足时显示「样本不足」。</p>
+      <div id="analyticsTableWrap"></div>
+    </div>
+  </section>
+
+  <!-- ============ 模拟组合 / 自选对比 P1-3 ============ -->
+  <section id="portfolio" class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">模拟组合 · 自选对比</h2>
+        <p class="section-desc">勾选 ≥2 只基金，生成<b>等权组合收益曲线</b>与<b>综合最大回撤</b>，并按名称保存/加载多个组合。组合与成分基金同屏对比，先看分散效果再决策。</p>
+      </div>
+      <div class="portfolio-picker" id="portfolioPicker"></div>
+      <div id="portfolioBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ 基金相关性矩阵 P1-5 ============ -->
+  <section id="correlation" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">基金相关性矩阵</h2>
+        <p class="section-desc">基于真实净值日收益计算两两相关系数。高度正相关（&gt;0.8）的基金分散效果有限——<b>买多只 ≈ 买一只</b>，组合配置时应降低重复暴露。</p>
+      </div>
+      <div id="correlationBody"></div>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
@@ -595,6 +636,8 @@
           <a href="https://cdn.jsdelivr.net/gh/Kyrie11Feng7/fund-trends@main/index.html" target="_blank" rel="noopener" style="color:var(--color-up)">cdn.jsdelivr.net/gh/Kyrie11Feng7/fund-trends</a>
         </p>
 
+        <div id="dataHealth"></div>
+
         <p class="copyright">© 2026 科技基金趋势分析 · Powered by WorkBuddy</p>
       </div>
     </div>
@@ -614,9 +657,14 @@
   <script src="js/holdings.js?v=20260718c"></script>
   <script src="js/index_temperature.js?v=20260718i"></script>
   <script src="js/etf_board.js?v=20260718a"></script>
-  <script src="js/etf_board.js?v=20260718a"></script>
   <script src="js/app.js?v=20260718j"></script>
   <script src="js/signal_layer.js?v=20260719a"></script>
+  <script src="js/analytics.js?v=20260719a"></script>
+  <script src="js/overview_tools.js?v=20260719a"></script>
+  <script src="js/portfolio.js?v=20260719a"></script>
+  <script src="js/correlation.js?v=20260719a"></script>
+  <script src="js/freshness.js?v=20260719a"></script>
+  <script src="js/search.js?v=20260719a"></script>
 </body>
 </html>
 <!-- build trigger 1784377963 -->
