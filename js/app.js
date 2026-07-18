@@ -242,7 +242,9 @@
         const extra = idx.extra
           ? `<div class="index-sub">5日 ${
               idx.extra.w5 >= 0 ? "+" : ""
-            }${idx.extra.w5}% · YTD +${idx.extra.ytd}%</div>`
+            }${idx.extra.w5 != null ? idx.extra.w5 : "—"}% · YTD ${
+              idx.extra.ytd != null ? (idx.extra.ytd >= 0 ? "+" : "") + idx.extra.ytd : "—"
+            }%</div>`
           : "";
         return `
           <div class="index-card">
@@ -1667,7 +1669,7 @@
 
     if (toggle) {
       toggle.addEventListener("click", () => {
-        navLinks.classList.toggle("mobile-open");
+        navLinks.classList.toggle("open");
       });
     }
   }
