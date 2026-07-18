@@ -1,32 +1,35 @@
 #!/usr/bin/env node
 /**
- * 每日数据管线：拉取底层指数技术面 → 计算趋势信号 → 写出 fund_signals.json
+ * 每日数据管线 v2：拉取每只基金真实净值（天天基金公开接口）→ 计算技术面趋势信号 → 写出 fund_signals.json
  *
  * 运行方式（本地）：
- *   node pipeline.js
+ *   NODE_TLS_REJECT_UNAUTHORIZED=0 node pipeline.js      # 沙箱需绕过 TLS 拦截
+ *   node pipeline.js                                     # 正常环境（含 GitHub Actions）
  *
  * 在 CI（GitHub Actions）中由 .github/workflows/daily-update.yml 定时触发，
- * 需要仓库 Secret GH_TOKEN（用于提交更新后的 fund_signals.json）。
+ * 需要仓库 Secret GITHUB_TOKEN（workflow 已用 secrets.GITHUB_TOKEN 自动提供），
+ * 由 workflow 的 git add/commit/push 步骤负责提交。
  *
- * 数据源：westock-data（npx westock-data-clawhub）。若无法访问，可替换为自有行情 API。
+ * 数据源：天天基金 F10 净值历史接口（api.fund.eastmoney.com/f10/lsjz），公开、无需鉴权，
+ *         仅需带 Referer 头。每只基金用「累计净值 LJJZ」作为连续价格序列计算技术指标。
  */
-const { execFileSync } = require('child_process');
+
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const WESTOCK = 'npx -y westock-data-clawhub@1.0.4';
 const OUT = path.join(__dirname, 'fund_signals.json');
 
-// 组 → 底层驱动标的（美股代码用 us 前缀）
-const GROUP_DRIVERS = {
-  G1: { symbol: 'usQQQ', name: '纳指100/美股成长', driver: 'QQQ', risk: '中低' },
-  G2: { symbol: 'usXLK,usSOXX', name: '信息科技/半导体/AI', driver: 'XLK+SOXX', risk: '高' },
-  G3: { symbol: 'usQQQ', name: '全球新能源车', driver: '海外NEV指数', risk: '中' }, // 近似代理，按需替换
-  G4: { symbol: 'usQQQ', name: 'A股科创主题', driver: '科创板/创业板', risk: '中' }, // 近似代理，按需替换
-  G5: { symbol: 'usQQQ', name: '新兴/亚洲/混合', driver: 'MSCI EM/ACWI', risk: '中' }
+// ───────────────────────────── 基金映射 ─────────────────────────────
+// 组元数据（risk 为该组风险基线，真实风险会在每只基金上按回撤/波动微调）
+const GROUP_META = {
+  G1: { name: '纳指100/美股成长', driver: '纳斯达克100', risk: '中低' },
+  G2: { name: '信息科技/半导体/AI', driver: '标普信息科技/费城半导体', risk: '高' },
+  G3: { name: '全球新能源车', driver: '海外新能源车产业链', risk: '中' },
+  G4: { name: 'A股科创主题', driver: '科创板/创业板', risk: '中' },
+  G5: { name: '新兴/亚洲/混合', driver: 'MSCI 新兴/亚洲股', risk: '中' }
 };
 
-// 25 只基金 → 分组映射（与前端 fund_signals.json 的 funds 一致）
 const FUND_GROUP = {
   '513100': 'G1', '017436': 'G1', '000043': 'G1', '161130': 'G1', '017093': 'G1',
   '006555': 'G2', '017730': 'G2', '161128': 'G2', '012920': 'G2', '006373': 'G2',
@@ -44,7 +47,105 @@ const FUND_NAME = {
   '270023': '广发全球精选', '539002': '建信新兴市场混合', '008253': '华宝致远混合', '016664': '天弘全球高端制造', '457001': '国富亚洲机会'
 };
 
-/** 计算趋势信号（短期动能 + 中期结构） */
+// ───────────────────────────── 技术指标库 ─────────────────────────────
+const SMA = (a, n) => (a.length < n ? null : a.slice(a.length - n).reduce((s, v) => s + v, 0) / n);
+
+function EMA(a, n) {
+  if (a.length < n) return null;
+  const k = 2 / (n + 1);
+  let e = a.slice(0, n).reduce((s, v) => s + v, 0) / n;
+  for (let i = n; i < a.length; i++) e = a[i] * k + e * (1 - k);
+  return e;
+}
+// Wilder 平滑（RMA）
+function RMA(a, n) {
+  if (a.length < n) return null;
+  let s = a.slice(0, n).reduce((x, v) => x + v, 0) / n;
+  for (let i = n; i < a.length; i++) s = (s * (n - 1) + a[i]) / n;
+  return s;
+}
+
+function MACD(closes) {
+  const ema12 = EMA(closes, 12), ema26 = EMA(closes, 26);
+  if (ema12 == null || ema26 == null) return { dif: null, dea: null, hist: null };
+  const dif = ema12 - ema26;
+  // DEA = DIF 的 9 日 EMA
+  const difSeries = [];
+  for (let i = 0; i < closes.length; i++) {
+    const e12 = EMA(closes.slice(0, i + 1), 12);
+    const e26 = EMA(closes.slice(0, i + 1), 26);
+    if (e12 != null && e26 != null) difSeries.push(e12 - e26);
+  }
+  const dea = EMA(difSeries, 9);
+  const hist = (difSeries.length && dea != null) ? (dif - dea) * 2 : null;
+  return { dif, dea, hist };
+}
+
+function RSI(closes, n = 6) {
+  if (closes.length <= n) return 50;
+  let gain = 0, loss = 0;
+  for (let i = closes.length - n; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    if (d >= 0) gain += d; else loss -= d;
+  }
+  if (loss === 0) return 100;
+  const rs = gain / loss;
+  return 100 - 100 / (1 + rs);
+}
+
+function BOLL(closes, n = 20, k = 2) {
+  if (closes.length < n) return { mid: null, upper: null, lower: null };
+  const slice = closes.slice(closes.length - n);
+  const mid = slice.reduce((s, v) => s + v, 0) / n;
+  const variance = slice.reduce((s, v) => s + (v - mid) ** 2, 0) / n;
+  const sd = Math.sqrt(variance);
+  return { mid, upper: mid + k * sd, lower: mid - k * sd };
+}
+
+// close-only 近似 ADX（用相邻净值变动构造 ±DM / TR），14 日
+function ADX(closes, n = 14) {
+  if (closes.length < n + 2) return 50; // 数据不足给中性值
+  const tr = [], pdm = [], mdm = [];
+  for (let i = 1; i < closes.length; i++) {
+    const chg = closes[i] - closes[i - 1];
+    tr.push(Math.abs(chg));
+    pdm.push(chg > 0 ? chg : 0);
+    mdm.push(chg < 0 ? -chg : 0);
+  }
+  let atr = RMA(tr, n), pdi = RMA(pdm, n), mdi = RMA(mdm, n);
+  if (atr == null || pdi == null || mdi == null || atr === 0) return 50;
+  const plusDI = (pdi / atr) * 100, minusDI = (mdi / atr) * 100;
+  const dx = (Math.abs(plusDI - minusDI) / (plusDI + minusDI)) * 100;
+  // DX 序列再做 RMA 平滑得 ADX（用尾部 n 个 DX 近似）
+  const dxArr = [];
+  for (let i = n; i < tr.length; i++) {
+    const a = RMA(tr.slice(0, i + 1), n), p = RMA(pdm.slice(0, i + 1), n), m = RMA(mdm.slice(0, i + 1), n);
+    if (a && a > 0) { const pd = (p / a) * 100, md = (m / a) * 100; dxArr.push((Math.abs(pd - md) / (pd + md)) * 100); }
+  }
+  const adx = RMA(dxArr, n);
+  return adx == null ? 50 : adx;
+}
+
+function MAX_DRAWDOWN(equity) {
+  let peak = equity[0], mdd = 0;
+  for (const v of equity) {
+    if (v > peak) peak = v;
+    const d = (v / peak - 1) * 100;
+    if (d < mdd) mdd = d;
+  }
+  return mdd;
+}
+
+function ANNUAL_VOL(closes) {
+  const rets = [];
+  for (let i = 1; i < closes.length; i++) rets.push(closes[i] / closes[i - 1] - 1);
+  if (rets.length < 2) return 0;
+  const mean = rets.reduce((s, v) => s + v, 0) / rets.length;
+  const variance = rets.reduce((s, v) => s + (v - mean) ** 2, 0) / rets.length;
+  return Math.sqrt(variance) * Math.sqrt(242) * 100;
+}
+
+// ───────────────────────────── 信号判定 ─────────────────────────────
 function computeTrendSignal(t) {
   const oversold = t.rsi6 < 35 && t.close <= t.bollLower;
   const belowShort = t.close < t.ma20 && t.macd < 0;
@@ -55,80 +156,188 @@ function computeTrendSignal(t) {
   else if (!belowShort && t.macd > 0) { shortTerm = '偏强'; sScore = 70; }
   else { shortTerm = '弱势下行'; sScore = 30; }
   let midTerm, mScore;
-  if (t.close > t.ma120 && t.close > t.ma250) { midTerm = '长牛结构未破'; mScore = 78; }
-  else if (t.close > t.ma250) { midTerm = '中性'; mScore = 55; }
+  if (t.ma250 != null && t.close > t.ma250 && t.close > t.ma120) { midTerm = '长牛结构未破'; mScore = 80; }
+  else if (t.ma250 != null && t.close > t.ma250) { midTerm = '中性'; mScore = 55; }
+  else if (t.ma250 == null) { midTerm = '数据不足·中性'; mScore = 55; }
   else { midTerm = '趋势转弱'; mScore = 35; }
   return { shortTerm, sScore, midTerm, mScore };
 }
 
-/** 调用 westock-data 拉取技术指标，返回驱动标的的技术面对象数组 */
-function fetchTechnical(symbols) {
-  try {
-    const out = execFileSync('bash', ['-c', `${WESTOCK} technical ${symbols} --group all`], { encoding: 'utf8', timeout: 120000 });
-    // 简化解析：实际返回为文本表格，生产环境应解析为结构化对象
-    // 这里返回占位对象，便于在无网络环境下也能跑通管线写出结构
-    console.warn('[pipeline] westock 原始输出需解析，当前使用占位技术面。');
-    return null;
-  } catch (e) {
-    console.warn('[pipeline] 拉取失败，使用占位技术面：', e.message);
-    return null;
+function shortLabel(score) {
+  if (score >= 65) return '偏强';
+  if (score >= 50) return '中性偏多';
+  if (score >= 40) return '超卖待反弹';
+  return '超卖但趋势强';
+}
+function midLabel(score) {
+  if (score >= 75) return '长牛结构未破';
+  if (score >= 60) return '中性';
+  if (score >= 45) return '中性偏弱';
+  return '趋势转弱';
+}
+function riskFromStats(dd, vol, baseRisk) {
+  if (dd == null) return baseRisk;
+  if (dd <= -40 || vol >= 35) return '高';
+  if (dd <= -22 || vol >= 24) return baseRisk === '高' ? '高' : '中';
+  return baseRisk === '高' ? '中' : '中低';
+}
+
+// ───────────────────────────── 数据拉取 ─────────────────────────────
+async function getJSON(url, headers) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers }, (res) => {
+      let d = '';
+      res.on('data', (c) => (d += c));
+      res.on('end', () => {
+        try { resolve(JSON.parse(d)); } catch (e) { reject(new Error('parse: ' + e.message)); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(20000, () => req.destroy(new Error('timeout')));
+  });
+}
+
+// 分页拉取某基金净值序列，目标累计 target 条；返回升序 {dates[], navs[]}（navs 用累计净值）
+async function fetchNavSeries(code, target = 260) {
+  const hdrs = { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://fundf10.eastmoney.com/', 'Accept': 'application/json' };
+  const dates = [], navs = [];
+  let page = 1;
+  const PAGE = 20; // 天天基金接口每页实际返回上限约 20 条（pageSize 参数被忽略）
+  while (dates.length < target && page <= 40) {
+    const url = `https://api.fund.eastmoney.com/f10/lsjz?fundCode=${code}&pageIndex=${page}&pageSize=${PAGE}`;
+    let list = [];
+    try { list = (await getJSON(url, hdrs)).Data?.LSJZList || []; }
+    catch (e) { console.warn(`  [${code}] 第${page}页失败:`, e.message); break; }
+    if (!list.length) break;
+    for (const r of list) {
+      const nav = parseFloat(r.LJJZ);
+      if (isNaN(nav)) continue;
+      dates.push(r.FSRQ); navs.push(nav);
+    }
+    if (list.length < PAGE) break; // 到底
+    page++;
+    await new Promise((r) => setTimeout(r, 120)); // 轻量限速，避免触发风控
   }
+  // 接口返回降序（最新在前），反转成升序（最旧在前）
+  dates.reverse(); navs.reverse();
+  return { dates, navs };
 }
 
-/** 占位技术面：当无法联网时，沿用上一次 fund_signals.json 的数值，保证管线不中断 */
-function loadPrevious() {
-  try { return JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch { return null; }
+// 并发池
+async function pool(items, worker, size = 4) {
+  const out = new Array(items.length);
+  let i = 0;
+  const runners = Array.from({ length: Math.min(size, items.length) }, async () => {
+    while (i < items.length) {
+      const idx = i++;
+      try { out[idx] = await worker(items[idx]); } catch (e) { out[idx] = { error: e.message }; }
+    }
+  });
+  await Promise.all(runners);
+  return out;
 }
 
-function main() {
-  const prev = loadPrevious();
+// ───────────────────────────── 主流程 ─────────────────────────────
+async function main() {
   const asOf = new Date().toISOString().slice(0, 10);
-  const groups = {};
-  const funds = [];
+  const codes = Object.keys(FUND_GROUP);
+  console.log(`[pipeline] 开始拉取 ${codes.length} 只基金真实净值（天天基金接口）…`);
 
-  for (const [g, meta] of Object.entries(GROUP_DRIVERS)) {
-    const tech = fetchTechnical(meta.symbol);
-    let signal;
-    if (tech && tech.length) {
-      // 多标的取平均（G2 为 XLK+SOXX）
-      signal = computeTrendSignal(tech[0]); // 生产环境应聚合
-    } else if (prev && prev.groups && prev.groups[g]) {
-      signal = { shortTerm: prev.groups[g].shortLabel, sScore: prev.groups[g].shortScore, midTerm: prev.groups[g].midLabel, mScore: prev.groups[g].midScore };
+  const results = await pool(codes, async (code) => {
+    const g = FUND_GROUP[code];
+    try {
+      const { dates, navs } = await fetchNavSeries(code);
+      if (navs.length < 5) throw new Error('净值条数不足(' + navs.length + ')');
+      const close = navs[navs.length - 1];
+      const ma20 = SMA(navs, 20), ma60 = SMA(navs, 60), ma120 = SMA(navs, 120), ma250 = SMA(navs, 250);
+      const { dif, dea, hist } = MACD(navs);
+      const macd = hist != null ? hist : (dif != null && dea != null ? dif - dea : 0);
+      const rsi6 = RSI(navs, 6);
+      const boll = BOLL(navs, 20, 2);
+      const adx = ADX(navs, 14);
+      const sig = computeTrendSignal({ close, ma20, ma60, ma120, ma250, macd, rsi6, bollLower: boll.lower, adx });
+      const ret30 = navs.length > 30 ? (close / navs[navs.length - 31] - 1) * 100 : (close / navs[0] - 1) * 100;
+      const dd = MAX_DRAWDOWN(navs);
+      const vol = ANNUAL_VOL(navs);
+      const risk = riskFromStats(dd, vol, GROUP_META[g].risk);
+      return {
+        code, name: FUND_NAME[code], group: g, measured: true,
+        shortLabel: sig.shortTerm, shortScore: sig.sScore,
+        midLabel: sig.midTerm, midScore: sig.mScore,
+        risk,
+        nav: close, navDate: dates[dates.length - 1],
+        ret30: +ret30.toFixed(2), drawdown: +dd.toFixed(2), annualVol: +vol.toFixed(1),
+        note: `实测：真实净值 ${close}@${dates[dates.length - 1]}，RSI6=${rsi6.toFixed(1)}，MA250${ma250 != null ? '上方' : '数据不足'}`
+      };
+    } catch (e) {
+      console.warn(`  [${code}] 拉取/计算失败，降级继承组:`, e.message);
+      return { code, name: FUND_NAME[code], group: g, error: e.message };
+    }
+  }, 4);
+
+  // 聚合组信号（成功基金取均值 + 标签由分数推导；失败基金先占位，最后用组均值回填）
+  const groups = {};
+  for (const g of Object.keys(GROUP_META)) {
+    const members = results.filter((r) => r.group === g && r.measured);
+    const failed = results.filter((r) => r.group === g && !r.measured);
+    let shortScore, midScore, risk;
+    if (members.length) {
+      shortScore = Math.round(members.reduce((s, r) => s + r.shortScore, 0) / members.length);
+      midScore = Math.round(members.reduce((s, r) => s + r.midScore, 0) / members.length);
+      const risks = members.map((r) => r.risk);
+      risk = risks.includes('高') ? '高' : risks.includes('中') ? '中' : '中低';
     } else {
-      signal = { shortTerm: '数据缺失', sScore: 50, midTerm: '数据缺失', mScore: 50 };
+      // 整组失败：用上一版文件值（若有）
+      shortScore = prevGroups[g]?.shortScore ?? 50;
+      midScore = prevGroups[g]?.midScore ?? 50;
+      risk = GROUP_META[g].risk;
     }
     groups[g] = {
-      name: meta.name, driver: meta.driver,
-      shortLabel: signal.shortTerm, shortScore: signal.sScore,
-      midLabel: signal.midTerm, midScore: signal.mScore, risk: meta.risk
+      name: GROUP_META[g].name, driver: GROUP_META[g].driver,
+      shortLabel: shortLabel(shortScore), shortScore,
+      midLabel: midLabel(midScore), midScore, risk
     };
+    // 回填失败基金
+    for (const f of failed) {
+      f.measured = false;
+      f.shortLabel = groups[g].shortLabel; f.shortScore = groups[g].shortScore;
+      f.midLabel = groups[g].midLabel; f.midScore = groups[g].midScore;
+      f.risk = groups[g].risk;
+      f.note = `继承${g}（真实净值拉取失败：${f.error}）`;
+      f.nav = null; f.navDate = null; f.ret30 = null; f.drawdown = null; f.annualVol = null;
+    }
   }
 
-  for (const [code, g] of Object.entries(FUND_GROUP)) {
-    const gMeta = groups[g];
-    const measured = ['513100', '161128', '161130', '501312'].includes(code);
-    funds.push({
-      code, name: FUND_NAME[code], group: g, measured,
-      shortLabel: gMeta.shortLabel, shortScore: gMeta.shortScore,
-      midLabel: gMeta.midLabel, midScore: gMeta.midScore,
-      risk: gMeta.risk,
-      note: measured ? '实测：由管线拉取技术面' : `继承${g}(${groups[g].driver})`
-    });
-  }
+  const funds = results.map((r) => ({
+    code: r.code, name: r.name, group: r.group, measured: r.measured,
+    shortLabel: r.shortLabel, shortScore: r.shortScore,
+    midLabel: r.midLabel, midScore: r.midScore, risk: r.risk, note: r.note,
+    ...(r.measured ? { nav: r.nav, navDate: r.navDate, ret30: r.ret30, drawdown: r.drawdown, annualVol: r.annualVol } : {})
+  }));
 
   const result = {
-    meta: { asOf, source: 'westock-data 美股底层指数 + A股可交易代理技术面', scale: 'shortScore/midScore 0-100，越高越偏多/越健康', disclaimer: '信号为技术面趋势标签，非买卖建议', generatedBy: 'pipeline.js' },
+    meta: {
+      asOf,
+      source: '天天基金 F10 净值历史（api.fund.eastmoney.com），基于累计净值 LJJZ 计算技术面',
+      scale: 'shortScore/midScore 0-100，越高越偏多/越健康',
+      disclaimer: '信号为技术面趋势标签，非买卖建议；QDII 基金净值有 T+1/T+2 披露延迟',
+      generatedBy: 'pipeline.js v2 (real NAV)'
+    },
     groups, funds
   };
   fs.writeFileSync(OUT, JSON.stringify(result, null, 2));
-  console.log(`[pipeline] 已写出 ${OUT}（asOf=${asOf}, ${funds.length} 只基金）`);
+  const ok = funds.filter((f) => f.measured).length;
+  console.log(`[pipeline] 已写出 ${OUT}（asOf=${asOf}, ${funds.length} 只基金，真实测算 ${ok} 只，继承 ${funds.length - ok} 只）`);
 
-  // 若设置了 GH_TOKEN，则提交（CI 中由 workflow 处理；本地可选）
   if (process.env.GH_TOKEN && process.env.AUTO_COMMIT) {
     try {
-      execFileSync('bash', ['-c', `git add fund_signals.json && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
+      require('child_process').execFileSync('bash', ['-c', `git add fund_signals.json && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
     } catch (e) { console.warn('[pipeline] 提交失败：', e.message); }
   }
 }
 
-main();
+// 读取上一版组信号用于整组失败降级
+let prevGroups = {};
+try { prevGroups = JSON.parse(fs.readFileSync(OUT, 'utf8')).groups || {}; } catch {}
+
+main().catch((e) => { console.error('[pipeline] 致命错误:', e); process.exit(1); });
