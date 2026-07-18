@@ -2191,10 +2191,184 @@ canvas {
   .temp-metric-row {
     grid-template-columns: 1fr;
   }
-  .percentile-grid {
-    grid-template-columns: 1fr;
+.percentile-grid {
+  grid-template-columns: 1fr;
+}
+.drawdown-row {
+  grid-template-columns: 1fr;
+}
+
+/* ============ 科技 ETF 榜单 ============ */
+.etf-board-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+}
+
+.etf-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.etf-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.etf-tab:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.etf-tab.active {
+  background: linear-gradient(135deg, var(--color-up) 0%, var(--color-accent) 100%);
+  color: #04140d;
+  border-color: transparent;
+}
+
+.etf-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.etf-tab:not(.active) .etf-tab-count {
+  background: var(--border-color);
+  color: var(--text-muted);
+}
+
+.etf-board-source {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.etf-table-scroll {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.etf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 560px;
+}
+
+.etf-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.etf-table th.etf-sortable {
+  cursor: pointer;
+  user-select: none;
+  text-align: right;
+  transition: var(--transition);
+}
+
+.etf-table th.etf-sortable:hover {
+  color: var(--text-primary);
+}
+
+.etf-table th.etf-sortable.active {
+  color: var(--color-up);
+}
+
+.etf-table tbody td {
+  padding: 11px 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.etf-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.etf-table tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.etf-rank {
+  width: 44px;
+  text-align: center;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.etf-code {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.etf-name {
+  font-weight: 500;
+}
+
+.etf-num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 溢折率：溢价=红（偏贵），折价=绿（偏便宜） */
+.etf-disc-premium {
+  color: var(--color-gain);
+}
+
+.etf-disc-discount {
+  color: var(--color-loss);
+}
+
+/* 移动端微调 */
+@media (max-width: 768px) {
+  .etf-board-wrap {
+    padding: 14px;
+    border-radius: var(--radius-md);
   }
-  .drawdown-row {
-    grid-template-columns: 1fr;
+  .etf-tab {
+    padding: 7px 14px;
+    font-size: 13px;
   }
+  .etf-table {
+    font-size: 13px;
+  }
+  .etf-table thead th,
+  .etf-table tbody td {
+    padding: 9px 10px;
+  }
+}
 }
