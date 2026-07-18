@@ -115,16 +115,33 @@
       <div class="signal-methodology">
         <button class="methodology-toggle" id="methodologyToggle" aria-expanded="false">查看数据口径与方法论 ▾</button>
         <div class="methodology-panel" id="methodologyPanel" hidden>
-          <h4>分组规则</h4>
+          <h4>一、分组规则</h4>
           <p>每只基金按其跟踪的底层指数/赛道归入 G1–G5，组内共享同一技术面代理标的（纳指100=QQQ、信息科技/半导体=XLK+SOXX、新能源=海外NEV、A股科创=科创板/创业板、新兴混合=MSCI EM）。</p>
-          <h4>信号算法</h4>
+
+          <h4>二、信号含义速查表</h4>
+          <table class="signal-legend-table">
+            <thead>
+              <tr><th>短期信号</th><th>触发条件</th><th>含义</th><th>得分</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><b class="text-up">偏强</b></td><td>MACD 转正且收盘价站上 MA20</td><td>短期趋势向上，动能偏多</td><td>60–100</td></tr>
+              <tr><td><b class="text-up">超卖待反弹</b></td><td>RSI6&lt;35 且收盘价≤布林下轨</td><td>跌多了，短期技术性反弹概率上升</td><td>40–60</td></tr>
+              <tr><td><b class="text-up">超卖但趋势强</b></td><td>超卖 + ADX&gt;25</td><td>下跌中趋势动能仍强，止跌/反弹信号更剧烈</td><td>30–50</td></tr>
+              <tr><td><b class="text-down">弱势下行</b></td><td>以上皆非</td><td>短期没有明确止跌信号，趋势偏弱</td><td>0–40</td></tr>
+            </tbody>
+          </table>
+          <p>中期结构看价格与 MA120/MA250 的相对位置：<strong>收盘价在两者之上 = 长牛结构未破</strong>；仅在 MA250 之上 = 中性；跌破年线 = 趋势转弱。</p>
+
+          <h4>三、如何读信号表</h4>
           <ul>
-            <li><strong>短期动能</strong>：RSI6&lt;35 且收盘价≤布林下轨 → 超卖待反弹；若 ADX&gt;25 则「超卖但趋势强」（反弹易中继）；MACD 转正且站上 MA20 → 偏强；其余为弱势下行。得分 0–100，越高越偏多。</li>
-            <li><strong>中期结构</strong>：收盘价在 MA120 与 MA250 上方 → 长牛结构未破；仅在 MA250 上方 → 中性；跌破年线 → 趋势转弱。</li>
-            <li><strong>风险等级</strong>：按赛道波动属性标注（纳指100 中低、半导体/AI 高、其余中），并结合短期信号强度微调。</li>
+            <li><strong>近30日收益</strong>：过去30个交易日真实净值累计涨跌；<span class="text-up">红色=涨</span>，<span class="text-down">绿色=跌</span>。</li>
+            <li><strong>最大回撤</strong>：近30日内从高点到低点的最大亏损幅度；数值为负，绿色越深表示回撤越大。</li>
+            <li><strong>年化波动</strong>：近30日收益的年化标准差，衡量短期波动大小。</li>
+            <li><strong>风险等级</strong>：高/中/中低，由赛道历史波动与当前短期信号共同决定。</li>
           </ul>
-          <h4>数据来源与局限</h4>
-          <p>信号基于美股底层指数（westock-data）与 A 股可交易代理（513100/161128/161130/501312）的真实技术面计算得出；组内其他基金继承该组信号。当前净值为示例数据（DEMO），真实净值接入后信号将更精确。本信号为技术面趋势标签，<strong>非买卖建议</strong>。</p>
+
+          <h4>四、数据来源与局限</h4>
+          <p>信号基于美股底层指数与 A 股可交易代理的真实技术面计算；组内其他基金继承该组信号。当前净值来自天天基金公开净值接口。本信号为技术面趋势标签，<strong>非买卖建议</strong>。</p>
         </div>
       </div>
     </div>
@@ -481,6 +498,37 @@
         <h2 class="section-title">信号回测参考</h2>
         <p class="section-desc">基于各基金<b>真实历史净值</b>的「短期信号前瞻验证」回测：逐日判定信号标签，统计该标签出现后未来 5 个交易日的前瞻收益，用于检验信号有效性边界（非实盘业绩，含过拟合/幸存偏差风险）。</p>
       </div>
+
+      <div class="backtest-explain">
+        <button class="methodology-toggle" id="backtestExplainToggle" aria-expanded="false">回测含义说明 ▾</button>
+        <div class="methodology-panel" id="backtestExplainPanel" hidden>
+          <h4>一、回测在验证什么？</h4>
+          <p>回测回答的是：<strong>「当某个短期信号标签出现时，未来5个交易日平均能赚/亏多少？」</strong></p>
+          <p>具体做法：对25只基金逐日回看历史净值，按与信号卡完全相同的规则判断当天属于哪一种短期信号；然后统计该信号出现后第5个交易日的累计收益。样本数=历史上所有出现该信号的日子。</p>
+
+          <h4>二、指标怎么读</h4>
+          <table class="signal-legend-table">
+            <thead>
+              <tr><th>指标</th><th>含义</th><th>怎么看</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>命中率</td><td>未来5个交易日收涨的比例</td><td>&gt;50% 表示信号略偏积极；但命中率≠稳赚</td></tr>
+              <tr><td>平均收益</td><td>未来5个交易日的平均累计收益</td><td><span class="text-up">红色=正收益</span>，<span class="text-down">绿色=负收益</span></td></tr>
+              <tr><td>样本数</td><td>该信号在历史上出现过的次数</td><td>太少（如&lt;50）时统计意义有限</td></tr>
+              <tr><td>基准命中</td><td>全样本随机5日收涨概率</td><td>信号命中率应比基准高，才算有信息优势</td></tr>
+            </tbody>
+          </table>
+
+          <h4>三、重要限制</h4>
+          <ul>
+            <li><strong>过拟合风险</strong>：规则是在历史数据上设计的，未来市场环境可能改变。</li>
+            <li><strong>幸存偏差</strong>：当前仍存在的基金才进入回测，清盘/合并的基金未纳入。</li>
+            <li><strong>区间选择</strong>：不同时间段（牛市/熊市）结果差异会很大。</li>
+            <li><strong>非投资建议</strong>：回测仅用于理解信号含义，不构成买卖依据。</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="backtest-overview" id="backtestOverview">
         <!-- 由 JS 动态渲染 -->
       </div>
