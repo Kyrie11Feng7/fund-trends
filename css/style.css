@@ -2276,6 +2276,7 @@ canvas {
 .etf-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: 14px;
   min-width: 560px;
 }
@@ -2342,6 +2343,35 @@ canvas {
   text-align: right;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* 固定表头列宽，确保表头与 tbody 对齐 */
+.etf-table thead th.etf-rank,
+.etf-table tbody td.etf-rank {
+  width: 44px;
+  min-width: 44px;
+  text-align: center;
+}
+
+.etf-table thead th.etf-code-col,
+.etf-table tbody td.etf-code {
+  width: 80px;
+  min-width: 80px;
+  text-align: left;
+}
+
+.etf-table thead th.etf-name-col,
+.etf-table tbody td.etf-name {
+  width: auto;
+  min-width: 130px;
+  text-align: left;
+}
+
+.etf-table thead th.etf-num-col,
+.etf-table tbody td.etf-num {
+  width: 92px;
+  min-width: 92px;
+  text-align: right;
 }
 
 /* 溢折率：溢价=红（偏贵），折价=绿（偏便宜） */
