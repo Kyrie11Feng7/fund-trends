@@ -1,0 +1,41 @@
+me: 每日信号更新
+
+on:
+  schedule:
+    # 每个交易日收盘后（北京时间约 16:30 / UTC 08:30）触发；周一至周五
+    - cron: '30 8 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 运行数据管线
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node pipeline.js
+
+      - name: 提交更新
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain fund_signals.json)" ]; then
+            git add fund_signals.json
+            git commit -m "chore: daily signal update $(date +%F)"
+            git push
+          else
+            echo "无变化，跳过提交"
+          fi
