@@ -45,7 +45,12 @@
     '.bt-summary{display:flex;flex-wrap:wrap;gap:18px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:16px 20px;font-size:14px;color:var(--text-secondary);}',
     '.bt-summary b{color:var(--text-primary);font-size:16px;margin-left:4px;}',
     '.backtest-chart-wrap{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:16px;margin-bottom:18px;height:300px;position:relative;}',
-    '.backtest-table-wrap{overflow-x:auto;}'
+    '.backtest-table-wrap{overflow-x:auto;}',
+    '.backtest-subtitle{font-size:15px;color:var(--text-primary);margin:22px 0 10px;font-weight:600;}',
+    '.signal-funds{min-width:1000px;}',
+    '.sf-spark{width:96px;height:30px;display:block;}',
+    '.sf-stat{font-weight:600;font-variant-numeric:tabular-nums;}',
+    '.sf-name-cell{display:flex;align-items:center;gap:8px;}'
   ].join('\n');
   document.head.appendChild(style);
 
@@ -99,31 +104,75 @@
     }).join('');
   }
 
-  /* ---------- 渲染：25 只信号表 ---------- */
-  function renderFunds(funds) {
+  /* ---------- 迷你走势图（SVG sparkline） ---------- */
+  function sparkline(nav, w, h) {
+    if (!nav || nav.length < 2) return '<span style="color:var(--text-muted)">—</span>';
+    var data = nav.slice(-80);
+    var min = Math.min.apply(null, data), max = Math.max.apply(null, data);
+    var range = (max - min) || 1;
+    var n = data.length;
+    var pts = data.map(function (v, i) {
+      var x = (i / (n - 1)) * w;
+      var y = h - ((v - min) / range) * (h - 2) - 1;
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+    var up = data[n - 1] >= data[0];
+    var col = up ? getCss('--color-up') : getCss('--color-down');
+    return '<svg class="sf-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  }
+
+  function fmtPct(v) {
+    if (v == null) return '—';
+    return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+  }
+  function retColor(v) {
+    if (v == null) return getCss('--text-muted');
+    return v >= 0 ? getCss('--color-up') : getCss('--color-down');
+  }
+  function ddColor(v) {
+    if (v == null) return getCss('--text-muted');
+    if (v <= -25) return getCss('--color-down');
+    if (v <= -15) return getCss('--color-gold');
+    return getCss('--color-up');
+  }
+
+  /* ---------- 渲染：25 只信号表（含真实风险字段 + 走势） ---------- */
+  function renderFunds(funds, navMap) {
     var wrap = $('signalTableWrap');
     if (!wrap || !funds) return;
     var rows = funds.map(function (f) {
+      var nav = navMap && navMap[f.code] ? navMap[f.code].nav : null;
       return '<tr>' +
         '<td class="sf-code">' + esc(f.code) + '</td>' +
-        '<td class="sf-name">' + esc(f.name) + '</td>' +
+        '<td class="sf-name-cell"><span class="sf-name">' + esc(f.name) + '</span></td>' +
         '<td><span class="sf-group">' + esc(f.group) + '</span></td>' +
         '<td style="color:' + scoreColor(f.shortScore) + '">' + esc(f.shortLabel) + '<br><small>' + f.shortScore + '</small></td>' +
         '<td style="color:' + scoreColor(f.midScore) + '">' + esc(f.midLabel) + '<br><small>' + f.midScore + '</small></td>' +
         '<td style="color:' + riskColor(f.risk) + '">' + esc(f.risk) + '</td>' +
+        '<td class="sf-stat" style="color:' + retColor(f.ret30) + '">' + fmtPct(f.ret30) + '</td>' +
+        '<td class="sf-stat" style="color:' + ddColor(f.drawdown) + '">' + (f.drawdown == null ? '—' : f.drawdown.toFixed(2) + '%') + '</td>' +
+        '<td class="sf-stat">' + (f.annualVol == null ? '—' : f.annualVol.toFixed(1) + '%') + '</td>' +
+        '<td>' + sparkline(nav, 96, 30) + '</td>' +
         '</tr>';
     }).join('');
-    wrap.innerHTML = '<table class="signal-table">' +
-      '<thead><tr><th>代码</th><th>基金</th><th>组</th><th>短期动能</th><th>中期结构</th><th>风险</th></tr></thead>' +
+    wrap.innerHTML = '<table class="signal-table signal-funds">' +
+      '<thead><tr><th>代码</th><th>基金</th><th>组</th><th>短期动能</th><th>中期结构</th><th>风险</th>' +
+      '<th>近30日收益</th><th>最大回撤</th><th>年化波动</th><th>净值走势</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table>';
   }
 
   async function initSignals() {
     try {
       var data = await loadJSON('fund_signals.json');
+      var navMap = {};
+      try {
+        var navData = await loadJSON('fund_nav.json');
+        (navData.series || []).forEach(function (s) { navMap[s.code] = s; });
+      } catch (e) { /* 净值曲线数据缺失时不阻断信号表渲染 */ }
       if (data.meta && data.meta.asOf && $('sigAsOf')) $('sigAsOf').textContent = data.meta.asOf;
       renderGroups(data.groups);
-      renderFunds(data.funds);
+      renderFunds(data.funds, navMap);
     } catch (e) {
       var w = $('signalTableWrap');
       if (w) w.innerHTML = '<p class="sig-err">信号数据加载失败：' + esc(e.message) + '（请确认 fund_signals.json 已部署）</p>';
@@ -148,9 +197,9 @@
       if (ov && data.summary) {
         var s = data.summary;
         ov.innerHTML = '<div class="bt-summary">' +
-          '信号 <b>' + esc(s.signalName) + '</b>' +
+          '回测信号 <b>' + esc(s.signalName) + '</b>' +
+          '前瞻窗口 <b>' + s.holdDays + '日</b>' +
           '样本 <b>' + s.sampleSignals + '</b>' +
-          '持有 <b>' + s.holdDays + '日</b>' +
           '命中率 <b>' + (s.winRate * 100).toFixed(1) + '%</b>' +
           '平均收益 <b style="color:' + getCss('--color-up') + '">' + (s.avgReturnPct >= 0 ? '+' : '') + s.avgReturnPct + '%</b>' +
           '基准命中 <b>' + (s.benchmarkWinRate * 100).toFixed(1) + '%</b>' +
@@ -169,6 +218,20 @@
             '</tr>';
         }).join('');
         tw.innerHTML = '<table class="signal-table"><thead><tr><th>组</th><th>赛道</th><th>命中率</th><th>平均收益</th><th>样本</th></tr></thead><tbody>' + rows + '</tbody></table>';
+      }
+      // 各信号标签的前瞻收益表
+      var stw = $('backtestSignalTable');
+      if (stw && data.summary && data.summary.bySignalForward) {
+        var srows = data.summary.bySignalForward.map(function (r) {
+          var ret = (r.avgFwdReturnPct >= 0 ? '+' : '') + r.avgFwdReturnPct + '%';
+          return '<tr>' +
+            '<td>' + esc(r.signal) + '</td>' +
+            '<td>' + r.count + '</td>' +
+            '<td style="color:' + scoreColor(r.winRate * 100) + '">' + (r.winRate * 100).toFixed(1) + '%</td>' +
+            '<td style="color:' + (r.avgFwdReturnPct >= 0 ? getCss('--color-up') : getCss('--color-down')) + '">' + ret + '</td>' +
+            '</tr>';
+        }).join('');
+        stw.innerHTML = '<table class="signal-table"><thead><tr><th>信号标签</th><th>出现次数</th><th>5日胜率</th><th>平均前瞻5日收益</th></tr></thead><tbody>' + srows + '</tbody></table>';
       }
       if (window.Chart && data.byGroup && $('backtestChart')) {
         var ctx = $('backtestChart').getContext('2d');
