@@ -187,12 +187,13 @@
     });
   }
 
-  function init() {
+  async function init() {
     renderIndices();
     renderSentiment();
     renderIndexTemperature();
     renderSentimentDetail();
     renderEtfBoard();
+    await loadFundMeta();
     renderFundCards();
     renderFundSelector();
     renderMainChart();
@@ -200,13 +201,75 @@
     renderDailyTable();
     renderWindowSummary();
     updateBarAndTableVisibility();
-    renderNewsTimeline();
     renderNewsHighlights();
     initNav();
     initBackToTop();
     initTimeframeButtons();
     initCompareToggle();
     initNewsFilters();
+    initSubBox();
+    setupLazySections();
+  }
+
+  // ============ 订阅框（P2-4） ============
+  function initSubBox() {
+    const btn = document.getElementById("copyRssBtn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      let abs = "rss.xml";
+      try { abs = new URL("rss.xml", location.href).href; } catch (e) {}
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(abs).then(function () {
+          btn.textContent = "已复制 ✓";
+          setTimeout(function () { btn.textContent = "复制 RSS 链接"; }, 2000);
+        }).catch(function () { btn.textContent = abs; });
+      } else {
+        btn.textContent = abs;
+      }
+    });
+  }
+
+  // ============ 懒加载（P2-6）：资讯 / 相关性 / 组合 进入视口才渲染 ============
+  function setupLazySections() {
+    const tasks = {
+      news: function () { try { renderNewsTimeline(); } catch (e) { console.error(e); } },
+      corr: function () {
+        if (window.__initCorrelation) {
+          if (window.FundAnalytics) window.FundAnalytics.ready().then(window.__initCorrelation);
+          else window.__initCorrelation();
+        }
+      },
+      port: function () {
+        if (window.__initPortfolio) {
+          if (window.FundAnalytics) window.FundAnalytics.ready().then(window.__initPortfolio);
+          else window.__initPortfolio();
+        }
+      }
+    };
+    const done = {};
+    const run = function (k) {
+      if (!done[k]) { done[k] = true; try { tasks[k](); } catch (e) { console.error("lazy render failed:", k, e); } }
+    };
+
+    if (!("IntersectionObserver" in window)) { Object.keys(tasks).forEach(run); return; }
+
+    const io = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          const k = en.target.getAttribute("data-lazy");
+          if (k) { run(k); obs.unobserve(en.target); }
+        }
+      });
+    }, { rootMargin: "300px" });
+
+    [["news", "#newsTimeline"], ["corr", "#correlationBody"], ["port", "#portfolioBody"]].forEach(function (pair) {
+      const el = document.querySelector(pair[1]);
+      if (el) { el.setAttribute("data-lazy", pair[0]); io.observe(el); }
+      else { run(pair[0]); }
+    });
+
+    // 兜底：5s 后强制渲染所有未完成区块（防止布局异常导致永不触发）
+    setTimeout(function () { Object.keys(tasks).forEach(run); }, 5000);
   }
 
   // ============ 渲染全球指数 ============
@@ -325,64 +388,50 @@
   }
 
   // ============ 渲染指数温度（信息图卡片） ============
-  function renderIndexTemperature() {
+  async function renderIndexTemperature() {
     const grid = document.getElementById("indexTemperatureGrid");
     if (!grid) return;
-    const data = window.INDEX_TEMPERATURE;
-    if (!data || !data.items) return;
-
-    const snap = window.MARKET_SNAPSHOT;
-    const snapIdx = (k) =>
-      snap && snap.indices ? snap.indices.find((i) => i.key === k) : null;
     const sentiment = window.MARKET_SENTIMENT || {};
+    const staticData = window.INDEX_TEMPERATURE || {};
 
+    // 1) VIX 卡：结构取静态定义，数值取真实行情（window.MARKET_SENTIMENT.vix）
+    const vixItem = (staticData.items || []).find((i) => i.key === "vix");
+    let html = "";
+    if (vixItem) {
+      let vixVal = vixItem.value;
+      if (vixVal == null && sentiment.vix != null) vixVal = Number(sentiment.vix);
+      html += renderVixCard(
+        vixItem,
+        vixVal,
+        "",
+        vixVal != null ? Number(vixVal).toFixed(2) : "—"
+      );
+    }
+    grid.innerHTML = html;
+
+    // 2) 真实指数温度（分位温度，替代原示例 PE）——来自 pipeline 生成的 index_temperature.json
     const sourceEl = document.getElementById("indexTemperatureSource");
-    if (sourceEl && data.source) sourceEl.textContent = "数据来源说明：" + data.source;
-
-    grid.innerHTML = data.items
-      .map((item) => {
-        let value = item.value;
-        let change = item.change;
-        let changeStr = "—";
-        let valueLabel = "";
-
-        if (item.key === "vix") {
-          if (value == null && sentiment.vix != null) {
-            value = Number(sentiment.vix);
-          }
-          changeStr = "";
-          valueLabel = "";
-        } else if (item.key === "ndx") {
-          const si = snapIdx("ndx");
-          if (si) {
-            if (value == null && si.value != null) value = si.value;
-            if (change == null && si.change != null) change = si.change;
-          }
-        } else if (item.key === "spx") {
-          const si = snapIdx("spx");
-          if (si) {
-            if (value == null && si.value != null) value = si.value;
-            if (change == null && si.change != null) change = si.change;
-          }
-        }
-
-        if (value != null && typeof value === "number") {
-          valueLabel =
-            item.key === "vix"
-              ? value.toFixed(2)
-              : Number(value).toLocaleString("en-US", { maximumFractionDigits: 2 });
-        }
-        if (change != null && typeof change === "number") {
-          const arrow = change >= 0 ? "▲" : "▼";
-          changeStr = `${arrow} ${Math.abs(change).toFixed(2)}%`;
-        }
-
-        if (item.type === "vix") {
-          return renderVixCard(item, value, changeStr, valueLabel);
-        }
-        return renderIndexTempCard(item, value, changeStr, valueLabel);
-      })
-      .join("");
+    try {
+      const resp = await fetch("index_temperature.json?t=" + Date.now(), { cache: "no-cache" });
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const json = await resp.json();
+      window.INDEX_TEMPERATURE_REAL = json;
+      if (sourceEl && json.meta && json.meta.source) {
+        sourceEl.textContent =
+          "数据来源：" + json.meta.source + (json.meta.asOf ? " · 截至 " + json.meta.asOf : "");
+      }
+      grid.insertAdjacentHTML(
+        "beforeend",
+        (json.items || []).map((it) => renderIndexTempCard(it)).join("")
+      );
+    } catch (e) {
+      grid.insertAdjacentHTML(
+        "beforeend",
+        '<div class="temp-card temp-card-error"><div class="temp-card-body">指数温度数据加载失败（' +
+          escText(e.message) +
+          '），请确认 index_temperature.json 已部署。</div></div>'
+      );
+    }
   }
 
   function renderVixCard(item, value, changeStr, valueLabel) {
@@ -457,22 +506,35 @@
     `;
   }
 
-  function renderIndexTempCard(item, value, changeStr, valueLabel) {
+  function renderIndexTempCard(item) {
+    const temp = typeof item.temperature === "number" ? item.temperature : null;
+    const tempColor = item.tempColor || "#f7b500";
+    const band = item.tempBand || "—";
     const pct = item.percentiles || {};
-    const p1y = pct["1y"] != null ? pct["1y"] : 0;
-    const p5y = pct["5y"] != null ? pct["5y"] : 0;
-    const p10y = pct["10y"] != null ? pct["10y"] : 0;
+    const p1 = pct.y1 != null ? pct.y1 : 0;
+    const p3 = pct.y3 != null ? pct.y3 : 0;
+    const p5 = pct.y5 != null ? pct.y5 : 0;
     const d = item.drawdown || {};
 
+    let valueLabel = "—", changeStr = "";
+    if (typeof item.value === "number") {
+      valueLabel = Number(item.value).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+    if (typeof item.change === "number") {
+      const arrow = item.change >= 0 ? "▲" : "▼";
+      changeStr = arrow + " " + Math.abs(item.change).toFixed(2) + "%";
+    }
+
+    const barColor = (v) => (v >= 70 ? "#ff5252" : v >= 50 ? "#f7b500" : "#00d68f");
     const percentileHtml = [
-      { key: "1y", label: "过去1年", val: p1y },
-      { key: "5y", label: "过去5年", val: p5y },
-      { key: "10y", label: "过去10年", val: p10y }
+      { key: "y1", label: "过去1年", val: p1 },
+      { key: "y3", label: "过去3年", val: p3 },
+      { key: "y5", label: "过去5年", val: p5 }
     ]
       .map((p) => `
         <div class="percentile-item">
           <div class="percentile-bar-bg">
-            <div class="percentile-bar-fill" style="width:${p.val}%;"></div>
+            <div class="percentile-bar-fill" style="width:${p.val}%;background:${barColor(p.val)};"></div>
           </div>
           <div class="percentile-value">${p.val}%</div>
           <div class="percentile-label">处于${p.label}的位置</div>
@@ -480,34 +542,35 @@
       `)
       .join("");
 
+    const dca = item.dca || {};
     return `
-      <div class="temp-card">
+      <div class="temp-card temp-card-real" style="--temp-color:${tempColor}">
         <div class="temp-card-header">
           <div>
-            <h3 class="temp-card-title">${item.title}</h3>
-            <p class="temp-card-subtitle">${item.subtitle}</p>
+            <h3 class="temp-card-title">${escText(item.title)}</h3>
+            <p class="temp-card-subtitle">${escText(item.subtitle || "")}</p>
           </div>
+          <span class="temp-band-badge" style="background:${tempColor}">${escText(band)}</span>
         </div>
         <div class="temp-card-body">
           <div class="temp-metric-row">
-            <div class="temp-metric-box">
-              <div class="temp-metric-icon">📊</div>
-              <div class="temp-metric-label">最新PE</div>
-              <div class="temp-metric-value">${item.pe != null ? item.pe.toFixed(2) : "—"}</div>
-              <div class="temp-metric-sub">远期市盈率：${item.forwardPe != null ? item.forwardPe.toFixed(2) : "—"}</div>
-              <div class="temp-metric-sub">远期PE处于过去10年的${item.pePercentile10Y != null ? item.pePercentile10Y : "—"}%</div>
+            <div class="temp-metric-box temp-metric-main">
+              <div class="temp-metric-icon">🌡️</div>
+              <div class="temp-metric-label">分位温度</div>
+              <div class="temp-metric-value" style="color:${tempColor}">${temp != null ? temp : "—"}°</div>
+              <div class="temp-metric-sub">越高越贵 · 基于真实价格序列历史分位</div>
             </div>
             <div class="temp-metric-box">
               <div class="temp-metric-icon">📈</div>
-              <div class="temp-metric-label">目前指数</div>
-              <div class="temp-metric-value ${changeStr && changeStr.includes("▲") ? "text-up" : changeStr && changeStr.includes("▼") ? "text-down" : ""}">${valueLabel || "—"}</div>
+              <div class="temp-metric-label">当前点位</div>
+              <div class="temp-metric-value ${changeStr.indexOf("▲") >= 0 ? "text-up" : changeStr.indexOf("▼") >= 0 ? "text-down" : ""}">${valueLabel}</div>
               ${changeStr ? `<div class="temp-metric-change">${changeStr}</div>` : ""}
-              <div class="temp-update-label">更新时间 ${item.updateTime || "—"}</div>
+              <div class="temp-update-label">更新 ${escText(item.updateTime || "—")}</div>
             </div>
           </div>
 
           <div class="percentile-section">
-            <div class="percentile-title">PE-TTM历史分位值对比</div>
+            <div class="percentile-title">历史分位（当前价位在过去区间中的位置）</div>
             <div class="percentile-grid">${percentileHtml}</div>
           </div>
 
@@ -515,34 +578,31 @@
             <div class="drawdown-box">
               <div class="drawdown-icon">📉</div>
               <div>
-                <div class="drawdown-label">当前大跌幅度</div>
+                <div class="drawdown-label">当前较大回撤</div>
                 <div class="drawdown-value">${d.current != null ? d.current.toFixed(2) + "%" : "—"}</div>
-                <div class="drawdown-status">（${d.status || "—"}）</div>
               </div>
             </div>
             <div class="drawdown-box">
               <div class="drawdown-icon">📋</div>
               <div>
-                <div class="drawdown-label">参考上轮大跌幅度</div>
-                <div class="drawdown-value">${d.last != null ? d.last.toFixed(2) + "%" : "—"}</div>
-                <div class="drawdown-status">（${d.lastRange || "—"}）</div>
+                <div class="drawdown-label">近5年最大回撤</div>
+                <div class="drawdown-value">${d.y5 != null ? d.y5.toFixed(2) + "%" : "—"}</div>
               </div>
             </div>
           </div>
 
-          <div class="temp-tips">
-            <div class="temp-tips-icon">💡</div>
-            <div>
-              <div class="temp-tips-title">估值是否合理请参考：</div>
-              <div class="temp-tips-list">历史分位值水平、恐慌指数（见 VIX 卡）</div>
-            </div>
+          <div class="dca-box" style="border-color:${tempColor}">
+            <div class="dca-head">💡 定投参考区间：<strong style="color:${tempColor}">${escText(dca.level || "—")}</strong></div>
+            <div class="dca-text">${escText(dca.text || "")}</div>
+            <div class="dca-note">※ 温度=价格历史分位（非估值倍数）；区间仅供参考，非买卖建议</div>
           </div>
         </div>
         <div class="temp-card-footer">
-          <span>⏱ 更新时间 ${item.updateTime || "—"}</span>
+          <span>⏱ 更新 ${escText(item.updateTime || "—")}</span>
           <span>整理：科技基金趋势</span>
-          <span>来源：${item.valueSource || "—"}${item.note ? " · " + item.note : ""}</span>
+          <span>来源：${escText(item.source || "—")}</span>
         </div>
+        ${item.note ? `<div class="temp-card-note">※ ${escText(item.note)}</div>` : ""}
       </div>
     `;
   }
@@ -598,6 +658,11 @@
   function clampPct(v, lo, hi) {
     return Math.max(lo, Math.min(hi, v));
   }
+  function escText(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
   function fgLabel(v) {
     if (v < 25) return "极度恐惧";
     if (v < 50) return "恐惧";
@@ -627,6 +692,21 @@
     return "极端恐慌：危机模式，历史上往往是极端情绪释放的末端。";
   }
 
+  // ============ 费率与跟踪误差（P1-4，来自 fund_meta.json） ============
+  async function loadFundMeta() {
+    try {
+      const r = await fetch("fund_meta.json?t=" + Date.now(), { cache: "no-cache" });
+      if (r.ok) {
+        const j = await r.json();
+        window.FUND_META = (j && j.byCode) || {};
+      } else {
+        window.FUND_META = {};
+      }
+    } catch (e) {
+      window.FUND_META = {};
+    }
+  }
+
   // ============ 渲染基金卡片 ============
   function renderFundCards() {
     const grid = document.getElementById("fundGrid");
@@ -635,6 +715,10 @@
     grid.innerHTML = FUNDS.map((fund, i) => {
       const isUp = fund.latestChange >= 0;
       const periodClass = fund.periodReturn >= 0 ? "up" : "down";
+      const meta = (window.FUND_META && window.FUND_META[fund.code]) || {};
+      const mgmt = meta.mgmtFee != null ? meta.mgmtFee + "%" : "—";
+      const cust = meta.custFee != null ? meta.custFee + "%" : "—";
+      const track = meta.trackErr != null ? meta.trackErr + "%" : "—";
 
       return `
         <div class="fund-card ${isUp ? "" : "down"} fade-in" data-index="${i}" style="animation-delay: ${i * 0.08}s">
@@ -657,6 +741,11 @@
               30日收益 <strong class="${periodClass}">${fund.periodReturn >= 0 ? "+" : ""}${fund.periodReturn}%</strong>
             </span>
             <span class="fund-manager">${fund.manager}</span>
+          </div>
+          <div class="fund-fees">
+            <span>管理费 <b>${mgmt}</b></span>
+            <span>托管费 <b>${cust}</b></span>
+            <span>跟踪误差 <b title="年化跟踪误差＝基金净值日收益与标的指数日收益的年化标准差；主动基金无基准指数，显示「—」">${track}</b></span>
           </div>
         </div>
       `;
@@ -1539,6 +1628,34 @@
     });
   }
 
+  // ============ 资讯行动标签（P2-3，规则化分类·仅供参考） ============
+  function classifyNews(news) {
+    var text = ((news.title || "") + " " + (news.soWhat || "") + " " + (news.summary || "")).toLowerCase();
+    var score = 0;
+    var pos = ["回暖", "上涨", "利好", "修复", "增长", "超预期", "提振", "复苏", "创新高", "扩容", "刺激", "降息", "企稳", "盈利", "受益", "机会", "改善", "大增", "新高", "回升", "扩内需"];
+    var neg = ["下跌", "承压", "亏损", "暴跌", "下滑", "紧张", "升级", "担忧", "下调", "萎缩", "制裁", "加征", "关税", "扰动", "预警", "预亏", "走弱", "探底", "避险"];
+    pos.forEach(function (k) { if (text.indexOf(k) >= 0) score += 1; });
+    neg.forEach(function (k) { if (text.indexOf(k) >= 0) score -= 1; });
+    // 通胀/利率回落、降息 => 利好成长股
+    if (text.indexOf("通胀回落") >= 0 || text.indexOf("cpi回落") >= 0 || text.indexOf("利率回落") >= 0 || text.indexOf("收益率回落") >= 0 || text.indexOf("降息") >= 0) score += 2;
+    // 加征关税 => 利空
+    if (text.indexOf("加征关税") >= 0 || (text.indexOf("关税") >= 0 && text.indexOf("升级") >= 0)) score -= 2;
+    var sentiment = score > 0 ? "positive" : score < 0 ? "negative" : "neutral";
+    var related = (news.relatedFunds || []).length;
+    var macro = /美联储|通胀|cpi|利率|降息|加息|关税|地缘|中东|霍尔木兹|非农|pmi/.test(text);
+    var impact = related >= 6 ? "high" : related >= 3 ? "medium" : "low";
+    if (macro && impact === "low") impact = "medium";
+    if (macro && related >= 6) impact = "high";
+    return { sentiment: sentiment, impact: impact };
+  }
+  function newsActionTags(news) {
+    var c = classifyNews(news);
+    var sentLabel = c.sentiment === "positive" ? "利好" : c.sentiment === "negative" ? "利空" : "中性";
+    var impLabel = c.impact === "high" ? "高" : c.impact === "medium" ? "中" : "低";
+    return '<span class="news-tag news-' + c.sentiment + '" title="自动分类·仅供参考，非投资建议">' + sentLabel + '</span>' +
+           '<span class="news-tag news-impact-' + c.impact + '" title="自动分类·仅供参考，非投资建议">影响·' + impLabel + '</span>';
+  }
+
   function renderNewsTimeline() {
     const timeline = document.getElementById("newsTimeline");
     if (!timeline) return;
@@ -1580,6 +1697,7 @@
               <div class="news-card-meta">
                 <span class="news-date">${news.dateCN}${news.time ? " " + news.time : ""}</span>
                 <span class="news-category ${news.category}">${news.category}</span>
+                ${newsActionTags(news)}
               </div>
               <h3 class="news-title">${news.title}</h3>
               <p class="news-excerpt">${excerpt}${full.length > 80 ? "…" : ""}</p>
@@ -1712,4 +1830,28 @@
       });
     }, 200);
   });
+
+  // ============ 主题切换（暗/亮，默认暗色） ============
+  function setupTheme() {
+    var btn = document.getElementById('themeToggle');
+    function apply(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (btn) {
+        btn.textContent = theme === 'dark' ? '亮色' : '暗色';
+        btn.setAttribute('aria-label', theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式');
+      }
+    }
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    apply(saved === 'light' ? 'light' : 'dark');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        apply(next);
+      });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupTheme);
+  else setupTheme();
 })();
