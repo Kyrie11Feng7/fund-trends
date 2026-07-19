@@ -1,4 +1,4 @@
-// 科技 ETF 榜单数据（来源：腾讯自选股 westock-tool，生成于 2026-07-19）
+// 科技 ETF 榜单数据（来源：腾讯自选股 westock-tool，生成于 2026-07-18）
 // 字段说明：size=最新规模(元) | chg20d=近20日涨跌(%) | valPct=PE_TTM历史百分位(0=最便宜) | disc=月均溢折率(%)
 window.ETF_BOARD = {
   "us": [
@@ -839,6 +839,6 @@ window.ETF_BOARD = {
       "disc": 0.0415
     }
   ],
-  "date": "2026-07-19",
+  "date": "2026-07-18",
   "source": "腾讯自选股（westock-tool）"
 };
