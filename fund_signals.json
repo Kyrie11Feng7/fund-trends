@@ -1,6 +1,6 @@
 {
   "meta": {
-    "asOf": "2026-07-18",
+    "asOf": "2026-07-19",
     "source": "天天基金 F10 净值历史（api.fund.eastmoney.com），基于累计净值 LJJZ 计算技术面",
     "scale": "shortScore/midScore 0-100，越高越偏多/越健康",
     "disclaimer": "信号为技术面趋势标签，非买卖建议；QDII 基金净值有 T+1/T+2 披露延迟",
@@ -51,9 +51,53 @@
       "midLabel": "长牛结构未破",
       "midScore": 80,
       "risk": "高"
+    },
+    "G6": {
+      "name": "宽基指数",
+      "driver": "沪深300/中证500/创业板",
+      "shortLabel": "超卖但趋势强",
+      "shortScore": 38,
+      "midLabel": "趋势转弱",
+      "midScore": 42,
+      "risk": "中"
+    },
+    "G7": {
+      "name": "债券",
+      "driver": "中债国债",
+      "shortLabel": "偏强",
+      "shortScore": 70,
+      "midLabel": "长牛结构未破",
+      "midScore": 80,
+      "risk": "中低"
+    },
+    "G8": {
+      "name": "黄金",
+      "driver": "国内黄金现货",
+      "shortLabel": "偏强",
+      "shortScore": 70,
+      "midLabel": "趋势转弱",
+      "midScore": 35,
+      "risk": "中"
     }
   },
   "funds": [
+    {
+      "code": "159915",
+      "name": "易方达创业板ETF",
+      "group": "G6",
+      "measured": true,
+      "shortLabel": "超卖待反弹",
+      "shortScore": 38,
+      "midLabel": "中性",
+      "midScore": 55,
+      "risk": "中",
+      "note": "实测：真实净值 3.9531@2026-07-17，RSI6=15.2，MA250上方",
+      "nav": 3.9531,
+      "navDate": "2026-07-17",
+      "ret30": -15.93,
+      "drawdown": -21.36,
+      "annualVol": 29.9
+    },
     {
       "code": "161128",
       "name": "易方达标普信息科技",
@@ -157,6 +201,57 @@
       "annualVol": 29.6
     },
     {
+      "code": "510300",
+      "name": "华泰柏瑞沪深300ETF",
+      "group": "G6",
+      "measured": true,
+      "shortLabel": "超卖待反弹",
+      "shortScore": 38,
+      "midLabel": "趋势转弱",
+      "midScore": 35,
+      "risk": "中低",
+      "note": "实测：真实净值 2.0264@2026-07-17，RSI6=18.8，MA250上方",
+      "nav": 2.0264,
+      "navDate": "2026-07-17",
+      "ret30": -5.95,
+      "drawdown": -9.17,
+      "annualVol": 13.8
+    },
+    {
+      "code": "510500",
+      "name": "南方中证500ETF",
+      "group": "G6",
+      "measured": true,
+      "shortLabel": "超卖待反弹",
+      "shortScore": 38,
+      "midLabel": "趋势转弱",
+      "midScore": 35,
+      "risk": "中低",
+      "note": "实测：真实净值 2.539@2026-07-17，RSI6=9.8，MA250上方",
+      "nav": 2.539,
+      "navDate": "2026-07-17",
+      "ret30": -9.03,
+      "drawdown": -16.06,
+      "annualVol": 21.9
+    },
+    {
+      "code": "511010",
+      "name": "国泰上证5年期国债ETF",
+      "group": "G7",
+      "measured": true,
+      "shortLabel": "偏强",
+      "shortScore": 70,
+      "midLabel": "长牛结构未破",
+      "midScore": 80,
+      "risk": "中低",
+      "note": "实测：真实净值 1.456@2026-07-17，RSI6=100.0，MA250上方",
+      "nav": 1.456,
+      "navDate": "2026-07-17",
+      "ret30": 0.07,
+      "drawdown": -1.54,
+      "annualVol": 1.3
+    },
+    {
       "code": "513100",
       "name": "纳斯达克100ETF",
       "group": "G1",
@@ -172,6 +267,23 @@
       "ret30": -5.52,
       "drawdown": -22.57,
       "annualVol": 22.3
+    },
+    {
+      "code": "518880",
+      "name": "华安黄金ETF",
+      "group": "G8",
+      "measured": true,
+      "shortLabel": "偏强",
+      "shortScore": 70,
+      "midLabel": "趋势转弱",
+      "midScore": 35,
+      "risk": "中",
+      "note": "实测：真实净值 3.1371@2026-07-17，RSI6=0.0，MA250上方",
+      "nav": 3.1371,
+      "navDate": "2026-07-17",
+      "ret30": -10.54,
+      "drawdown": -30.29,
+      "annualVol": 25.1
     },
     {
       "code": "539002",
