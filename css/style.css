@@ -56,6 +56,70 @@
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 亮色主题（可切换，默认暗色；覆盖 CSS 变量即可整体换肤） */
+[data-theme="light"] {
+  --bg-primary: #f4f6fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f3f9;
+  --bg-elevated: #eaeef5;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --color-up: #059669;
+  --color-up-bg: rgba(5, 150, 105, 0.1);
+  --color-down: #dc2626;
+  --color-down-bg: rgba(220, 38, 38, 0.1);
+  --color-gain: #dc2626;            /* 涨 = 红（中国惯例） */
+  --color-gain-bg: rgba(220, 38, 38, 0.1);
+  --color-loss: #059669;            /* 跌 = 绿 */
+  --color-loss-bg: rgba(5, 150, 105, 0.1);
+  --color-neutral: #4a5568;
+  --color-accent: #2563eb;
+  --color-gold: #d97706;
+  --color-purple: #7c3aed;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 40px rgba(5, 150, 105, 0.06);
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  margin-left: 12px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.theme-toggle:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+
+/* 无障碍：跳到主内容 */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 2000;
+  padding: 10px 18px;
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+
+/* 无障碍：键盘焦点清晰可见 */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 /* ============ 重置 & 基础 ============ */
 *,
 *::before,
@@ -2572,4 +2636,71 @@ body { scroll-padding-top: 72px; }
 @media (min-width: 769px) {
   .nav-toggle { display: none; }
 }
+
+/* ============ P2-4 订阅 / RSS ============ */
+.sub-box {
+  display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
+  background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  padding: 16px 20px; margin: 0 0 22px;
+}
+.sub-left { display: flex; gap: 12px; align-items: flex-start; }
+.sub-icon { font-size: 26px; line-height: 1; }
+.sub-title { font-weight: 700; font-size: 15px; color: var(--text-primary); }
+.sub-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.6; }
+.sub-actions { display: flex; gap: 10px; align-items: center; }
+.sub-rss, .sub-copy {
+  display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition); text-decoration: none;
+}
+.sub-rss { background: var(--color-accent); color: #fff; }
+.sub-rss:hover { filter: brightness(1.08); }
+.sub-copy { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-color); }
+.sub-copy:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+/* ============ P2-3 资讯行动标签 ============ */
+.news-tag {
+  display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; line-height: 1.6; margin-left: 6px;
+}
+.news-positive { background: rgba(255,82,82,.14); color: #ff6b6b; border: 1px solid rgba(255,82,82,.4); }
+.news-negative { background: rgba(0,214,143,.14); color: #00d68f; border: 1px solid rgba(0,214,143,.4); }
+.news-neutral { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-color); }
+.news-impact-high { background: rgba(247,181,0,.16); color: #f7b500; border: 1px solid rgba(247,181,0,.45); }
+.news-impact-medium { background: rgba(120,144,255,.16); color: #8aa0ff; border: 1px solid rgba(120,144,255,.4); }
+.news-impact-low { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+/* ============ P1-4 卡片费率 ============ */
+.fund-fees {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed var(--border-color); font-size: 12px; color: var(--text-secondary);
+}
+.fund-fees b { color: var(--text-primary); font-weight: 600; }
+
+/* ============ P0-1 / P1-6 真实温度卡 ============ */
+.temp-card-real { border-top: 3px solid var(--temp-color, #f7b500); }
+.temp-band-badge {
+  color: #fff; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; white-space: nowrap;
+}
+.temp-card-real .temp-metric-main { flex: 1.2; }
+.dca-box {
+  margin-top: 14px; padding: 12px 14px; border: 1px solid var(--border-color); border-left-width: 4px;
+  border-radius: var(--radius-sm); background: var(--bg-elevated);
+}
+.dca-head { font-size: 14px; color: var(--text-primary); }
+.dca-text { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.6; }
+.temp-card-note {
+  font-size: 11.5px; color: var(--text-muted); padding: 8px 16px 14px; line-height: 1.6;
+  border-top: 1px dashed var(--border-color); margin-top: 6px;
+}
+.temp-card-error { border: 1px dashed #ff8c42; }
+
+/* ============ P1-4 导出按钮 ============ */
+.ft-export {
+  margin-left: 8px; padding: 6px 14px; border: 1px solid var(--border-color);
+  background: var(--bg-card); color: var(--text-primary); border-radius: 8px;
+  cursor: pointer; font-size: 13px; transition: all .15s;
+}
+.ft-export:hover { border-color: var(--color-up); color: var(--color-up); }
+.dca-note { margin-top: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
 
