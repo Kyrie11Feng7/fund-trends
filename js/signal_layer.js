@@ -95,7 +95,7 @@
   function renderGroups(groups) {
     var grid = $('signalGroupGrid');
     if (!grid || !groups) return;
-    var order = ['G1', 'G2', 'G3', 'G4', 'G5'];
+    var order = ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8'];
     grid.innerHTML = order.map(function (g) {
       var m = groups[g];
       if (!m) return '';
