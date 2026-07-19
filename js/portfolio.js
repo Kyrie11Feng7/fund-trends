@@ -7,6 +7,7 @@
   'use strict';
   var LS_KEY = 'fundtrends:portfolios';
   var RED = '#ff5252', GREEN = '#00d68f';
+  var currentPortfolioName = ''; // 当前加载的组合名，控制下拉框保持选中
 
   function $(id) { return document.getElementById(id); }
   function maxDD(nav) { var peak = -Infinity, mdd = 0; for (var i = 0; i < nav.length; i++) { if (nav[i] > peak) peak = nav[i]; var d = nav[i] / peak - 1; if (d < mdd) mdd = d; } return mdd * 100; }
@@ -44,8 +45,23 @@
     };
   }
 
-  function loadPortfolios() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch (e) { return {}; } }
+  function rawLoad() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch (e) { return {}; }
+  }
   function savePortfolios(p) { try { localStorage.setItem(LS_KEY, JSON.stringify(p)); } catch (e) {} }
+
+  // 清理无效/空的组合：要求是非空数组且长度 >= 2
+  function cleanPortfolios(p) {
+    var out = {};
+    for (var k in p) {
+      if (Object.prototype.hasOwnProperty.call(p, k)) {
+        var arr = p[k];
+        if (Array.isArray(arr) && arr.length >= 2) out[k] = arr;
+      }
+    }
+    return out;
+  }
+  function loadPortfolios() { var p = rawLoad(); p = cleanPortfolios(p); savePortfolios(p); return p; }
 
   function render() {
     var host = $('portfolioBody'); if (!host) return;
@@ -77,16 +93,26 @@
       }
     }
     html += '</div>';
+
     // 保存/加载栏
     var saved = loadPortfolios();
+    var savedNames = Object.keys(saved);
+    var saveDisabled = checked.length < 2 ? 'disabled' : '';
+    var loadOptions = savedNames.length
+      ? savedNames.map(function (n) {
+          var selected = (currentPortfolioName === n) ? ' selected' : '';
+          return '<option value="' + n + '"' + selected + '>' + n + '（' + saved[n].length + '只）</option>';
+        }).join('')
+      : '<option value="" disabled>暂无已保存组合</option>';
+    var hasLoad = currentPortfolioName && savedNames.indexOf(currentPortfolioName) >= 0;
+
     html += '<div class="pf-savebar">' +
       '<input class="pf-name" id="pfName" placeholder="给组合起个名字" />' +
-      '<button class="pf-btn" id="pfSave">保存当前组合</button>' +
+      '<button class="pf-btn" id="pfSave" ' + saveDisabled + '>' + (currentPortfolioName && hasLoad ? '覆盖当前组合' : '保存当前组合') + '</button>' +
+      '<button class="pf-btn ghost" id="pfClear">清除选择</button>' +
       '<span class="pf-sep">已保存：</span>' +
-      '<select class="pf-load" id="pfLoad"><option value="">— 选择 —</option>' +
-        Object.keys(saved).map(function (n) { return '<option value="' + n + '">' + n + '（' + saved[n].length + '只）</option>'; }).join('') +
-      '</select>' +
-      '<button class="pf-btn ghost" id="pfDel">删除</button>' +
+      '<select class="pf-load" id="pfLoad"><option value="">— 选择 —</option>' + loadOptions + '</select>' +
+      '<button class="pf-btn ghost" id="pfDel" ' + (hasLoad ? '' : 'disabled') + '>删除</button>' +
       '</div>';
     host.innerHTML = html;
 
@@ -119,21 +145,40 @@
     // 保存
     var saveBtn = host.querySelector('#pfSave');
     if (saveBtn) saveBtn.onclick = function () {
+      if (checked.length < 2) { alert('请至少勾选 2 只基金'); return; }
       var name = (host.querySelector('#pfName').value || '').trim();
       if (!name) { alert('请先输入组合名称'); return; }
-      var p = loadPortfolios(); p[name] = checked; savePortfolios(p); render();
-    };
-    var loadSel = host.querySelector('#pfLoad');
-    if (loadSel) loadSel.onchange = function () {
-      var name = loadSel.value; if (!name) return;
-      var codes = loadPortfolios()[name] || [];
-      host.querySelectorAll('.pf-check').forEach(function (c) { c.checked = codes.indexOf(c.value) >= 0; });
+      var p = loadPortfolios();
+      p[name] = checked;
+      savePortfolios(p);
+      currentPortfolioName = name;
       render();
     };
+    // 加载
+    var loadSel = host.querySelector('#pfLoad');
+    if (loadSel) loadSel.onchange = function () {
+      var name = loadSel.value;
+      if (!name) return;
+      var codes = loadPortfolios()[name] || [];
+      host.querySelectorAll('.pf-check').forEach(function (c) { c.checked = codes.indexOf(c.value) >= 0; });
+      currentPortfolioName = name;
+      render();
+    };
+    // 清除选择
+    var clearBtn = host.querySelector('#pfClear');
+    if (clearBtn) clearBtn.onclick = function () {
+      host.querySelectorAll('.pf-check').forEach(function (c) { c.checked = false; });
+      currentPortfolioName = '';
+      render();
+    };
+    // 删除
     var delBtn = host.querySelector('#pfDel');
     if (delBtn) delBtn.onclick = function () {
-      var name = loadSel.value; if (!name) return;
-      var p = loadPortfolios(); delete p[name]; savePortfolios(p); render();
+      if (!currentPortfolioName) return;
+      if (!confirm('确定删除组合「' + currentPortfolioName + '」吗？')) return;
+      var p = loadPortfolios(); delete p[currentPortfolioName]; savePortfolios(p);
+      currentPortfolioName = '';
+      render();
     };
   }
 
