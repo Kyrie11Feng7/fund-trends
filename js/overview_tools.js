@@ -51,8 +51,17 @@
         '</select>' +
         '<button class="ft-dir" id="ftDir" title="切换升降序">降序 ↓</button>' +
         '<button class="ft-reset" id="ftReset">重置</button>' +
+      '</div>' +
+      '<div class="ft-row">' +
+        '<span class="ft-label">导出</span>' +
+        '<button class="ft-export" id="ftExportCsv">CSV</button>' +
+        '<button class="ft-export" id="ftExportJson">JSON</button>' +
       '</div>';
     header.insertAdjacentElement('afterend', bar);
+
+    var csvBtn = $('ftExportCsv'), jsonBtn = $('ftExportJson');
+    if (csvBtn) csvBtn.addEventListener('click', function () { exportFunds('csv'); });
+    if (jsonBtn) jsonBtn.addEventListener('click', function () { exportFunds('json'); });
 
     var activeTypes = st.types && st.types.length ? st.types : ['__all'];
     var sortKey = st.sort || 'ret30';
@@ -253,6 +262,52 @@
     });
     render();
     window.addEventListener('fundAnalyticsReady', render);
+  }
+
+  function dateStr() {
+    var d = new Date();
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
+  }
+  function csvCell(v) {
+    v = String(v == null ? '' : v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function downloadFile(name, type, content) {
+    var blob = new Blob([content], { type: type });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+  function exportFunds(format) {
+    var rows = window.FUNDS.map(function (f) {
+      var m = (window.FUND_META && window.FUND_META[f.code]) || {};
+      return {
+        code: f.code, name: f.name, type: f.type,
+        manager: f.manager || '', trackIndex: f.trackIndex || '',
+        latestNav: (f.latestNav == null ? '' : f.latestNav),
+        latestChange: (f.latestChange == null ? '' : f.latestChange),
+        ret30: (f.periodReturn == null ? '' : f.periodReturn),
+        manageFee: (m.manageFee == null ? '' : m.manageFee),
+        custodianFee: (m.custodianFee == null ? '' : m.custodianFee),
+        trackErr: (m.trackErr == null ? '' : m.trackErr)
+      };
+    });
+    if (format === 'json') {
+      downloadFile('fund-trends-' + dateStr() + '.json', 'application/json', JSON.stringify(rows, null, 2));
+    } else {
+      var headers = ['代码', '名称', '类型', '基金经理', '跟踪指数', '最新净值', '日涨跌%', '近30日收益%', '管理费率%', '托管费率%', '跟踪误差%'];
+      var lines = [headers.join(',')];
+      rows.forEach(function (r) {
+        lines.push([
+          r.code, csvCell(r.name), csvCell(r.type), csvCell(r.manager), csvCell(r.trackIndex),
+          r.latestNav, r.latestChange, r.ret30, r.manageFee, r.custodianFee, r.trackErr
+        ].join(','));
+      });
+      downloadFile('fund-trends-' + dateStr() + '.csv', 'text/csv;charset=utf-8', '﻿' + lines.join('\r\n'));
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
