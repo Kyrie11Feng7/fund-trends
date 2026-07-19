@@ -3,7 +3,7 @@
  * 每日数据管线 v2：拉取每只基金真实净值（天天基金公开接口）→ 计算技术面趋势信号 → 写出 fund_signals.json
  *
  * 运行方式（本地）：
- *   NODE_TLS_REJECT_UNAUTHORIZED=0 node pipeline.js      # 沙箱需绕过 TLS 拦截
+ *   INSECURE_TLS=1 node pipeline.js                    # 仅沙箱代理拦截 TLS 时需显式开启；生产/CI 默认开启校验
  *   node pipeline.js                                     # 正常环境（含 GitHub Actions）
  *
  * 在 CI（GitHub Actions）中由 .github/workflows/daily-update.yml 定时触发，
@@ -18,6 +18,13 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
+// 默认开启 TLS 证书校验（生产 / CI 安全基线）。
+// 仅当显式设置 INSECURE_TLS=1 时（沙箱代理会拦截 TLS）才临时关闭，并打出告警。
+if (process.env.INSECURE_TLS === '1') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  console.warn('[pipeline] ⚠️ 已按 INSECURE_TLS=1 关闭 TLS 校验（仅限沙箱代理，生产环境请勿使用）');
+}
+
 const OUT = path.join(__dirname, 'fund_signals.json');
 const NAV_OUT = path.join(__dirname, 'fund_nav.json');
 const BT_OUT = path.join(__dirname, 'backtest.json');
@@ -29,8 +36,33 @@ const GROUP_META = {
   G2: { name: '信息科技/半导体/AI', driver: '标普信息科技/费城半导体', risk: '高' },
   G3: { name: '全球新能源车', driver: '海外新能源车产业链', risk: '中' },
   G4: { name: 'A股科创主题', driver: '科创板/创业板', risk: '中' },
-  G5: { name: '新兴/亚洲/混合', driver: 'MSCI 新兴/亚洲股', risk: '中' }
+  G5: { name: '新兴/亚洲/混合', driver: 'MSCI 新兴/亚洲股', risk: '中' },
+  // 拓宽覆盖（P2-5）：宽基 / 债券 / 黄金
+  G6: { name: '宽基指数', driver: '沪深300/中证500/创业板', risk: '中低' },
+  G7: { name: '债券', driver: '中债国债', risk: '低' },
+  G8: { name: '黄金', driver: '国内黄金现货', risk: '中' }
 };
+
+// ───────────────────────────── 拓宽覆盖的新基金（P2-5） ─────────────────────────────
+const EXTRA_FUNDS = {
+  '510300': { group: 'G6', name: '华泰柏瑞沪深300ETF', enName: 'Huatai-PB CSI300 ETF', type: '宽基指数型', manager: '华泰柏瑞基金', track: '沪深300指数', inception: '2012-05-04' },
+  '510500': { group: 'G6', name: '南方中证500ETF', enName: 'Southern CSI500 ETF', type: '宽基指数型', manager: '南方基金', track: '中证500指数', inception: '2013-02-06' },
+  '159915': { group: 'G6', name: '易方达创业板ETF', enName: 'EFund ChiNext ETF', type: '宽基指数型', manager: '易方达基金', track: '创业板指数', inception: '2011-09-20' },
+  '511010': { group: 'G7', name: '国泰上证5年期国债ETF', enName: 'Guotai Treasury ETF', type: '债券型', manager: '国泰基金', track: '中债国债总财富指数', inception: '2013-03-05' },
+  '518880': { group: 'G8', name: '华安黄金ETF', enName: 'HuaAn Gold ETF', type: '黄金主题', manager: '华安基金', track: '国内黄金现货', inception: '2013-07-18' }
+};
+
+// ───────────────────────────── 指数温度定义（P0-1 真实温度） ─────────────────────────────
+// secid 为东方财富行情标识；温度由真实日收盘价历史分位计算（替代原示例 PE）
+// 温度数据源优先级：sina（A股指数/ETF，稳定）> proxyFund（用真实基金净值代理美股指数）> secid（东方财富，CI 可达）
+const INDEX_DEFS = [
+  { key: 'ndx', title: '纳斯达克100', proxyFund: '513100', asset: 'equity', market: 'us', note: '美股科技龙头晴雨表（纳斯达克100ETF 净值代理）' },
+  { key: 'spx', title: '标普信息科技', proxyFund: '161128', asset: 'equity', market: 'us', note: '美股科技大盘（标普500信息科技指数）' },
+  { key: 'hs300', title: '沪深300', sina: 'sh000300', asset: 'equity', market: 'cn', note: 'A股大盘蓝筹' },
+  { key: 'cyb', title: '创业板指', sina: 'sz399006', asset: 'equity', market: 'cn', note: 'A股成长风格' },
+  { key: 'zz500', title: '中证500', sina: 'sh000905', asset: 'equity', market: 'cn', note: 'A股中小盘' },
+  { key: 'gold', title: '黄金ETF', sina: 'sh518880', asset: 'gold', market: 'cn', note: '避险资产 / 抗通胀' }
+];
 
 const FUND_GROUP = {
   '513100': 'G1', '017436': 'G1', '000043': 'G1', '161130': 'G1', '017093': 'G1',
@@ -48,6 +80,9 @@ const FUND_NAME = {
   '007349': '华夏科技创新A', '007345': '富国科技创新A',
   '270023': '广发全球精选', '539002': '建信新兴市场混合', '008253': '华宝致远混合', '016664': '天弘全球高端制造', '457001': '国富亚洲机会'
 };
+// 合并拓宽覆盖的新基金到主映射（声明后即可安全合并）
+Object.assign(FUND_GROUP, Object.fromEntries(Object.entries(EXTRA_FUNDS).map(([c, v]) => [c, v.group])));
+Object.assign(FUND_NAME, Object.fromEntries(Object.entries(EXTRA_FUNDS).map(([c, v]) => [c, v.name])));
 
 // ───────────────────────────── 技术指标库 ─────────────────────────────
 const SMA = (a, n) => (a.length < n ? null : a.slice(a.length - n).reduce((s, v) => s + v, 0) / n);
@@ -331,10 +366,23 @@ async function getJSON(url, headers) {
   });
 }
 
+// 拉取文本（HTML 页面，如费率/跟踪误差页），用于正则提取
+async function getText(url, headers) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers }, (res) => {
+      let d = '';
+      res.on('data', (c) => (d += c));
+      res.on('end', () => resolve(d));
+    });
+    req.on('error', reject);
+    req.setTimeout(20000, () => req.destroy(new Error('timeout')));
+  });
+}
+
 // 分页拉取某基金净值序列，目标累计 target 条；返回升序 {dates[], navs[]}（navs 用累计净值）
 async function fetchNavSeries(code, target = 400) {
   const hdrs = { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://fundf10.eastmoney.com/', 'Accept': 'application/json' };
-  const dates = [], navs = [];
+  const dates = [], navs = [], dwjzs = [];
   let page = 1;
   const PAGE = 20; // 天天基金接口每页实际返回上限约 20 条（pageSize 参数被忽略）
   while (dates.length < target && page <= 40) {
@@ -347,14 +395,16 @@ async function fetchNavSeries(code, target = 400) {
       const nav = parseFloat(r.LJJZ);
       if (isNaN(nav)) continue;
       dates.push(r.FSRQ); navs.push(nav);
+      const dw = parseFloat(r.DWJZ);
+      dwjzs.push(isNaN(dw) ? nav : dw);
     }
     if (list.length < PAGE) break; // 到底
     page++;
     await new Promise((r) => setTimeout(r, 120)); // 轻量限速，避免触发风控
   }
   // 接口返回降序（最新在前），反转成升序（最旧在前）
-  dates.reverse(); navs.reverse();
-  return { dates, navs };
+  dates.reverse(); navs.reverse(); dwjzs.reverse();
+  return { dates, navs, dwjzs };
 }
 
 // 并发池
@@ -371,6 +421,372 @@ async function pool(items, worker, size = 4) {
   return out;
 }
 
+// ───────────────────────────── P0-1 真实指数温度（基于真实收盘价历史分位） ─────────────────────────────
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+// 新浪 K 线（A股指数/ETF，稳定）：返回 {dates, closes, chg(%)}
+async function fetchSinaKline(symbol) {
+  const url = `https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=${symbol}&scale=240&ma=no&datalen=1300`;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const txt = await getText(url, { 'User-Agent': 'Mozilla/5.0' });
+      if (!txt) throw new Error('empty');
+      const arr = JSON.parse(txt);
+      if (!Array.isArray(arr) || !arr.length) throw new Error('no data');
+      const dates = [], closes = [], chg = [];
+      for (const k of arr) {
+        const c = parseFloat(k.close);
+        if (isNaN(c)) continue;
+        dates.push(k.day); closes.push(c); chg.push(0);
+      }
+      for (let i = 1; i < closes.length; i++) chg[i] = (closes[i] / closes[i - 1] - 1) * 100;
+      if (closes.length < 60) throw new Error('too few');
+      return { dates, closes, chg };
+    } catch (e) {
+      if (attempt < 2) await sleep(800);
+    }
+  }
+  return null;
+}
+
+// 用基金真实净值历史作为指数温度代理（美股指数在沙箱不可达时的真实替代）
+function fetchFundKline(code) {
+  try {
+    const json = JSON.parse(fs.readFileSync(NAV_OUT, 'utf8'));
+    const s = json.series && json.series.find((x) => x.code === code);
+    if (!s || !s.nav || s.nav.length < 30) return null;
+    const closes = s.nav, dates = s.dates;
+    const chg = closes.map((c, i) => (i > 0 ? (c / closes[i - 1] - 1) * 100 : 0));
+    return { dates, closes, chg };
+  } catch (e) { return null; }
+}
+
+// 东方财富 K 线（美股指数，CI 环境可达；沙箱常被限频，作为兜底，带重试）
+async function fetchKline(secid, beg = '20200101') {
+  const url = `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${secid}&fields1=f1%2Cf2%2Cf3&fields2=f51%2Cf2%2Cf3&klt=101&fqt=1&beg=${beg}&end=20500101`;
+  const hdrs = { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://quote.eastmoney.com/' };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const j = await getJSON(url, hdrs);
+      const kl = j && j.data && j.data.klines;
+      if (!kl || !kl.length) throw new Error('empty');
+      const dates = [], closes = [], chg = [];
+      for (const line of kl) {
+        const p = line.split(',');
+        const c = parseFloat(p[1]);
+        if (isNaN(c)) continue;
+        dates.push(p[0]); closes.push(c); chg.push(parseFloat(p[2]) || 0);
+      }
+      if (closes.length < 60) throw new Error('too few');
+      return { dates, closes, chg };
+    } catch (e) {
+      if (attempt < 2) await sleep(800);
+    }
+  }
+  return null;
+}
+
+// 当前价位在历史上的分位（0-100）：小于当前价的比例
+function percentileRank(arr, v) {
+  if (!arr.length) return 50;
+  let below = 0;
+  for (const x of arr) if (x < v) below++;
+  return (below / arr.length) * 100;
+}
+function tempBand(t) {
+  if (t < 30) return { band: '低估', color: '#00d68f' };
+  if (t < 50) return { band: '正常偏低', color: '#7bc043' };
+  if (t < 70) return { band: '正常偏高', color: '#f7b500' };
+  return { band: '高估', color: '#ff5252' };
+}
+function dcaLevel(t) {
+  if (t < 30) return { level: '偏低区间', text: '温度<30%，处于历史偏低区间，可适度增加定投金额（仅供参考，非投资建议）' };
+  if (t < 50) return { level: '中性区间', text: '温度30-50%，处于历史中性区间，可按基准金额定投（仅供参考，非投资建议）' };
+  if (t < 70) return { level: '偏高区间', text: '温度50-70%，处于历史偏高区间，可考虑减少定投金额（仅供参考，非投资建议）' };
+  return { level: '偏高区间', text: '温度>70%，处于历史偏高区间，建议谨慎或分批兑现（仅供参考，非投资建议）' };
+}
+
+async function generateIndexTemperature() {
+  const items = [];
+  for (const def of INDEX_DEFS) {
+    let kl = null, srcLabel = '';
+    if (def.sina) { kl = await fetchSinaKline(def.sina); srcLabel = '新浪K线:' + def.sina; }
+    else if (def.proxyFund) { kl = fetchFundKline(def.proxyFund); srcLabel = '基金净值代理:' + def.proxyFund; }
+    else if (def.secid) { kl = await fetchKline(def.secid); srcLabel = '东方财富K线:' + def.secid; }
+    if (!kl || kl.closes.length < 60) { console.warn(`  [temp ${def.key}] 数据源不足(${srcLabel})，跳过`); continue; }
+    const closes = kl.closes, dates = kl.dates, chg = kl.chg;
+    const cur = closes[closes.length - 1];
+    const lastDate = dates[dates.length - 1];
+    const lastChg = chg[chg.length - 1];
+    const tempAll = percentileRank(closes, cur);
+    const windowed = (years) => {
+      const need = Math.floor(years * 242);
+      return percentileRank(closes.slice(Math.max(0, closes.length - need)), cur);
+    };
+    const ddOf = (years) => {
+      const need = Math.floor(years * 242);
+      const sub = closes.slice(Math.max(0, closes.length - need));
+      let peak = -Infinity, mdd = 0;
+      for (const v of sub) { if (v > peak) peak = v; const d = (v / peak - 1) * 100; if (d < mdd) mdd = d; }
+      return mdd;
+    };
+    const band = tempBand(tempAll);
+    const dca = dcaLevel(tempAll);
+    items.push({
+      key: def.key, title: def.title, subtitle: def.note, asset: def.asset, market: def.market,
+      value: cur, change: +lastChg.toFixed(2),
+      temperature: +tempAll.toFixed(1),
+      tempBand: band.band, tempColor: band.color,
+      percentiles: { y1: +windowed(1).toFixed(1), y3: +windowed(3).toFixed(1), y5: +windowed(5).toFixed(1) },
+      drawdown: { current: +ddOf(1).toFixed(2), y5: +ddOf(5).toFixed(2) },
+      dca,
+      updateTime: lastDate,
+      source: srcLabel + '；分位温度为当前价位在历史区间的百分位',
+      note: '分位温度基于真实价格序列计算，非券商 PE 口径；仅反映"价格贵贱"，不构成买卖建议'
+    });
+    console.log(`  [temp ${def.key}] 来源=${srcLabel} 价位=${cur} 温度=${tempAll.toFixed(1)} 区间=${band.band}`);
+  }
+  const out = {
+    meta: {
+      asOf: items.length ? items[items.length - 1].updateTime : new Date().toISOString().slice(0, 10),
+      source: 'A股指数/ETF 取新浪真实日K线；美股指数取对应 ETF 真实净值（均为真实价格序列）',
+      method: '分位温度 = 当前价位在对应历史区间（1/3/5年）中的百分位；越高越贵',
+      note: '真实数据，替代原示例 PE；定投档位由温度推导'
+    },
+    items
+  };
+  fs.writeFileSync(path.join(__dirname, 'index_temperature.json'), JSON.stringify(out, null, 2));
+  console.log(`[pipeline] 已写出 index_temperature.json（${items.length} 个指数，真实温度）`);
+  return out;
+}
+
+// ───────────────────────────── P1-4 费率与跟踪误差（F10 HTML 正则提取） ─────────────────────────────
+async function fetchFundMeta(code) {
+  const hdrs = { 'User-Agent': 'Mozilla/5.0', 'Referer': 'http://fundf10.eastmoney.com/' };
+  let mgmt = null, cust = null, track = null;
+  try {
+    const html = await getText(`https://fundf10.eastmoney.com/jjfl_${code}.html`, hdrs);
+    const m = html.match(/管理费率<\/td><td[^>]*>([\d.]+)%/);
+    const c = html.match(/托管费率<\/td><td[^>]*>([\d.]+)%/);
+    if (m) mgmt = parseFloat(m[1]);
+    if (c) cust = parseFloat(c[1]);
+  } catch (e) { /* 跳过 */ }
+  try {
+    const html2 = await getText(`https://fundf10.eastmoney.com/tszf_${code}.html`, hdrs);
+    let t = html2.match(/跟踪误差<\/td><td[^>]*>([\d.]+)%/);
+    if (!t) t = html2.match(/跟踪误差[^\d]{0,40}?([\d.]+)%/);
+    if (t) track = parseFloat(t[1]);
+  } catch (e) { /* 跳过 */ }
+  return { code, mgmtFee: mgmt, custFee: cust, trackErr: track };
+}
+
+async function generateFundMeta(codes) {
+  const list = await pool(codes, (code) => fetchFundMeta(code), 6);
+  const byCode = {};
+  list.forEach((m) => { if (m && m.code) byCode[m.code] = { mgmtFee: m.mgmtFee, custFee: m.custFee, trackErr: m.trackErr }; });
+  // 真实跟踪误差：基金净值日收益 vs 标的指数日收益，年化 std（替代 404 的 tszf 页面）
+  const teMap = await computeTrackingError();
+  Object.keys(teMap).forEach((code) => {
+    if (byCode[code]) {
+      byCode[code].trackErr = teMap[code].trackErr;
+      byCode[code].trackErrNote = teMap[code].trackErrNote;
+    }
+  });
+  const out = {
+    meta: {
+      asOf: new Date().toISOString().slice(0, 10),
+      source: '天天基金 F10 费率页面（fundf10.eastmoney.com），管理/托管费率与跟踪误差（指数/ETF）',
+      note: '跟踪误差仅指数/ETF 适用，主动基金为 null'
+    },
+    byCode
+  };
+  fs.writeFileSync(path.join(__dirname, 'fund_meta.json'), JSON.stringify(out, null, 2));
+  const withTrack = Object.values(byCode).filter((x) => x.trackErr != null).length;
+  console.log(`[pipeline] 已写出 fund_meta.json（${Object.keys(byCode).length} 只，含跟踪误差 ${withTrack} 只）`);
+  return out;
+}
+
+// ───────────────────────────── 真实跟踪误差（P1-4 补全） ─────────────────────────────
+// 基金净值日收益 vs 标的指数日收益，年化 std = std(diff) * sqrt(252)
+const TRACK_BENCH = {
+  '510300': 'sh000300', // 沪深300ETF -> 沪深300
+  '510500': 'sh000905', // 中证500ETF -> 中证500
+  '159915': 'sz399006', // 创业板ETF -> 创业板指
+  '518880': 'sh518880', // 黄金ETF -> 黄金ETF市价
+  '511010': 'sh000012'  // 国债ETF -> 上证国债指数
+};
+const NO_BENCH = {
+  '513100': '纳指100 无独立可比对标指数（沙箱不可达），无法计算',
+  '161128': '标普信息科技 无独立可比对标指数（沙箱不可达），无法计算'
+};
+
+async function computeTrackingError() {
+  let navJson;
+  try { navJson = JSON.parse(fs.readFileSync(NAV_OUT, 'utf8')); } catch (e) { return {}; }
+  const seriesArr = navJson.series || [];
+  const byCodeMap = {};
+  seriesArr.forEach((s) => { byCodeMap[s.code] = s; });
+  const out = {};
+  for (const [code, reason] of Object.entries(NO_BENCH)) {
+    out[code] = { trackErr: null, trackErrNote: reason };
+  }
+  for (const [code, sym] of Object.entries(TRACK_BENCH)) {
+    const f = byCodeMap[code];
+    if (!f || !f.dates || !f.nav || f.dates.length < 30) {
+      out[code] = { trackErr: null, trackErrNote: '净值数据不足' };
+      continue;
+    }
+    const bench = await fetchSinaKline(sym);
+    if (!bench || bench.dates.length < 30) {
+      out[code] = { trackErr: null, trackErrNote: `标的 ${sym} 行情不可达` };
+      continue;
+    }
+    const benchMap = {};
+    bench.dates.forEach((d, i) => { benchMap[d] = bench.closes[i]; });
+    const diffs = [];
+    for (let i = 1; i < f.dates.length; i++) {
+      const d = f.dates[i], pd = f.dates[i - 1];
+      if (!(d in benchMap) || !(pd in benchMap)) continue;
+      const fr = f.nav[i] / f.nav[i - 1] - 1;
+      const br = benchMap[d] / benchMap[pd] - 1;
+      if (!isFinite(fr) || !isFinite(br)) continue;
+      diffs.push(fr - br);
+    }
+    if (diffs.length < 20) {
+      out[code] = { trackErr: null, trackErrNote: '对齐样本不足' };
+      continue;
+    }
+    const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+    const variance = diffs.reduce((a, b) => a + (b - mean) ** 2, 0) / diffs.length;
+    const annual = Math.sqrt(variance) * Math.sqrt(252) * 100;
+    out[code] = {
+      trackErr: +annual.toFixed(3),
+      trackErrNote: `年化跟踪误差（净值 vs ${sym}，约 ${diffs.length} 个交易日）`
+    };
+    console.log(`[track] ${code} -> ${annual.toFixed(3)}% (n=${diffs.length})`);
+  }
+  return out;
+}
+
+// ───────────────────────────── 资讯自动滚动更新（P2-3 时效补全） ─────────────────────────────
+// 新浪财经滚动新闻（沙箱可达），规则化分类与情绪标签（自动·仅供参考）
+const NEWS_LIDS = ['2515', '2513', '2516', '2517', '2518', '2519'];
+
+async function fetchSinaNews() {
+  const items = [];
+  const seen = new Set();
+  for (const lid of NEWS_LIDS) {
+    const url = `https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=${lid}&k=&num=12&page=1`;
+    try {
+      const txt = await getText(url, { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://finance.sina.com.cn/' });
+      const o = JSON.parse(txt);
+      const arr = (o.result && o.result.data) || [];
+      for (const it of arr) {
+        const title = it.title || '';
+        if (!title || seen.has(title)) continue;
+        seen.add(title);
+        const ctime = parseInt(it.ctime, 10);
+        if (!ctime) continue;
+        const dt = new Date(ctime * 1000);
+        const dateCN = `${dt.getMonth() + 1}月${dt.getDate()}日`;
+        const date = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+        const hh = String(dt.getHours()).padStart(2, '0');
+        const mm = String(dt.getMinutes()).padStart(2, '0');
+        const summary = (it.intro || it.summary || it.stitle || '').replace(/\s+/g, ' ').trim();
+        const url2 = it.url || it.wapurl || '';
+        items.push({ title, summary, date, dateCN, time: `${hh}:${mm}`, url: url2, source: '新浪财经' });
+      }
+    } catch (e) { console.warn(`[news] lid ${lid} 失败：${e.message}`); }
+    await sleep(300);
+  }
+  return items;
+}
+
+function classifyNewsItem(n) {
+  const t = (n.title + ' ' + n.summary);
+  const has = (...kw) => kw.some((k) => t.includes(k));
+  let category = '内地';
+  if (has('港股', '恒生', 'H股')) category = '港股';
+  else if (has('美股', '纳斯达克', '标普', '道指', '美债', '美联储', '美国', '特朗普')) category = '国际';
+  else if (has('地产', '楼市', '房地产', '房贷', '房企')) category = '地产';
+  else if (has('政策', '央行', '国务院', '政治局', '两会', '财政', '货币', 'GDP', 'CPI', 'PMI', '宏观', '降息', '加息')) category = '宏观政策';
+  else if (has('A股', '沪', '深', '创业板', '科创', '指数', '基金', 'ETF', '公募', '股市', '板块')) category = '金融市场';
+  let sentiment = 'neutral';
+  if (has('利好', '上涨', '大涨', '回暖', '复苏', '增长', '新高', '超预期', '上调', '盈利', '反弹', '创新高')) sentiment = 'positive';
+  else if (has('利空', '下跌', '大跌', '暴跌', '风险', '危机', '下调', '亏损', '下滑', '违约', '降温', '承压')) sentiment = 'negative';
+  return { category, sentiment };
+}
+
+async function generateNewsDeep() {
+  const raw = await fetchSinaNews();
+  if (!raw.length) {
+    console.warn('[news] 未抓到新闻，保留旧 js/news_deep.js');
+    return;
+  }
+  const list = raw.slice(0, 45).map((n) => {
+    const c = classifyNewsItem(n);
+    return {
+      category: c.category,
+      date: n.date,
+      dateCN: n.dateCN,
+      time: n.time,
+      title: n.title,
+      summary: n.summary.slice(0, 400),
+      soWhat: '',
+      relatedFunds: [],
+      source: n.source,
+      url: n.url,
+      sentiment: c.sentiment,
+      auto: true
+    };
+  });
+  const header = [
+    '// 自动生成：新浪财经滚动新闻（每日 pipeline 抓取）',
+    '// 分类与情绪标签为规则启发式（自动·仅供参考，非投资建议）；抓取于 ' + new Date().toISOString().slice(0, 10),
+    'window.NEWS_DEEP = ' + JSON.stringify(list, null, 2) + ';'
+  ];
+  fs.writeFileSync(path.join(__dirname, 'js', 'news_deep.js'), header.join('\n'));
+  console.log(`[pipeline] 已写出 js/news_deep.js（${list.length} 条，新浪财经实时抓取）`);
+}
+
+// ───────────────────────────── P2-5 新增基金 sparkline 数据（realdata_extra.js） ─────────────────────────────
+function emitRealDataExtra(extraByCode) {
+  // 列式压缩：date->YYYYMMDD整数，省 dateCN（运行时推导），与 realdata.js 同格式，控制体积
+  const compact = {};
+  Object.keys(extraByCode).forEach((code) => {
+    const arr = extraByCode[code] || [];
+    const d = [], nav = [], acc = [], ch = [];
+    arr.forEach((p) => {
+      const m = String(p.date).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      d.push(m ? parseInt(m[1] + m[2] + m[3], 10) : 0);
+      nav.push(p.nav); acc.push(p.acc); ch.push(p.change);
+    });
+    compact[code] = [d, nav, acc, ch];
+  });
+  const body = `// 自动生成：新增基金（宽基/债券/黄金）的真实净值历史，供总览卡片 sparkline 使用
+// 由 pipeline.js 生成；加载顺序须在 realdata.js 之后、data.js 之前
+// 列式压缩格式（date->YYYYMMDD整数, dateCN 运行时推导），解压后形状与 REAL_FUND_DATA 一致
+(function () {
+  window.REAL_FUND_DATA = window.REAL_FUND_DATA || {};
+  var RAW = ${JSON.stringify(compact)};
+  for (var code in RAW) {
+    if (!RAW.hasOwnProperty(code)) continue;
+    var c = RAW[code], d = c[0], nav = c[1], acc = c[2], ch = c[3];
+    var arr = new Array(d.length);
+    for (var i = 0; i < d.length; i++) {
+      var num = d[i], s = String(num);
+      var date = s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8);
+      var dateCN = (Math.floor(num / 100) % 100) + '月' + (num % 100) + '日';
+      arr[i] = { date: date, dateCN: dateCN, nav: nav[i], acc: acc[i], change: ch[i] };
+    }
+    window.REAL_FUND_DATA[code] = arr;
+  }
+})();
+`;
+  fs.writeFileSync(path.join(__dirname, 'js', 'realdata_extra.js'), body);
+  console.log(`[pipeline] 已写出 js/realdata_extra.js（新增 ${Object.keys(extraByCode).length} 只基金净值历史，列式压缩）`);
+}
+
 // ───────────────────────────── 主流程 ─────────────────────────────
 async function main() {
   const asOf = new Date().toISOString().slice(0, 10);
@@ -378,9 +794,9 @@ async function main() {
   console.log(`[pipeline] 开始拉取 ${codes.length} 只基金真实净值（天天基金接口）…`);
 
   const results = await pool(codes, async (code) => {
-    const g = FUND_GROUP[code];
-    try {
-      const { dates, navs } = await fetchNavSeries(code);
+      const g = FUND_GROUP[code];
+      try {
+        const { dates, navs, dwjzs } = await fetchNavSeries(code);
       if (navs.length < 5) throw new Error('净值条数不足(' + navs.length + ')');
       const close = navs[navs.length - 1];
       const ma20 = SMA(navs, 20), ma60 = SMA(navs, 60), ma120 = SMA(navs, 120), ma250 = SMA(navs, 250);
@@ -396,7 +812,7 @@ async function main() {
       const risk = riskFromStats(dd, vol, GROUP_META[g].risk);
       return {
         code, name: FUND_NAME[code], group: g, measured: true,
-        dates, navs,
+        dates, navs, dwjzs,
         shortLabel: sig.shortTerm, shortScore: sig.sScore,
         midLabel: sig.midTerm, midScore: sig.mScore,
         risk,
@@ -474,6 +890,32 @@ async function main() {
   backtest.disclaimer = '回测为技术信号的历史模拟，非未来收益保证，不构成投资建议';
   fs.writeFileSync(BT_OUT, JSON.stringify(backtest, null, 2));
 
+  // ── 拓宽覆盖基金 sparkline 数据（P2-5） ──
+  const extraByCode = {};
+  for (const r of results) {
+    if (!EXTRA_FUNDS[r.code] || !r.measured || !r.dwjzs || r.dwjzs.length < 5) continue;
+    const arr = [];
+    for (let i = 0; i < r.dates.length; i++) {
+      const nav = r.dwjzs[i];
+      const prev = i > 0 ? r.dwjzs[i - 1] : nav;
+      const change = i > 0 ? (nav / prev - 1) * 100 : 0;
+      const parts = r.dates[i].split('-');
+      arr.push({
+        date: r.dates[i],
+        dateCN: `${parseInt(parts[1])}月${parseInt(parts[2])}日`,
+        nav, acc: r.navs[i], change: +change.toFixed(2)
+      });
+    }
+    extraByCode[r.code] = arr;
+  }
+
+  // ── 真实指数温度（P0-1）/ 费率与跟踪误差（P1-4）/ 新基金 sparkline（P2-5） ──
+  await generateIndexTemperature();
+  const allCodes = Object.keys(FUND_GROUP); // 含拓宽覆盖的新基金
+  await generateFundMeta(allCodes);
+  await generateNewsDeep(); // 新浪财经滚动新闻实时抓取
+  if (Object.keys(extraByCode).length) emitRealDataExtra(extraByCode);
+
   const result = {
     meta: {
       asOf,
@@ -492,7 +934,7 @@ async function main() {
 
   if (process.env.GH_TOKEN && process.env.AUTO_COMMIT) {
     try {
-      require('child_process').execFileSync('bash', ['-c', `git add fund_signals.json fund_nav.json backtest.json && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
+      require('child_process').execFileSync('bash', ['-c', `git add fund_signals.json fund_nav.json backtest.json index_temperature.json fund_meta.json js/realdata_extra.js js/news_deep.js && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
     } catch (e) { console.warn('[pipeline] 提交失败：', e.message); }
   }
 }
