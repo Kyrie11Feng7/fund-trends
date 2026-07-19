@@ -2584,6 +2584,7 @@ body { scroll-padding-top: 72px; }
 .pf-btn { height: 34px; padding: 0 16px; border-radius: 8px; border: none; background: var(--color-accent); color: #fff; font-size: 13px; cursor: pointer; }
 .pf-btn.ghost { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); color: var(--text-secondary); }
 .pf-btn:hover { filter: brightness(1.1); }
+.pf-btn:disabled, .pf-btn:disabled:hover { opacity: 0.5; cursor: not-allowed; filter: none; }
 .pf-sep { color: var(--text-muted); font-size: 13px; }
 
 /* P1-5 相关性热力图 */
