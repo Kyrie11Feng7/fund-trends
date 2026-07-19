@@ -2,39 +2,46 @@
   "summary": {
     "signalName": "短期信号前瞻验证",
     "holdDays": 5,
-    "sampleSignals": 4846,
-    "winRate": 0.5961617829137433,
-    "avgReturnPct": 0.84,
-    "benchmarkWinRate": 0.6065753424657534,
+    "sampleSignals": 5825,
+    "winRate": 0.5914163090128756,
+    "avgReturnPct": 0.81,
+    "benchmarkWinRate": 0.6025570776255708,
     "bySignalForward": [
       {
-        "signal": "弱势下行",
-        "count": 4239,
-        "avgFwdReturnPct": 0.88,
-        "winRate": 0.6150035385704176
+        "signal": "超卖待反弹",
+        "count": 386,
+        "avgFwdReturnPct": 0.9,
+        "winRate": 0.5906735751295337
       },
       {
-        "signal": "超卖待反弹",
-        "count": 328,
-        "avgFwdReturnPct": 0.91,
-        "winRate": 0.5884146341463414
+        "signal": "弱势下行",
+        "count": 5079,
+        "avgFwdReturnPct": 0.77,
+        "winRate": 0.61193148257531
       },
       {
         "signal": "偏强",
-        "count": 4518,
-        "avgFwdReturnPct": 0.83,
-        "winRate": 0.5967242142540947
+        "count": 5439,
+        "avgFwdReturnPct": 0.8,
+        "winRate": 0.5914690200404487
       },
       {
         "signal": "超卖但趋势强",
-        "count": 40,
-        "avgFwdReturnPct": 7.74,
-        "winRate": 0.975
+        "count": 46,
+        "avgFwdReturnPct": 7.05,
+        "winRate": 0.9782608695652174
       }
     ],
-    "validFunds": 25
+    "validFunds": 30
   },
   "byGroup": [
+    {
+      "group": "G6",
+      "name": "宽基指数",
+      "sampleSignals": 599,
+      "winRate": 0.6026711185308848,
+      "avgReturnPct": 0.83
+    },
     {
       "group": "G2",
       "name": "信息科技/半导体/AI",
@@ -64,6 +71,20 @@
       "avgReturnPct": 0.5
     },
     {
+      "group": "G7",
+      "name": "债券",
+      "sampleSignals": 185,
+      "winRate": 0.4648648648648649,
+      "avgReturnPct": 0.03
+    },
+    {
+      "group": "G8",
+      "name": "黄金",
+      "sampleSignals": 195,
+      "winRate": 0.558974358974359,
+      "avgReturnPct": 0.8
+    },
+    {
       "group": "G4",
       "name": "A股科创主题",
       "sampleSignals": 439,
@@ -71,7 +92,7 @@
       "avgReturnPct": 1.79
     }
   ],
-  "asOf": "2026-07-18",
+  "asOf": "2026-07-19",
   "strategy": "逐日判定短期信号标签，统计该标签出现后未来 5 个交易日(forward 5d)的累计收益，验证信号的前瞻含义；winRate/avgReturnPct 仅统计可操作的偏多信号（超卖待反弹/偏强），benchmarkWinRate 为全样本前瞻上涨概率",
   "note": "基于各基金真实历史净值的信号前瞻收益回测，含过拟合/幸存偏差与样本区间风险，不代表未来",
   "disclaimer": "回测为技术信号的历史模拟，非未来收益保证，不构成投资建议"
