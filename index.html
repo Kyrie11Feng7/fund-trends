@@ -9,6 +9,7 @@
   <script src="js/lib/chart.umd.min.js"></script>
 </head>
 <body>
+  <a href="#funds" class="skip-link">跳到主内容</a>
 
   <!-- ============ 导航栏 ============ -->
   <nav class="navbar">
@@ -34,6 +35,7 @@
         <a href="#correlation" class="nav-link">相关性</a>
         <a href="#backtest" class="nav-link">回测参考</a>
       </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="切换主题">亮色</button>
       <button class="nav-toggle" aria-label="菜单">
         <span></span><span></span><span></span>
       </button>
@@ -79,7 +81,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">指数温度</h2>
-        <p class="section-desc">用一张图读懂 VIX、纳斯达克100 与 标普500 的当下位置与估值温度</p>
+        <p class="section-desc">用一张图读懂 VIX、纳斯达克100 与 标普500 的当下位置与分位温度（区间位置，非估值倍数）</p>
       </div>
       <div class="index-temperature-grid" id="indexTemperatureGrid">
         <!-- 由 JS 动态渲染 -->
@@ -280,9 +282,24 @@
         <button class="filter-btn" data-category="宏观政策">宏观政策</button>
       </div>
 
+      <!-- 订阅 / RSS（P2-4） -->
+      <div class="sub-box" id="subBox">
+        <div class="sub-left">
+          <span class="sub-icon">🔔</span>
+          <div>
+            <div class="sub-title">订阅 fund-trends 更新</div>
+            <div class="sub-desc">通过 RSS 阅读器获取每日深度解读与指数温度更新。本站为纯静态站点，<strong>无服务端推送</strong>；RSS 为当前最可靠的更新订阅方式。</div>
+          </div>
+        </div>
+        <div class="sub-actions">
+          <a class="sub-rss" href="rss.xml" target="_blank" rel="noopener">📡 RSS 订阅</a>
+          <button class="sub-copy" id="copyRssBtn" type="button">复制 RSS 链接</button>
+        </div>
+      </div>
+
       <!-- 新闻列表 -->
       <div class="news-timeline" id="newsTimeline">
-        <!-- 由 JS 动态渲染 -->
+        <!-- 由 JS 动态渲染（P2-6 懒加载） -->
       </div>
     </div>
   </section>
@@ -650,19 +667,20 @@
     </svg>
   </button>
 
-  <script src="js/realdata.js?v=20260718b"></script>
-  <script src="js/data.js?v=20260718c"></script>
+  <script src="js/realdata.js?v=20260719c"></script>
+  <script src="js/realdata_extra.js?v=20260719c"></script>
+  <script src="js/data.js?v=20260719b"></script>
   <script src="js/market_snapshot.js?v=20260718a"></script>
   <script src="js/news_deep.js?v=20260718a"></script>
   <script src="js/holdings.js?v=20260718c"></script>
   <script src="js/index_temperature.js?v=20260718i"></script>
   <script src="js/etf_board.js?v=20260718a"></script>
-  <script src="js/app.js?v=20260718j"></script>
-  <script src="js/signal_layer.js?v=20260719a"></script>
+  <script src="js/app.js?v=20260719b"></script>
+  <script src="js/signal_layer.js?v=20260719b"></script>
   <script src="js/analytics.js?v=20260719a"></script>
   <script src="js/overview_tools.js?v=20260719a"></script>
-  <script src="js/portfolio.js?v=20260719a"></script>
-  <script src="js/correlation.js?v=20260719a"></script>
+  <script src="js/portfolio.js?v=20260719b"></script>
+  <script src="js/correlation.js?v=20260719b"></script>
   <script src="js/freshness.js?v=20260719a"></script>
   <script src="js/search.js?v=20260719a"></script>
 </body>
