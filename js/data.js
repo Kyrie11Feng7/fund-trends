@@ -313,6 +313,61 @@ const FUNDS = [
       "深度挖掘中国科技创新企业投资机会，重点关注半导体自主可控、AI大模型应用、机器人及商业航天等前沿领域。",
     data: REAL_FUND_DATA["007345"]
   },
+  {
+    code: "510300",
+    name: "华泰柏瑞沪深300ETF",
+    enName: "Huatai-PB CSI300 ETF",
+    type: "宽基指数型",
+    manager: "华泰柏瑞基金",
+    trackIndex: "沪深300指数",
+    inception: "2012-05-04",
+    description: "A股大盘蓝筹旗舰ETF，跟踪沪深300指数，是观察A股核心资产温度与定投参考的基准标的。",
+    data: REAL_FUND_DATA["510300"]
+  },
+  {
+    code: "510500",
+    name: "南方中证500ETF",
+    enName: "Southern CSI500 ETF",
+    type: "宽基指数型",
+    manager: "南方基金",
+    trackIndex: "中证500指数",
+    inception: "2013-02-06",
+    description: "跟踪中证500指数，覆盖A股中小盘核心成长企业，与沪深300互补，分散单一市值暴露。",
+    data: REAL_FUND_DATA["510500"]
+  },
+  {
+    code: "159915",
+    name: "易方达创业板ETF",
+    enName: "E-Fonda ChiNext ETF",
+    type: "宽基指数型",
+    manager: "易方达基金",
+    trackIndex: "创业板指",
+    inception: "2011-09-20",
+    description: "跟踪创业板指，聚集A股高成长创新企业，波动与弹性高于主板宽基，适合作为成长风格定投标的。",
+    data: REAL_FUND_DATA["159915"]
+  },
+  {
+    code: "511010",
+    name: "国泰上证5年期国债ETF",
+    enName: "Guotai 5Y Treasury ETF",
+    type: "债券型",
+    manager: "国泰基金",
+    trackIndex: "上证5年期国债指数",
+    inception: "2013-03-05",
+    description: "跟踪上证5年期国债指数，低波动避险资产，与权益基金低相关，用于组合压舱与再平衡。",
+    data: REAL_FUND_DATA["511010"]
+  },
+  {
+    code: "518880",
+    name: "华安黄金ETF",
+    enName: "HuaAn Gold ETF",
+    type: "商品型",
+    manager: "华安基金",
+    trackIndex: "国内黄金现货",
+    inception: "2013-07-18",
+    description: "跟踪国内黄金现货价格，抗通胀与避险资产，与股债低相关，是组合分散风险的重要一环。",
+    data: REAL_FUND_DATA["518880"]
+  }
 ];
 
 // ============ 计算基金统计数据 ============
