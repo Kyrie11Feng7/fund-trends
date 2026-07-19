@@ -162,9 +162,5 @@
     render();
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    if (window.FundAnalytics) window.FundAnalytics.ready().then(init);
-    else window.addEventListener('fundAnalyticsReady', init);
-  });
   window.__initPortfolio = init;
 })();
