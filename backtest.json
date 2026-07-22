@@ -2,37 +2,37 @@
   "summary": {
     "signalName": "短期信号前瞻验证",
     "holdDays": 5,
-    "sampleSignals": 5816,
-    "winRate": 0.5904401650618982,
-    "avgReturnPct": 0.8,
-    "benchmarkWinRate": 0.6016438356164383,
+    "sampleSignals": 5068,
+    "winRate": 0.5883977900552486,
+    "avgReturnPct": 0.81,
+    "benchmarkWinRate": 0.6009483667017914,
     "bySignalForward": [
       {
         "signal": "弱势下行",
-        "count": 5087,
+        "count": 4378,
         "avgFwdReturnPct": 0.73,
-        "winRate": 0.6109691370159229
+        "winRate": 0.6116948378254911
       },
       {
         "signal": "偏强",
-        "count": 5432,
-        "avgFwdReturnPct": 0.8,
-        "winRate": 0.5907584683357879
+        "count": 4745,
+        "avgFwdReturnPct": 0.82,
+        "winRate": 0.5888303477344573
       },
       {
         "signal": "超卖待反弹",
-        "count": 384,
-        "avgFwdReturnPct": 0.82,
-        "winRate": 0.5859375
+        "count": 323,
+        "avgFwdReturnPct": 0.78,
+        "winRate": 0.5820433436532507
       },
       {
         "signal": "超卖但趋势强",
-        "count": 47,
-        "avgFwdReturnPct": 6.93,
-        "winRate": 0.9787234042553191
+        "count": 44,
+        "avgFwdReturnPct": 6.68,
+        "winRate": 0.9772727272727273
       }
     ],
-    "validFunds": 30
+    "validFunds": 26
   },
   "byGroup": [
     {
@@ -43,25 +43,11 @@
       "avgReturnPct": 0.81
     },
     {
-      "group": "G2",
-      "name": "信息科技/半导体/AI",
-      "sampleSignals": 2170,
-      "winRate": 0.603225806451613,
-      "avgReturnPct": 0.89
-    },
-    {
       "group": "G1",
       "name": "纳指100/美股成长",
-      "sampleSignals": 868,
-      "winRate": 0.543778801843318,
-      "avgReturnPct": 0.31
-    },
-    {
-      "group": "G5",
-      "name": "新兴/亚洲/混合",
-      "sampleSignals": 1010,
-      "winRate": 0.6059405940594059,
-      "avgReturnPct": 0.85
+      "sampleSignals": 871,
+      "winRate": 0.5430539609644087,
+      "avgReturnPct": 0.3
     },
     {
       "group": "G3",
@@ -82,17 +68,31 @@
       "name": "黄金",
       "sampleSignals": 195,
       "winRate": 0.5538461538461539,
-      "avgReturnPct": 0.78
+      "avgReturnPct": 0.79
+    },
+    {
+      "group": "G5",
+      "name": "新兴/亚洲/混合",
+      "sampleSignals": 622,
+      "winRate": 0.594855305466238,
+      "avgReturnPct": 0.84
+    },
+    {
+      "group": "G2",
+      "name": "信息科技/半导体/AI",
+      "sampleSignals": 1804,
+      "winRate": 0.6075388026607539,
+      "avgReturnPct": 0.96
     },
     {
       "group": "G4",
       "name": "A股科创主题",
-      "sampleSignals": 434,
-      "winRate": 0.6728110599078341,
-      "avgReturnPct": 1.81
+      "sampleSignals": 437,
+      "winRate": 0.6727688787185355,
+      "avgReturnPct": 1.8
     }
   ],
-  "asOf": "2026-07-21",
+  "asOf": "2026-07-22",
   "strategy": "逐日判定短期信号标签，统计该标签出现后未来 5 个交易日(forward 5d)的累计收益，验证信号的前瞻含义；winRate/avgReturnPct 仅统计可操作的偏多信号（超卖待反弹/偏强），benchmarkWinRate 为全样本前瞻上涨概率",
   "note": "基于各基金真实历史净值的信号前瞻收益回测，含过拟合/幸存偏差与样本区间风险，不代表未来",
   "disclaimer": "回测为技术信号的历史模拟，非未来收益保证，不构成投资建议"
