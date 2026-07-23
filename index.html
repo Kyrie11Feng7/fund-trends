@@ -6,6 +6,7 @@
   <meta name="description" content="科技基金趋势分析 - 结合世界新闻深度解读每日涨跌">
   <title>科技基金趋势分析 | 全球视野 x 基金涨跌</title>
   <link rel="stylesheet" href="css/style.css?v=20260719d">
+  <script src="js/cdn.js?v=20260724a"></script>
   <script src="js/lib/chart.umd.min.js"></script>
 </head>
 <body>
@@ -667,11 +668,12 @@
     </svg>
   </button>
 
-  <script src="js/realdata.js?v=20260719c"></script>
-  <script src="js/realdata_extra.js?v=20260719c"></script>
+  <script>document.write(window.CDN.dataScriptTag('js/realdata.js'));</script>
+  <script>document.write(window.CDN.dataScriptTag('js/realdata_extra.js'));</script>
+  <script>window.REAL_FUND_DATA = window.REAL_FUND_DATA || {};</script>
   <script src="js/data.js?v=20260719b"></script>
   <script src="js/market_snapshot.js?v=20260718a"></script>
-  <script src="js/news_deep.js?v=20260718a"></script>
+  <script>document.write(window.CDN.dataScriptTag('js/news_deep.js'));</script>
   <script src="js/holdings.js?v=20260718c"></script>
   <script src="js/index_temperature.js?v=20260718i"></script>
   <script src="js/etf_board.js?v=20260718a"></script>
