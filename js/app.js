@@ -412,9 +412,7 @@
     // 2) 真实指数温度（分位温度，替代原示例 PE）——来自 pipeline 生成的 index_temperature.json
     const sourceEl = document.getElementById("indexTemperatureSource");
     try {
-      const resp = await fetch("index_temperature.json?t=" + Date.now(), { cache: "no-cache" });
-      if (!resp.ok) throw new Error("HTTP " + resp.status);
-      const json = await resp.json();
+      const json = await CDN.loadJSON("index_temperature.json");
       window.INDEX_TEMPERATURE_REAL = json;
       if (sourceEl && json.meta && json.meta.source) {
         sourceEl.textContent =
@@ -695,13 +693,8 @@
   // ============ 费率与跟踪误差（P1-4，来自 fund_meta.json） ============
   async function loadFundMeta() {
     try {
-      const r = await fetch("fund_meta.json?t=" + Date.now(), { cache: "no-cache" });
-      if (r.ok) {
-        const j = await r.json();
-        window.FUND_META = (j && j.byCode) || {};
-      } else {
-        window.FUND_META = {};
-      }
+      const j = await CDN.loadJSON("fund_meta.json");
+      window.FUND_META = (j && j.byCode) || {};
     } catch (e) {
       window.FUND_META = {};
     }
