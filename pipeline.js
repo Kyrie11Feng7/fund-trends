@@ -749,6 +749,50 @@ async function generateNewsDeep() {
   console.log(`[pipeline] 已写出 js/news_deep.js（${list.length} 条，新浪财经实时抓取）`);
 }
 
+// ───────────────────────────── 科技 ETF 榜单每日刷新（近20日涨跌） ─────────────────────────────
+// 静态字段(size/valPct/disc)来自 etf_board_seed.json 快照；chg20d 每日基于真实净值重算
+const ETF_SEED_PATH = path.join(__dirname, 'etf_board_seed.json');
+
+function computeChg20d(navs) {
+  if (!navs || navs.length < 21) return null;
+  const last = navs[navs.length - 1];
+  const prev = navs[navs.length - 21]; // 20 个交易日前
+  if (!isFinite(last) || !isFinite(prev) || prev === 0) return null;
+  return +((last / prev - 1) * 100).toFixed(2);
+}
+
+async function generateEtfBoard() {
+  let seed;
+  try { seed = JSON.parse(fs.readFileSync(ETF_SEED_PATH, 'utf8')); }
+  catch (e) { console.warn('[etf] 缺少 etf_board_seed.json，跳过榜单刷新'); return; }
+  const regions = Object.keys(seed).filter((k) => Array.isArray(seed[k]));
+  const out = {};
+  let refreshed = 0, kept = 0;
+  for (const rk of regions) {
+    out[rk] = await pool(seed[rk], async (item) => {
+      const code6 = item.code.replace(/^[a-z]+/, ''); // sz159941 -> 159941
+      try {
+        const { navs } = await fetchNavSeries(code6, 25);
+        const c = computeChg20d(navs);
+        if (c != null) { refreshed++; return Object.assign({}, item, { chg20d: c }); }
+      } catch (e) { /* 保留快照值 */ }
+      kept++;
+      return item;
+    }, 4);
+  }
+  const asOf = new Date().toISOString().slice(0, 10);
+  out.date = asOf;                                   // 近20日涨跌刷新日期
+  out.snapshotDate = seed.date || '2026-07-18';      // 规模/估值/折溢价快照日期
+  out.source = '近20日涨跌：天天基金真实净值（每日刷新）；规模/估值/折溢价：腾讯自选股（' + (seed.date || '2026-07-18') + ' 快照）';
+  const header = [
+    '// 科技 ETF 榜单（每日 pipeline 刷新 近20日涨跌 chg20d）',
+    '// chg20d = 基于天天基金真实净值的近20交易日区间涨跌%；规模/估值百分位/折溢价维持快照',
+    '// 生成于 ' + asOf + '；静态字段来源 etf_board_seed.json'
+  ].join('\n');
+  fs.writeFileSync(path.join(__dirname, 'js', 'etf_board.js'), header + '\nwindow.ETF_BOARD = ' + JSON.stringify(out, null, 2) + ';\n');
+  console.log(`[pipeline] 已写出 js/etf_board.js（${regions.map((r) => out[r].length).join('+')} 只，chg20d 刷新 ${refreshed} / 沿用快照 ${kept}，date=${asOf}）`);
+}
+
 // ───────────────────────────── P2-5 新增基金 sparkline 数据（realdata_extra.js） ─────────────────────────────
 function emitRealDataExtra(extraByCode) {
   // 列式压缩：date->YYYYMMDD整数，省 dateCN（运行时推导），与 realdata.js 同格式，控制体积
@@ -915,6 +959,7 @@ async function main() {
   await generateFundMeta(allCodes);
   await generateNewsDeep(); // 新浪财经滚动新闻实时抓取
   if (Object.keys(extraByCode).length) emitRealDataExtra(extraByCode);
+  await generateEtfBoard(); // 科技 ETF 榜单：近20日涨跌每日基于真实净值刷新
 
   const result = {
     meta: {
@@ -932,9 +977,9 @@ async function main() {
   console.log(`[pipeline] 已写出 ${NAV_OUT}（真实净值序列 ${navResults.length} 只）`);
   console.log(`[pipeline] 已写出 ${BT_OUT}（回测命中率 ${(backtest.summary.winRate * 100).toFixed(1)}%，样本 ${backtest.summary.sampleSignals}，有效基金 ${backtest.summary.validFunds}）`);
 
-  if (process.env.GH_TOKEN && process.env.AUTO_COMMIT) {
+  if (process.env.GH_TOKEN) {
     try {
-      require('child_process').execFileSync('bash', ['-c', `git add fund_signals.json fund_nav.json backtest.json index_temperature.json fund_meta.json js/realdata_extra.js js/news_deep.js && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
+      require('child_process').execFileSync('bash', ['-c', `git add fund_signals.json fund_nav.json backtest.json index_temperature.json fund_meta.json js/realdata_extra.js js/news_deep.js js/etf_board.js && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
     } catch (e) { console.warn('[pipeline] 提交失败：', e.message); }
   }
 }
