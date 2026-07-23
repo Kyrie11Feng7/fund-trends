@@ -62,7 +62,7 @@
       addSource('基金净值 fund_nav.json', window.FundAnalytics.meta.asOf, '天天基金 F10 真实净值');
     }
     // fund_signals.json asOf
-    fetch('fund_signals.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) {
+    CDN.loadJSON('fund_signals.json').then(function (j) {
       if (j.meta && j.meta.asOf) {
         addSource('前瞻信号 fund_signals.json', j.meta.asOf, '技术面信号（真实净值计算）');
         renderBanner(); renderHealth();
