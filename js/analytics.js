@@ -92,8 +92,7 @@
     ready: function () {
       if (this._ready) return this._ready;
       var self = this;
-      this._ready = fetch('fund_nav.json?t=' + Date.now())
-        .then(function (r) { return r.json(); })
+      this._ready = CDN.loadJSON('fund_nav.json')
         .then(function (json) {
           self.meta = json.meta || {};
           self.list = json.series.map(computeMetrics);
