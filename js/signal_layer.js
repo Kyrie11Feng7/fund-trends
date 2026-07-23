@@ -87,6 +87,10 @@
   }); }
 
   async function loadJSON(url) {
+    if (window.CDN && window.CDN.loadJSON) {
+      try { return await window.CDN.loadJSON(url); }
+      catch (e) { /* CDN 不可用，落到本地相对路径兜底 */ }
+    }
     var r = await fetch(url, { cache: 'no-cache' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
