@@ -124,7 +124,10 @@
     if (!board || !wrap || !tabs) return;
     const srcEl = document.getElementById("etfBoardSource");
     if (srcEl) {
-      srcEl.textContent = "数据来源：" + (board.source || "腾讯自选股") + " ｜ 数据日期：" + (board.date || "") + " ｜ 规模=最新规模；近20日=区间涨跌%；估值百分位=PE_TTM历史分位（越低越便宜）；溢折率=月均折溢价%（负为折价）";
+      srcEl.textContent = "数据来源：" + (board.source || "腾讯自选股") +
+        " ｜ 近20日涨跌更新：" + (board.date || "") +
+        " ｜ 规模/估值/折溢价快照：" + (board.snapshotDate || board.date || "") +
+        " ｜ 近20日=近20交易日区间涨跌%；估值百分位=PE_TTM历史分位（越低越便宜）；溢折率=月均折溢价%（负为折价）";
     }
     const regions = [
       { key: "us", label: "美股科技 ETF" },
