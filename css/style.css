@@ -2737,3 +2737,217 @@ body { scroll-padding-top: 72px; }
 .fund-live .live-chg { margin-left: 4px; }
 
 
+/* ============================================================
+   设计精修（简洁美观增强）— 2026-07-24
+   仅优化视觉表现；所有类名与 JS 行为保持不变
+   ============================================================ */
+
+/* —— 统一品牌强调色（与涨跌语义解耦，仅用于 UI 装饰/激活态） —— */
+:root {
+  --brand: #00d68f;
+  --brand-2: #38bdf8;
+  --brand-grad: linear-gradient(135deg, #00d68f 0%, #34d399 38%, #38bdf8 100%);
+  --brand-glow: 0 8px 26px rgba(0, 214, 143, 0.16);
+  --hairline: rgba(255, 255, 255, 0.05);
+  --card-radius: 18px;
+}
+
+/* —— 正文背景层次（极淡光晕，不抢内容） —— */
+body {
+  background:
+    radial-gradient(1100px 620px at 82% -8%, rgba(0, 214, 143, 0.05), transparent 60%),
+    radial-gradient(900px 520px at -5% 4%, rgba(56, 189, 248, 0.045), transparent 55%),
+    var(--bg-primary);
+  font-size: 15px;
+}
+
+/* —— 导航栏：更精致的激活态与悬浮 —— */
+.navbar {
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.nav-link {
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: color .2s, background .2s;
+}
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+.nav-link.active {
+  color: #04130d;
+  font-weight: 700;
+  background: var(--brand-grad);
+  box-shadow: var(--brand-glow);
+}
+
+/* —— 区块标题：上方小色条 + 流式字号 —— */
+.section-header {
+  position: relative;
+  margin-bottom: 44px;
+}
+.section-header::before {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 4px;
+  border-radius: 4px;
+  margin: 0 auto 18px;
+  background: var(--brand-grad);
+  box-shadow: var(--brand-glow);
+}
+.section-title {
+  font-size: clamp(26px, 3.2vw, 32px);
+  letter-spacing: -0.4px;
+}
+.section-desc {
+  max-width: 720px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+
+/* —— Hero 精修 —— */
+.hero {
+  padding: 128px 0 56px;
+}
+.hero-badge {
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+.gradient-text {
+  background: var(--brand-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.hero-title {
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1.12;
+}
+.hero-subtitle {
+  line-height: 1.8;
+}
+
+/* —— 卡片：统一半径与顺滑悬浮 —— */
+.fund-card,
+.index-card,
+.news-card,
+.sent-gauge-card,
+.analysis-card,
+.temp-card-real,
+.nh-item,
+.sub-box,
+.pf-stat,
+.signal-group-card,
+.sent-explain,
+.backtest-explain,
+.dca-box {
+  border-radius: var(--card-radius);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1),
+              border-color var(--transition),
+              box-shadow var(--transition),
+              background var(--transition);
+}
+.fund-card:hover,
+.index-card:hover,
+.news-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md), var(--brand-glow);
+}
+.fund-card::before,
+.fund-card.down::before {
+  background: var(--brand-grad);
+}
+
+/* —— 按钮 / 标签激活态统一为品牌渐变药丸 —— */
+.tf-btn.active {
+  background: var(--brand-grad);
+  color: #04130d;
+  font-weight: 700;
+  box-shadow: var(--brand-glow);
+}
+.filter-btn.active,
+.fund-chip.active,
+.ft-chip.active {
+  background: var(--brand-grad);
+  border-color: transparent;
+  color: #04130d;
+  font-weight: 700;
+  box-shadow: var(--brand-glow);
+}
+.chart-toggle-btn.active {
+  box-shadow: var(--brand-glow);
+}
+
+/* —— 表格：表头字距 + 顺滑行悬浮 —— */
+.daily-table thead th,
+.sent-table th,
+.window-summary-table th,
+.risk-table th,
+.signal-legend-table th {
+  letter-spacing: 0.3px;
+  font-size: 12.5px;
+}
+.daily-table tbody tr,
+.sent-table tbody tr,
+.window-summary-table tbody tr,
+.risk-table tbody tr {
+  transition: background var(--transition);
+}
+
+/* —— 区块交替背景更柔和（含 color-mix 兜底） —— */
+.section-alt {
+  background: var(--bg-secondary);
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, color-mix(in srgb, var(--bg-secondary) 92%, var(--bg-primary)) 100%);
+}
+
+/* —— 数据时效横幅：更干净的居中条 —— */
+.data-banner {
+  letter-spacing: .3px;
+}
+.data-banner.ok { color: #eafff5; }
+
+/* —— 实时指示器：连接态用品牌绿（表示“在线”） —— */
+.live-indicator.live-on {
+  color: var(--brand);
+  border-color: var(--brand);
+  background: var(--color-up-bg);
+}
+
+/* —— 订阅盒左侧品牌强调 —— */
+.sub-box {
+  border-left: 3px solid var(--brand);
+  box-shadow: var(--shadow-sm);
+}
+
+/* —— 页脚：顶部渐变分隔 + 更透气 —— */
+.footer {
+  border-top: 1px solid var(--hairline);
+  padding-top: 56px;
+  position: relative;
+}
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--brand-grad);
+  opacity: .5;
+}
+.footer-col a:hover {
+  color: var(--brand);
+}
+
+/* —— 通用按钮质感 —— */
+.pf-btn, .ft-export, .sub-rss, .sub-copy, .ft-dir, .ft-reset, .pf-name, .pf-load {
+  transition: var(--transition);
+}
+.pf-btn:hover, .ft-export:hover {
+  filter: brightness(1.08);
+  box-shadow: var(--brand-glow);
+}
+
+
