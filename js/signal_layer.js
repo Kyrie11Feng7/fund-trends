@@ -165,12 +165,14 @@
         '<td class="sf-stat" style="color:' + ddColor(f.drawdown) + '">' + (f.drawdown == null ? '—' : f.drawdown.toFixed(2) + '%') + '</td>' +
         '<td class="sf-stat">' + (f.annualVol == null ? '—' : f.annualVol.toFixed(1) + '%') + '</td>' +
         '<td>' + sparkline(nav, 96, 30) + '</td>' +
+        '<td class="sf-live" data-live-code="' + f.code + '"></td>' +
         '</tr>';
     }).join('');
     wrap.innerHTML = '<table class="signal-table signal-funds">' +
       '<thead><tr><th>代码</th><th>基金</th><th>组</th><th>短期动能</th><th>中期结构</th><th>风险</th>' +
-      '<th>近30日收益</th><th>最大回撤</th><th>年化波动</th><th>净值走势</th></tr></thead>' +
+      '<th>近30日收益</th><th>最大回撤</th><th>年化波动</th><th>净值走势</th><th>实时</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table>';
+    if (window.LiveQuote) window.LiveQuote.refresh();
   }
 
   async function initSignals() {
