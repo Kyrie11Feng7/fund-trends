@@ -156,11 +156,15 @@
       { key: "size", label: "规模" },
       { key: "chg20d", label: "近20日" },
       { key: "valPct", label: "估值百分位" },
-      { key: "disc", label: "溢折率" }
+      { key: "disc", label: "溢折率" },
+      { key: "live", label: "实时", live: true }
     ];
     const arrow = function (k) { return k === etfBoardSortKey ? (etfBoardSortDir < 0 ? " ↓" : " ↑") : ""; };
     const head = '<tr><th class="etf-rank">#</th><th class="etf-code-col">代码</th><th class="etf-name-col">名称</th>' +
-      cols.map(function (c) { return '<th class="etf-sortable etf-num-col ' + (c.key === etfBoardSortKey ? "active" : "") + '" data-key="' + c.key + '">' + c.label + arrow(c.key) + "</th>"; }).join("") + "</tr>";
+      cols.map(function (c) {
+        if (c.live) return '<th class="etf-live-col">实时</th>';
+        return '<th class="etf-sortable etf-num-col ' + (c.key === etfBoardSortKey ? "active" : "") + '" data-key="' + c.key + '">' + c.label + arrow(c.key) + "</th>";
+      }).join("") + "</tr>";
     const body = rows.map(function (r, i) {
       const chgCls = r.chg20d == null ? "" : (r.chg20d >= 0 ? "text-up" : "text-down");
       const discCls = r.disc == null ? "" : (r.disc >= 0 ? "etf-disc-premium" : "etf-disc-discount");
@@ -177,6 +181,7 @@
         '<td class="etf-num ' + chgCls + '">' + fmtSigned(r.chg20d) + "</td>" +
         '<td class="etf-num" style="' + valStyle + '">' + (r.valPct == null ? "—" : r.valPct.toFixed(0)) + "</td>" +
         '<td class="etf-num ' + discCls + '">' + fmtSigned(r.disc) + "</td>" +
+        '<td class="etf-live" data-live-code="' + r.code + '"></td>' +
         "</tr>";
     }).join("");
     wrap.innerHTML = '<div class="etf-table-scroll"><table class="etf-table"><thead>' + head + "</thead><tbody>" + body + "</tbody></table></div>";
@@ -188,6 +193,7 @@
         renderEtfBoard();
       });
     });
+    if (window.LiveQuote) window.LiveQuote.refresh();
   }
 
   async function init() {
@@ -730,6 +736,7 @@
             <span class="fund-change ${isUp ? "up" : "down"}">
               ${isUp ? "▲" : "▼"} ${Math.abs(fund.latestChange).toFixed(2)}%
             </span>
+            <span class="fund-live-wrap"><span class="fund-live-label">实时</span><span class="fund-live" data-live-code="${fund.code}" title="腾讯实时行情（盘中价与当日涨跌幅）；净值为 T 日收盘后披露"></span></span>
           </div>
           <canvas class="fund-sparkline" id="spark-${i}"></canvas>
           <div class="fund-card-footer">
@@ -751,6 +758,9 @@
     FUNDS.forEach((fund, i) => {
       drawSparkline(`spark-${i}`, fund.data);
     });
+
+    // 实时行情：表格生成后立即拉取盘中价
+    if (window.LiveQuote) window.LiveQuote.refresh();
 
     // 卡片点击 -> 跳转到图表
     grid.querySelectorAll(".fund-card").forEach((card) => {
