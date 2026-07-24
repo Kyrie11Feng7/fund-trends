@@ -13,9 +13,9 @@
   // 6 位基金/股票代码 -> 带市场前缀（腾讯接口需要 sh/sz/bj 前缀）
   function prefix(code) {
     if (/^(sh|sz|bj)/i.test(code)) return code.toLowerCase();
-    if (/^(60|68|51|58|56|50|53|59|11|90)/.test(code)) return 'sh' + code;
-    if (/^(00|30|15|16|18|12|39|20)/.test(code)) return 'sz' + code;
-    if (/^(8|4)/.test(code)) return 'bj' + code;
+    if (/^(60|68|51|58|56|50|53|59|11)/.test(code)) return 'sh' + code; // 上交所
+    if (/^(00|30|15|16|18|12|39|20|0|3)/.test(code)) return 'sz' + code; // 深交所（含 01/02/03 等）
+    if (/^(8|4)/.test(code)) return 'bj' + code;                          // 北交所
     return 'sh' + code;
   }
   function code6(code) { return String(code).replace(/^(sh|sz|bj)/i, ''); }
