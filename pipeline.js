@@ -807,9 +807,10 @@ function emitRealDataExtra(extraByCode) {
     });
     compact[code] = [d, nav, acc, ch];
   });
-  const body = `// 自动生成：新增基金（宽基/债券/黄金）的真实净值历史，供总览卡片 sparkline 使用
+  const body = `// 自动生成：全部基金的近期真实净值（每日 pipeline 刷新），与 realdata.js 旧快照增量合并
 // 由 pipeline.js 生成；加载顺序须在 realdata.js 之后、data.js 之前
 // 列式压缩格式（date->YYYYMMDD整数, dateCN 运行时推导），解压后形状与 REAL_FUND_DATA 一致
+// 合并规则：已有历史(realdata.js)保留，仅追加更新日期的净值；无历史的基金整段写入
 (function () {
   window.REAL_FUND_DATA = window.REAL_FUND_DATA || {};
   var RAW = ${JSON.stringify(compact)};
@@ -823,12 +824,21 @@ function emitRealDataExtra(extraByCode) {
       var dateCN = (Math.floor(num / 100) % 100) + '月' + (num % 100) + '日';
       arr[i] = { date: date, dateCN: dateCN, nav: nav[i], acc: acc[i], change: ch[i] };
     }
-    window.REAL_FUND_DATA[code] = arr;
+    var old = window.REAL_FUND_DATA[code];
+    if (old && old.length) {
+      // 增量合并：只把比旧快照末日更新的净值 push 进原数组（保持引用，data.js 已持有）
+      var last = old[old.length - 1].date;
+      for (var j = 0; j < arr.length; j++) {
+        if (arr[j].date > last) old.push(arr[j]);
+      }
+    } else {
+      window.REAL_FUND_DATA[code] = arr;
+    }
   }
 })();
 `;
   fs.writeFileSync(path.join(__dirname, 'js', 'realdata_extra.js'), body);
-  console.log(`[pipeline] 已写出 js/realdata_extra.js（新增 ${Object.keys(extraByCode).length} 只基金净值历史，列式压缩）`);
+  console.log(`[pipeline] 已写出 js/realdata_extra.js（${Object.keys(extraByCode).length} 只基金近期净值，前端与 realdata.js 增量合并）`);
 }
 
 // ───────────────────────────── 主流程 ─────────────────────────────
@@ -934,10 +944,13 @@ async function main() {
   backtest.disclaimer = '回测为技术信号的历史模拟，非未来收益保证，不构成投资建议';
   fs.writeFileSync(BT_OUT, JSON.stringify(backtest, null, 2));
 
-  // ── 拓宽覆盖基金 sparkline 数据（P2-5） ──
+  // ── 每日净值增量数据（原 P2-5 仅 EXTRA 基金，现覆盖全部基金） ──
+  // 关键修复（2026-07-24）：趋势分析用的 25 只核心科技基金净值在 js/realdata.js
+  // （建站时静态快照）中，此前每日管线从不刷新它们，导致「每日涨跌不更新」。
+  // 现把全部基金的近期净值输出到 realdata_extra.js，前端与旧快照增量合并。
   const extraByCode = {};
   for (const r of results) {
-    if (!EXTRA_FUNDS[r.code] || !r.measured || !r.dwjzs || r.dwjzs.length < 5) continue;
+    if (!r.measured || !r.dwjzs || r.dwjzs.length < 5) continue;
     const arr = [];
     for (let i = 0; i < r.dates.length; i++) {
       const nav = r.dwjzs[i];
