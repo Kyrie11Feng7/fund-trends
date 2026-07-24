@@ -994,6 +994,15 @@ async function main() {
     try {
       require('child_process').execFileSync('bash', ['-c', `git add fund_signals.json fund_nav.json backtest.json index_temperature.json fund_meta.json js/realdata_extra.js js/news_deep.js js/etf_board.js && git commit -m "chore: daily signal update ${asOf}" && git push`], { stdio: 'inherit' });
     } catch (e) { console.warn('[pipeline] 提交失败：', e.message); }
+    // 推送后主动清 jsDelivr CDN 缓存（@main 分支默认缓存最长 12h，会拖慢当日数据可见性）
+    const purgeFiles = ['fund_signals.json', 'fund_nav.json', 'backtest.json', 'index_temperature.json',
+      'fund_meta.json', 'js/realdata_extra.js', 'js/news_deep.js', 'js/etf_board.js'];
+    for (const f of purgeFiles) {
+      try {
+        const r = await fetch(`https://purge.jsdelivr.net/gh/Kyrie11Feng7/fund-trends@main/${f}`);
+        console.log(`[pipeline] purge CDN ${f}: ${r.status}`);
+      } catch (e) { console.warn(`[pipeline] purge CDN ${f} 失败：`, e.message); }
+    }
   }
 }
 
