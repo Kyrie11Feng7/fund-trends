@@ -8,8 +8,8 @@
     "159915": {
       "mgmtFee": 0.15,
       "custFee": 0.05,
-      "trackErr": 0.444,
-      "trackErrNote": "年化跟踪误差（净值 vs sz399006，约 399 个交易日）"
+      "trackErr": null,
+      "trackErrNote": "净值数据不足"
     },
     "161128": {
       "mgmtFee": 0.8,
@@ -38,27 +38,27 @@
       "trackErr": null
     },
     "501312": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1,
+      "custFee": 0.2,
       "trackErr": null
     },
     "510300": {
       "mgmtFee": null,
       "custFee": null,
-      "trackErr": 2.585,
-      "trackErrNote": "年化跟踪误差（净值 vs sh000300，约 399 个交易日）"
+      "trackErr": null,
+      "trackErrNote": "净值数据不足"
     },
     "510500": {
       "mgmtFee": null,
       "custFee": null,
-      "trackErr": 0.771,
-      "trackErrNote": "年化跟踪误差（净值 vs sh000905，约 399 个交易日）"
+      "trackErr": null,
+      "trackErrNote": "净值数据不足"
     },
     "511010": {
       "mgmtFee": null,
       "custFee": null,
-      "trackErr": 1.071,
-      "trackErrNote": "年化跟踪误差（净值 vs sh000012，约 399 个交易日）"
+      "trackErr": null,
+      "trackErrNote": "净值数据不足"
     },
     "513100": {
       "mgmtFee": null,
@@ -69,7 +69,7 @@
     "518880": {
       "mgmtFee": null,
       "custFee": null,
-      "trackErr": 5.289,
+      "trackErr": 5.308,
       "trackErrNote": "年化跟踪误差（净值 vs sh518880，约 399 个交易日）"
     },
     "539002": {
@@ -78,18 +78,18 @@
       "trackErr": null
     },
     "017436": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "000043": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "017093": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 0.8,
+      "custFee": 0.2,
       "trackErr": null
     },
     "006555": {
@@ -113,18 +113,18 @@
       "trackErr": null
     },
     "001668": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "005698": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "002891": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "016701": {
@@ -143,23 +143,23 @@
       "trackErr": null
     },
     "007349": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "007345": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "008253": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "016664": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     }
   }
