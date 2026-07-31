@@ -23,19 +23,27 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 运行数据管线
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 运行数据管线（净值/信号）
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node pipeline.js
+
+      - name: 刷新行情快照（指数/黄金/原油/美债/A股持仓，腾讯财经实时源）
+        run: python fetch_market_snapshot.py
 
       - name: 提交更新
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # pipeline.js 会更新三个真实数据文件，任一有变化就整体提交
-          if [ -n "$(git status --porcelain fund_signals.json fund_nav.json backtest.json)" ]; then
-            git add fund_signals.json fund_nav.json backtest.json
-            git commit -m "chore: daily signal update $(date +%F)"
+          # pipeline.js 更新净值/信号；快照脚本更新 js/market_snapshot.js；任一有变化就整体提交
+          if [ -n "$(git status --porcelain fund_signals.json fund_nav.json backtest.json js/market_snapshot.js)" ]; then
+            git add fund_signals.json fund_nav.json backtest.json js/market_snapshot.js
+            git commit -m "chore: daily update $(date +%F)"
             git push
           else
             echo "无变化，跳过提交"
