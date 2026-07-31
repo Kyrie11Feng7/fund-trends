@@ -9,22 +9,22 @@ window.MARKET_SNAPSHOT = {
       "key": "ndx",
       "name": "纳斯达克100",
       "code": "usNDX",
-      "value": 28106.35,
-      "change": 3.36
+      "value": 28152.22,
+      "change": 0.16
     },
     {
       "key": "ixic",
       "name": "纳斯达克综合",
       "code": "usIXIC",
-      "value": 25122.18,
-      "change": 2.78
+      "value": 25180.73,
+      "change": 0.23
     },
     {
       "key": "spx",
       "name": "标普500",
       "code": "usINX",
-      "value": 7437.63,
-      "change": 1.66
+      "value": 7451.64,
+      "change": 0.19
     },
     {
       "key": "hstech",
@@ -37,16 +37,16 @@ window.MARKET_SNAPSHOT = {
       "key": "gold",
       "name": "伦敦金",
       "code": "hf_GC",
-      "value": 4110.32,
-      "change": -1.21,
+      "value": 4099.33,
+      "change": -1.47,
       "unit": "/oz"
     },
     {
       "key": "oil",
       "name": "WTI原油",
       "code": "hf_CL",
-      "value": 83.74,
-      "change": 0.18,
+      "value": 84.3,
+      "change": 0.85,
       "unit": "/bbl"
     },
     {
