@@ -1,13 +1,13 @@
 // 科技 ETF 榜单（每日 pipeline 刷新 近20日涨跌 chg20d）
 // chg20d = 基于天天基金真实净值的近20交易日区间涨跌%；规模/估值百分位/折溢价维持快照
-// 生成于 2026-08-05；静态字段来源 etf_board_seed.json
+// 生成于 2026-08-06；静态字段来源 etf_board_seed.json
 window.ETF_BOARD = {
   "us": [
     {
       "code": "sz159941",
       "name": "纳指ETF广发",
       "size": 27649905796.1,
-      "chg20d": -7.8,
+      "chg20d": 1.61,
       "valPct": 90.66,
       "disc": 7.920499999999999
     },
@@ -15,7 +15,7 @@ window.ETF_BOARD = {
       "code": "sh513500",
       "name": "标普500",
       "size": 20958247094.45,
-      "chg20d": 2.84,
+      "chg20d": 2.86,
       "valPct": 78.13,
       "disc": 4.452
     },
@@ -39,7 +39,7 @@ window.ETF_BOARD = {
       "code": "sh513300",
       "name": "纳斯达克",
       "size": 10534872125.27,
-      "chg20d": 1.21,
+      "chg20d": 0.02,
       "valPct": 90.66,
       "disc": 6.825
     },
@@ -47,7 +47,7 @@ window.ETF_BOARD = {
       "code": "sz159501",
       "name": "纳指ETF嘉实",
       "size": 9616978009.47,
-      "chg20d": 1.66,
+      "chg20d": 0.48,
       "valPct": 90.66,
       "disc": 9.046000000000001
     },
@@ -55,7 +55,7 @@ window.ETF_BOARD = {
       "code": "sz159632",
       "name": "纳斯达克ETF华安",
       "size": 8910855970,
-      "chg20d": 1.65,
+      "chg20d": 0.47,
       "valPct": 90.66,
       "disc": 6.250000000000002
     },
@@ -63,7 +63,7 @@ window.ETF_BOARD = {
       "code": "sz159659",
       "name": "纳斯达克100ETF招商",
       "size": 7570426778.74,
-      "chg20d": 1.69,
+      "chg20d": 0.5,
       "valPct": 90.66,
       "disc": 6.577500000000001
     },
@@ -71,7 +71,7 @@ window.ETF_BOARD = {
       "code": "sz159513",
       "name": "纳斯达克100ETF大成",
       "size": 5577271080.11,
-      "chg20d": 1.63,
+      "chg20d": 0.44,
       "valPct": 90.66,
       "disc": 6.3195
     },
@@ -87,7 +87,7 @@ window.ETF_BOARD = {
       "code": "sh513110",
       "name": "纳指100",
       "size": 3969800280.23,
-      "chg20d": 1.63,
+      "chg20d": 0.45,
       "valPct": 90.66,
       "disc": 6.1745
     },
@@ -95,7 +95,7 @@ window.ETF_BOARD = {
       "code": "sz159696",
       "name": "纳指ETF易方达",
       "size": 3763645028.31,
-      "chg20d": 1.67,
+      "chg20d": 0.48,
       "valPct": 90.66,
       "disc": 7.972499999999999
     },
@@ -103,7 +103,7 @@ window.ETF_BOARD = {
       "code": "sz159660",
       "name": "纳指ETF汇添富",
       "size": 3700623429.03,
-      "chg20d": 1.66,
+      "chg20d": 0.48,
       "valPct": 90.66,
       "disc": 6.573000000000002
     },
@@ -111,7 +111,7 @@ window.ETF_BOARD = {
       "code": "sz159655",
       "name": "标普500ETF华夏",
       "size": 3389741126.71,
-      "chg20d": 2.39,
+      "chg20d": 2.4,
       "valPct": 78.13,
       "disc": 3.1785
     },
@@ -119,7 +119,7 @@ window.ETF_BOARD = {
       "code": "sh513390",
       "name": "纳指基金",
       "size": 3295664706.24,
-      "chg20d": 1.66,
+      "chg20d": 0.48,
       "valPct": 90.66,
       "disc": 6.3865
     },
@@ -127,7 +127,7 @@ window.ETF_BOARD = {
       "code": "sh513400",
       "name": "道琼斯",
       "size": 2397975828.88,
-      "chg20d": 1.95,
+      "chg20d": 3.48,
       "valPct": 58.9,
       "disc": 1.1775000000000002
     },
@@ -135,7 +135,7 @@ window.ETF_BOARD = {
       "code": "sz159518",
       "name": "标普油气ETF嘉实",
       "size": 2186668705.64,
-      "chg20d": 9.04,
+      "chg20d": 1.58,
       "valPct": null,
       "disc": -0.8924999999999998
     },
@@ -143,7 +143,7 @@ window.ETF_BOARD = {
       "code": "sh513870",
       "name": "纳指指数",
       "size": 1926838992.54,
-      "chg20d": 1.65,
+      "chg20d": 0.48,
       "valPct": 90.66,
       "disc": 6.538500000000001
     },
@@ -151,7 +151,7 @@ window.ETF_BOARD = {
       "code": "sz159502",
       "name": "标普生物科技ETF嘉实",
       "size": 1886213997.49,
-      "chg20d": -7.53,
+      "chg20d": -6.41,
       "valPct": null,
       "disc": 1.6575
     },
@@ -159,7 +159,7 @@ window.ETF_BOARD = {
       "code": "sh513850",
       "name": "美国50",
       "size": 1684663305.08,
-      "chg20d": 3.12,
+      "chg20d": 2.84,
       "valPct": null,
       "disc": 2.6315
     },
@@ -167,7 +167,7 @@ window.ETF_BOARD = {
       "code": "sh513290",
       "name": "纳指生物",
       "size": 1516960488.93,
-      "chg20d": -4.49,
+      "chg20d": -2.87,
       "valPct": null,
       "disc": 1.8439999999999999
     },
@@ -175,7 +175,7 @@ window.ETF_BOARD = {
       "code": "sh513350",
       "name": "油气ETF",
       "size": 1028588861.74,
-      "chg20d": 9.07,
+      "chg20d": 1.6,
       "valPct": null,
       "disc": 0.505
     },
@@ -191,7 +191,7 @@ window.ETF_BOARD = {
       "code": "sz159577",
       "name": "美国50ETF汇添富",
       "size": 794650015.97,
-      "chg20d": 3.09,
+      "chg20d": 2.77,
       "valPct": null,
       "disc": 2.1445
     },
@@ -265,7 +265,7 @@ window.ETF_BOARD = {
       "code": "sz159740",
       "name": "恒生科技ETF大成",
       "size": 18613202597.56,
-      "chg20d": 4.04,
+      "chg20d": 1.68,
       "valPct": 34.09,
       "disc": -0.38750000000000007
     },
@@ -313,7 +313,7 @@ window.ETF_BOARD = {
       "code": "sh513260",
       "name": "恒科技",
       "size": 7100476881.86,
-      "chg20d": 4.09,
+      "chg20d": 1.72,
       "valPct": 34.09,
       "disc": -0.161
     },
@@ -361,7 +361,7 @@ window.ETF_BOARD = {
       "code": "sh513860",
       "name": "HKC科技",
       "size": 3630349922.15,
-      "chg20d": 5.1,
+      "chg20d": 2.41,
       "valPct": 26.24,
       "disc": -0.7344999999999999
     },
@@ -545,7 +545,7 @@ window.ETF_BOARD = {
       "code": "sz159131",
       "name": "港股通信息技术ETF华宝",
       "size": 497041322.77,
-      "chg20d": -4.65,
+      "chg20d": -10.86,
       "valPct": 92.04,
       "disc": -0.036500000000000005
     },
@@ -840,7 +840,7 @@ window.ETF_BOARD = {
       "disc": 0.0415
     }
   ],
-  "date": "2026-08-05",
+  "date": "2026-08-06",
   "snapshotDate": "2026-07-18",
   "source": "近20日涨跌：天天基金真实净值（每日刷新）；规模/估值/折溢价：腾讯自选股（2026-07-18 快照）"
 };
