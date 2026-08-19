@@ -1,6 +1,6 @@
 {
   "meta": {
-    "asOf": "2026-08-18",
+    "asOf": "2026-08-19",
     "source": "天天基金 F10 费率页面（fundf10.eastmoney.com），管理/托管费率与跟踪误差（指数/ETF）",
     "note": "跟踪误差仅指数/ETF 适用，主动基金为 null"
   },
@@ -43,22 +43,22 @@
       "trackErr": null
     },
     "510300": {
-      "mgmtFee": 0.15,
-      "custFee": 0.05,
-      "trackErr": null,
-      "trackErrNote": "净值数据不足"
+      "mgmtFee": null,
+      "custFee": null,
+      "trackErr": 2.629,
+      "trackErrNote": "年化跟踪误差（净值 vs sh000300，约 399 个交易日）"
     },
     "510500": {
       "mgmtFee": 0.15,
       "custFee": 0.05,
-      "trackErr": null,
-      "trackErrNote": "净值数据不足"
+      "trackErr": 0.854,
+      "trackErrNote": "年化跟踪误差（净值 vs sh000905，约 399 个交易日）"
     },
     "511010": {
       "mgmtFee": null,
       "custFee": null,
-      "trackErr": null,
-      "trackErrNote": "净值数据不足"
+      "trackErr": 1.045,
+      "trackErrNote": "年化跟踪误差（净值 vs sh000012，约 399 个交易日）"
     },
     "513100": {
       "mgmtFee": 0.6,
@@ -78,8 +78,8 @@
       "trackErr": null
     },
     "017436": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "000043": {
@@ -88,8 +88,8 @@
       "trackErr": null
     },
     "017093": {
-      "mgmtFee": 0.8,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "006555": {
@@ -103,8 +103,8 @@
       "trackErr": null
     },
     "012920": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "006373": {
@@ -113,13 +113,13 @@
       "trackErr": null
     },
     "001668": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "005698": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "002891": {
@@ -153,8 +153,8 @@
       "trackErr": null
     },
     "008253": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "016664": {
