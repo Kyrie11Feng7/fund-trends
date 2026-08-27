@@ -2,97 +2,97 @@
   "summary": {
     "signalName": "短期信号前瞻验证",
     "holdDays": 5,
-    "sampleSignals": 4683,
-    "winRate": 0.5887251761691223,
-    "avgReturnPct": 0.89,
-    "benchmarkWinRate": 0.5915525114155251,
+    "sampleSignals": 5781,
+    "winRate": 0.5881335409098772,
+    "avgReturnPct": 0.87,
+    "benchmarkWinRate": 0.5918721461187214,
     "bySignalForward": [
       {
         "signal": "偏强",
-        "count": 4332,
-        "avgFwdReturnPct": 0.84,
-        "winRate": 0.5877192982456141
+        "count": 5335,
+        "avgFwdReturnPct": 0.81,
+        "winRate": 0.5861293345829428
       },
       {
         "signal": "弱势下行",
-        "count": 4036,
-        "avgFwdReturnPct": 0.57,
-        "winRate": 0.5909316154608524
+        "count": 5125,
+        "avgFwdReturnPct": 0.56,
+        "winRate": 0.592780487804878
       },
       {
         "signal": "超卖待反弹",
-        "count": 351,
-        "avgFwdReturnPct": 1.6,
-        "winRate": 0.6011396011396012
+        "count": 446,
+        "avgFwdReturnPct": 1.57,
+        "winRate": 0.6121076233183856
       },
       {
         "signal": "超卖但趋势强",
-        "count": 41,
-        "avgFwdReturnPct": 6.84,
-        "winRate": 0.975609756097561
+        "count": 44,
+        "avgFwdReturnPct": 6.87,
+        "winRate": 0.9772727272727273
       }
     ],
-    "validFunds": 24
+    "validFunds": 30
   },
   "byGroup": [
     {
       "group": "G6",
       "name": "宽基指数",
-      "sampleSignals": 199,
-      "winRate": 0.592964824120603,
-      "avgReturnPct": 1.01
-    },
-    {
-      "group": "G5",
-      "name": "新兴/亚洲/混合",
-      "sampleSignals": 798,
-      "winRate": 0.6027568922305765,
-      "avgReturnPct": 0.91
+      "sampleSignals": 573,
+      "winRate": 0.5741710296684118,
+      "avgReturnPct": 0.67
     },
     {
       "group": "G2",
       "name": "信息科技/半导体/AI",
-      "sampleSignals": 1986,
-      "winRate": 0.6112789526686808,
-      "avgReturnPct": 1.03
+      "sampleSignals": 2163,
+      "winRate": 0.6074895977808599,
+      "avgReturnPct": 1
+    },
+    {
+      "group": "G1",
+      "name": "纳指100/美股成长",
+      "sampleSignals": 878,
+      "winRate": 0.5455580865603644,
+      "avgReturnPct": 0.5
+    },
+    {
+      "group": "G5",
+      "name": "新兴/亚洲/混合",
+      "sampleSignals": 989,
+      "winRate": 0.6117290192113246,
+      "avgReturnPct": 0.97
+    },
+    {
+      "group": "G3",
+      "name": "全球新能源车",
+      "sampleSignals": 367,
+      "winRate": 0.55858310626703,
+      "avgReturnPct": 0.67
     },
     {
       "group": "G7",
       "name": "债券",
       "sampleSignals": 201,
-      "winRate": 0.47761194029850745,
-      "avgReturnPct": 0.04
-    },
-    {
-      "group": "G1",
-      "name": "纳指100/美股成长",
-      "sampleSignals": 706,
-      "winRate": 0.5439093484419264,
-      "avgReturnPct": 0.43
+      "winRate": 0.472636815920398,
+      "avgReturnPct": 0.03
     },
     {
       "group": "G8",
       "name": "黄金",
-      "sampleSignals": 194,
-      "winRate": 0.5515463917525774,
-      "avgReturnPct": 0.88
-    },
-    {
-      "group": "G3",
-      "name": "全球新能源车",
-      "sampleSignals": 183,
-      "winRate": 0.5081967213114754,
-      "avgReturnPct": 0.48
+      "sampleSignals": 196,
+      "winRate": 0.5612244897959183,
+      "avgReturnPct": 0.95
     },
     {
       "group": "G4",
       "name": "A股科创主题",
-      "sampleSignals": 416,
-      "winRate": 0.6346153846153846,
-      "avgReturnPct": 1.58
+      "sampleSignals": 414,
+      "winRate": 0.6352657004830918,
+      "avgReturnPct": 1.61
     }
   ],
-  "asOf": "2026-08-26",
+  "asOf": "2026-08-27",
   "strategy": "逐日判定短期信号标签，统计该标签出现后未来 5 个交易日(forward 5d)的累计收益，验证信号的前瞻含义；winRate/avgReturnPct 仅统计可操作的偏多信号（超卖待反弹/偏强），benchmarkWinRate 为全样本前瞻上涨概率",
   "note": "基于各基金真实历史净值的信号前瞻收益回测，含过拟合/幸存偏差与样本区间风险，不代表未来",
   "disclaimer": "回测为技术信号的历史模拟，非未来收益保证，不构成投资建议"
