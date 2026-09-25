@@ -1,6 +1,6 @@
 // 科技 ETF 榜单（每日 pipeline 刷新 近20日涨跌 chg20d）
 // chg20d = 基于天天基金真实净值的近20交易日区间涨跌%；规模/估值百分位/折溢价维持快照
-// 生成于 2026-09-24；静态字段来源 etf_board_seed.json
+// 生成于 2026-09-25；静态字段来源 etf_board_seed.json
 window.ETF_BOARD = {
   "us": [
     {
@@ -15,7 +15,7 @@ window.ETF_BOARD = {
       "code": "sh513500",
       "name": "标普500",
       "size": 20958247094.45,
-      "chg20d": -2.38,
+      "chg20d": -0.06,
       "valPct": 78.13,
       "disc": 4.452
     },
@@ -23,7 +23,7 @@ window.ETF_BOARD = {
       "code": "sh513100",
       "name": "纳指ETF",
       "size": 15544799438.02,
-      "chg20d": -7.02,
+      "chg20d": 3.68,
       "valPct": 90.66,
       "disc": 8.3445
     },
@@ -39,7 +39,7 @@ window.ETF_BOARD = {
       "code": "sh513300",
       "name": "纳斯达克",
       "size": 10534872125.27,
-      "chg20d": -6.72,
+      "chg20d": 4.05,
       "valPct": 90.66,
       "disc": 6.825
     },
@@ -55,7 +55,7 @@ window.ETF_BOARD = {
       "code": "sz159632",
       "name": "纳斯达克ETF华安",
       "size": 8910855970,
-      "chg20d": -7,
+      "chg20d": 3.76,
       "valPct": 90.66,
       "disc": 6.250000000000002
     },
@@ -377,7 +377,7 @@ window.ETF_BOARD = {
       "code": "sh520570",
       "name": "科技恒指",
       "size": 2799233467.82,
-      "chg20d": -5.98,
+      "chg20d": -6.24,
       "valPct": 34.09,
       "disc": -0.14550000000000002
     },
@@ -840,7 +840,7 @@ window.ETF_BOARD = {
       "disc": 0.0415
     }
   ],
-  "date": "2026-09-24",
+  "date": "2026-09-25",
   "snapshotDate": "2026-07-18",
   "source": "近20日涨跌：天天基金真实净值（每日刷新）；规模/估值/折溢价：腾讯自选股（2026-07-18 快照）"
 };
