@@ -1,30 +1,30 @@
 // 市场快照：全球指数 / 宏观 / A股持仓个股真实涨跌幅
-// 数据源：腾讯财经行情快照（实时）；数据日期：2026-09-30
+// 数据源：腾讯财经行情快照（实时）；数据日期：2026-10-01
 // 由 fetch_market_snapshot.py 生成，接入 GitHub Actions 每日自动刷新。
 window.MARKET_SNAPSHOT = {
-  "date": "2026-09-30",
+  "date": "2026-10-01",
   "source": "腾讯财经行情快照（实时）",
   "indices": [
     {
       "key": "ndx",
       "name": "纳斯达克100",
       "code": "usNDX",
-      "value": 30545.41,
-      "change": 0.68
+      "value": 30307.79,
+      "change": -0.33
     },
     {
       "key": "ixic",
       "name": "纳斯达克综合",
       "code": "usIXIC",
-      "value": 27034.56,
-      "change": 0.88
+      "value": 26759.33,
+      "change": -0.38
     },
     {
       "key": "spx",
       "name": "标普500",
       "code": "usINX",
-      "value": 7709.65,
-      "change": 0.51
+      "value": 7624.25,
+      "change": -0.36
     },
     {
       "key": "hstech",
@@ -37,16 +37,16 @@ window.MARKET_SNAPSHOT = {
       "key": "gold",
       "name": "伦敦金",
       "code": "hf_GC",
-      "value": 4193.44,
-      "change": 0.33,
+      "value": 4184.61,
+      "change": -0.05,
       "unit": "/oz"
     },
     {
       "key": "oil",
       "name": "WTI原油",
       "code": "hf_CL",
-      "value": 91.55,
-      "change": 2.43,
+      "value": 92.51,
+      "change": 2.31,
       "unit": "/bbl"
     },
     {
