@@ -1,6 +1,6 @@
 {
   "meta": {
-    "asOf": "2026-10-01",
+    "asOf": "2026-10-02",
     "source": "天天基金 F10 净值历史（api.fund.eastmoney.com），基于累计净值 LJJZ 计算技术面",
     "scale": "shortScore/midScore 0-100，越高越偏多/越健康",
     "disclaimer": "信号为技术面趋势标签，非买卖建议；QDII 基金净值有 T+1/T+2 披露延迟",
@@ -102,30 +102,30 @@
       "code": "161128",
       "name": "易方达标普信息科技",
       "group": "G2",
-      "measured": false,
-      "shortLabel": "偏强",
-      "shortScore": 66,
-      "midLabel": "中性",
-      "midScore": 73,
-      "risk": "高",
-      "note": "继承G2（真实净值拉取失败：净值条数不足(0)）"
-    },
-    {
-      "code": "161130",
-      "name": "易方达纳斯达克100",
-      "group": "G1",
       "measured": true,
       "shortLabel": "偏强",
       "shortScore": 70,
       "midLabel": "长牛结构未破",
       "midScore": 80,
-      "risk": "中低",
-      "note": "实测：真实净值 4.5452@2026-09-29，RSI6=70.1，MA250上方",
-      "nav": 4.5452,
+      "risk": "高",
+      "note": "实测：真实净值 6.9694@2026-09-29，RSI6=72.1，MA250上方",
+      "nav": 6.9694,
       "navDate": "2026-09-29",
-      "ret30": 0.54,
-      "drawdown": -21.52,
-      "annualVol": 21.2
+      "ret30": 1.84,
+      "drawdown": -24.31,
+      "annualVol": 25.2
+    },
+    {
+      "code": "161130",
+      "name": "易方达纳斯达克100",
+      "group": "G1",
+      "measured": false,
+      "shortLabel": "偏强",
+      "shortScore": 70,
+      "midLabel": "长牛结构未破",
+      "midScore": 80,
+      "risk": "中",
+      "note": "继承G1（真实净值拉取失败：净值条数不足(0)）"
     },
     {
       "code": "270023",

@@ -1,6 +1,6 @@
 // 科技 ETF 榜单（每日 pipeline 刷新 近20日涨跌 chg20d）
 // chg20d = 基于天天基金真实净值的近20交易日区间涨跌%；规模/估值百分位/折溢价维持快照
-// 生成于 2026-10-01；静态字段来源 etf_board_seed.json
+// 生成于 2026-10-02；静态字段来源 etf_board_seed.json
 window.ETF_BOARD = {
   "us": [
     {
@@ -23,7 +23,7 @@ window.ETF_BOARD = {
       "code": "sh513100",
       "name": "纳指ETF",
       "size": 15544799438.02,
-      "chg20d": 2.34,
+      "chg20d": -7.02,
       "valPct": 90.66,
       "disc": 8.3445
     },
@@ -31,7 +31,7 @@ window.ETF_BOARD = {
       "code": "sz159509",
       "name": "纳指科技ETF景顺",
       "size": 11182999578.86,
-      "chg20d": -7.48,
+      "chg20d": 5.01,
       "valPct": 83.01,
       "disc": 17.518
     },
@@ -840,7 +840,7 @@ window.ETF_BOARD = {
       "disc": 0.0415
     }
   ],
-  "date": "2026-10-01",
+  "date": "2026-10-02",
   "snapshotDate": "2026-07-18",
   "source": "近20日涨跌：天天基金真实净值（每日刷新）；规模/估值/折溢价：腾讯自选股（2026-07-18 快照）"
 };
