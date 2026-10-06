@@ -1,6 +1,6 @@
 {
   "meta": {
-    "asOf": "2026-10-05",
+    "asOf": "2026-10-06",
     "source": "天天基金 F10 净值历史（api.fund.eastmoney.com），基于累计净值 LJJZ 计算技术面",
     "scale": "shortScore/midScore 0-100，越高越偏多/越健康",
     "disclaimer": "信号为技术面趋势标签，非买卖建议；QDII 基金净值有 T+1/T+2 披露延迟",
@@ -49,7 +49,7 @@
       "shortLabel": "偏强",
       "shortScore": 70,
       "midLabel": "中性",
-      "midScore": 68,
+      "midScore": 70,
       "risk": "高"
     },
     "G6": {
@@ -131,13 +131,18 @@
       "code": "270023",
       "name": "广发全球精选",
       "group": "G5",
-      "measured": false,
+      "measured": true,
       "shortLabel": "偏强",
       "shortScore": 70,
-      "midLabel": "中性",
-      "midScore": 68,
-      "risk": "高",
-      "note": "继承G5（真实净值拉取失败：净值条数不足(0)）"
+      "midLabel": "长牛结构未破",
+      "midScore": 80,
+      "risk": "中",
+      "note": "实测：真实净值 6.8436@2026-09-29，RSI6=56.3，MA250上方",
+      "nav": 6.8436,
+      "navDate": "2026-09-29",
+      "ret30": -2.94,
+      "drawdown": -24.24,
+      "annualVol": 25.2
     },
     {
       "code": "457001",

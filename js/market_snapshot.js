@@ -1,52 +1,52 @@
 // 市场快照：全球指数 / 宏观 / A股持仓个股真实涨跌幅
-// 数据源：腾讯财经行情快照（实时）；数据日期：2026-10-05
+// 数据源：腾讯财经行情快照（实时）；数据日期：2026-10-06
 // 由 fetch_market_snapshot.py 生成，接入 GitHub Actions 每日自动刷新。
 window.MARKET_SNAPSHOT = {
-  "date": "2026-10-05",
+  "date": "2026-10-06",
   "source": "腾讯财经行情快照（实时）",
   "indices": [
     {
       "key": "ndx",
       "name": "纳斯达克100",
       "code": "usNDX",
-      "value": 31025.51,
-      "change": 0.71
+      "value": 31353.62,
+      "change": 0.89
     },
     {
       "key": "ixic",
       "name": "纳斯达克综合",
       "code": "usIXIC",
-      "value": 27439.26,
-      "change": 0.91
+      "value": 27717.21,
+      "change": 0.87
     },
     {
       "key": "spx",
       "name": "标普500",
       "code": "usINX",
-      "value": 7771.61,
-      "change": 0.63
+      "value": 7842.94,
+      "change": 0.89
     },
     {
       "key": "hstech",
       "name": "恒生科技",
       "code": "hkHSTECH",
-      "value": 4183.68,
-      "change": 0.62
+      "value": 4223.08,
+      "change": 0.94
     },
     {
       "key": "gold",
       "name": "伦敦金",
       "code": "hf_GC",
-      "value": 4154.14,
-      "change": -0.2,
+      "value": 4192.52,
+      "change": 0.86,
       "unit": "/oz"
     },
     {
       "key": "oil",
       "name": "WTI原油",
       "code": "hf_CL",
-      "value": 89.94,
-      "change": -1.29,
+      "value": 88.01,
+      "change": -1.59,
       "unit": "/bbl"
     },
     {
