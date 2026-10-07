@@ -1,13 +1,13 @@
 // 科技 ETF 榜单（每日 pipeline 刷新 近20日涨跌 chg20d）
 // chg20d = 基于天天基金真实净值的近20交易日区间涨跌%；规模/估值百分位/折溢价维持快照
-// 生成于 2026-10-06；静态字段来源 etf_board_seed.json
+// 生成于 2026-10-07；静态字段来源 etf_board_seed.json
 window.ETF_BOARD = {
   "us": [
     {
       "code": "sz159941",
       "name": "纳指ETF广发",
       "size": 27649905796.1,
-      "chg20d": 2.34,
+      "chg20d": -7.8,
       "valPct": 90.66,
       "disc": 7.920499999999999
     },
@@ -23,7 +23,7 @@ window.ETF_BOARD = {
       "code": "sh513100",
       "name": "纳指ETF",
       "size": 15544799438.02,
-      "chg20d": 2.34,
+      "chg20d": -7.02,
       "valPct": 90.66,
       "disc": 8.3445
     },
@@ -31,7 +31,7 @@ window.ETF_BOARD = {
       "code": "sz159509",
       "name": "纳指科技ETF景顺",
       "size": 11182999578.86,
-      "chg20d": 5.01,
+      "chg20d": -7.48,
       "valPct": 83.01,
       "disc": 17.518
     },
@@ -39,7 +39,7 @@ window.ETF_BOARD = {
       "code": "sh513300",
       "name": "纳斯达克",
       "size": 10534872125.27,
-      "chg20d": 2.73,
+      "chg20d": -6.72,
       "valPct": 90.66,
       "disc": 6.825
     },
@@ -47,7 +47,7 @@ window.ETF_BOARD = {
       "code": "sz159501",
       "name": "纳指ETF嘉实",
       "size": 9616978009.47,
-      "chg20d": 2.36,
+      "chg20d": -6.37,
       "valPct": 90.66,
       "disc": 9.046000000000001
     },
@@ -71,7 +71,7 @@ window.ETF_BOARD = {
       "code": "sz159513",
       "name": "纳斯达克100ETF大成",
       "size": 5577271080.11,
-      "chg20d": 2.15,
+      "chg20d": -7.7,
       "valPct": 90.66,
       "disc": 6.3195
     },
@@ -763,7 +763,7 @@ window.ETF_BOARD = {
       "code": "sh588220",
       "name": "科创100F",
       "size": 8206198091.75,
-      "chg20d": -5.28,
+      "chg20d": -17.4,
       "valPct": 15.03,
       "disc": 0.0655
     },
@@ -771,7 +771,7 @@ window.ETF_BOARD = {
       "code": "sh588030",
       "name": "科创指基",
       "size": 6099891484.96,
-      "chg20d": -5.23,
+      "chg20d": -17.69,
       "valPct": 15.03,
       "disc": 0.013999999999999993
     },
@@ -779,7 +779,7 @@ window.ETF_BOARD = {
       "code": "sh588190",
       "name": "科创100",
       "size": 3327006609.55,
-      "chg20d": -5.16,
+      "chg20d": -17.33,
       "valPct": 15.03,
       "disc": 0.052000000000000005
     },
@@ -787,7 +787,7 @@ window.ETF_BOARD = {
       "code": "sh588800",
       "name": "科创100C",
       "size": 2615142355.29,
-      "chg20d": -5.24,
+      "chg20d": -17.64,
       "valPct": 15.03,
       "disc": 0.089
     },
@@ -795,7 +795,7 @@ window.ETF_BOARD = {
       "code": "sh588120",
       "name": "科100ETF",
       "size": 972017284.47,
-      "chg20d": -5.33,
+      "chg20d": -17.48,
       "valPct": 15.03,
       "disc": 0.1395
     },
@@ -811,7 +811,7 @@ window.ETF_BOARD = {
       "code": "sh588210",
       "name": "科创100E",
       "size": 439329346.63,
-      "chg20d": -5.11,
+      "chg20d": -17.52,
       "valPct": 15.03,
       "disc": 0.062
     },
@@ -827,7 +827,7 @@ window.ETF_BOARD = {
       "code": "sh588910",
       "name": "科创价值",
       "size": 175371814.63,
-      "chg20d": -2.49,
+      "chg20d": -15.38,
       "valPct": 93.81,
       "disc": -0.049000000000000016
     },
@@ -840,7 +840,7 @@ window.ETF_BOARD = {
       "disc": 0.0415
     }
   ],
-  "date": "2026-10-06",
+  "date": "2026-10-07",
   "snapshotDate": "2026-07-18",
   "source": "近20日涨跌：天天基金真实净值（每日刷新）；规模/估值/折溢价：腾讯自选股（2026-07-18 快照）"
 };
