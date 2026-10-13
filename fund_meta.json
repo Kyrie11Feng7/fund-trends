@@ -1,6 +1,6 @@
 {
   "meta": {
-    "asOf": "2026-10-12",
+    "asOf": "2026-10-13",
     "source": "天天基金 F10 费率页面（fundf10.eastmoney.com），管理/托管费率与跟踪误差（指数/ETF）",
     "note": "跟踪误差仅指数/ETF 适用，主动基金为 null"
   },
@@ -38,26 +38,26 @@
       "trackErr": null
     },
     "501312": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1,
+      "custFee": 0.2,
       "trackErr": null
     },
     "510300": {
       "mgmtFee": 0.15,
       "custFee": 0.05,
-      "trackErr": 2.644,
+      "trackErr": 2.642,
       "trackErrNote": "年化跟踪误差（净值 vs sh000300，约 399 个交易日）"
     },
     "510500": {
       "mgmtFee": 0.15,
       "custFee": 0.05,
-      "trackErr": 0.906,
+      "trackErr": 0.905,
       "trackErrNote": "年化跟踪误差（净值 vs sh000905，约 399 个交易日）"
     },
     "511010": {
-      "mgmtFee": 0.15,
-      "custFee": 0.05,
-      "trackErr": 0.891,
+      "mgmtFee": null,
+      "custFee": null,
+      "trackErr": 0.884,
       "trackErrNote": "年化跟踪误差（净值 vs sh000012，约 399 个交易日）"
     },
     "513100": {
@@ -143,13 +143,13 @@
       "trackErr": null
     },
     "007349": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "007345": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "008253": {
