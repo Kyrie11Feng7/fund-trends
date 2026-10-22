@@ -1,6 +1,6 @@
 {
   "meta": {
-    "asOf": "2026-10-21",
+    "asOf": "2026-10-22",
     "source": "天天基金 F10 费率页面（fundf10.eastmoney.com），管理/托管费率与跟踪误差（指数/ETF）",
     "note": "跟踪误差仅指数/ETF 适用，主动基金为 null"
   },
@@ -8,7 +8,7 @@
     "159915": {
       "mgmtFee": 0.15,
       "custFee": 0.05,
-      "trackErr": 0.445,
+      "trackErr": 0.446,
       "trackErrNote": "年化跟踪误差（净值 vs sz399006，约 399 个交易日）"
     },
     "161128": {
@@ -33,31 +33,31 @@
       "trackErr": null
     },
     "501226": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "501312": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1,
+      "custFee": 0.2,
       "trackErr": null
     },
     "510300": {
-      "mgmtFee": null,
-      "custFee": null,
-      "trackErr": 2.65,
+      "mgmtFee": 0.15,
+      "custFee": 0.05,
+      "trackErr": 2.653,
       "trackErrNote": "年化跟踪误差（净值 vs sh000300，约 399 个交易日）"
     },
     "510500": {
-      "mgmtFee": null,
-      "custFee": null,
-      "trackErr": 0.912,
+      "mgmtFee": 0.15,
+      "custFee": 0.05,
+      "trackErr": 0.921,
       "trackErrNote": "年化跟踪误差（净值 vs sh000905，约 399 个交易日）"
     },
     "511010": {
-      "mgmtFee": 0.15,
-      "custFee": 0.05,
-      "trackErr": 0.873,
+      "mgmtFee": null,
+      "custFee": null,
+      "trackErr": 0.867,
       "trackErrNote": "年化跟踪误差（净值 vs sh000012，约 399 个交易日）"
     },
     "513100": {
@@ -69,7 +69,7 @@
     "518880": {
       "mgmtFee": null,
       "custFee": null,
-      "trackErr": 5.328,
+      "trackErr": 5.33,
       "trackErrNote": "年化跟踪误差（净值 vs sh518880，约 399 个交易日）"
     },
     "539002": {
@@ -78,8 +78,8 @@
       "trackErr": null
     },
     "017436": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "000043": {
@@ -88,8 +88,8 @@
       "trackErr": null
     },
     "017093": {
-      "mgmtFee": 0.8,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "006555": {
@@ -98,8 +98,8 @@
       "trackErr": null
     },
     "017730": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "012920": {
@@ -118,28 +118,28 @@
       "trackErr": null
     },
     "005698": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "002891": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     },
     "016701": {
-      "mgmtFee": 1.2,
-      "custFee": 0.2,
-      "trackErr": null
-    },
-    "006751": {
       "mgmtFee": null,
       "custFee": null,
       "trackErr": null
     },
-    "017145": {
+    "006751": {
       "mgmtFee": 1.2,
       "custFee": 0.2,
+      "trackErr": null
+    },
+    "017145": {
+      "mgmtFee": null,
+      "custFee": null,
       "trackErr": null
     },
     "007349": {
@@ -158,8 +158,8 @@
       "trackErr": null
     },
     "016664": {
-      "mgmtFee": null,
-      "custFee": null,
+      "mgmtFee": 1.2,
+      "custFee": 0.2,
       "trackErr": null
     }
   }
